@@ -12,9 +12,9 @@ Satu proyek aplikasi cukup untuk MVP. Pemisahan folder berikut adalah batas tang
 
 ```text
 src/NotchUI/
-  App.xaml.cs                   # bootstrap, satu instance, lifetime
-  MainWindow.xaml.cs / MainWindow.UI.cs # dashboard dan kontrol yang dibangun di C#
-  OverlayWindow.xaml.cs / OverlayWindow.UI.cs # visual notch dan interaksi di C#
+  App.xaml / App.xaml.cs       # resource dan bootstrap aplikasi
+  MainWindow.xaml / MainWindow.xaml.cs # tampilan dan interaksi dashboard
+  OverlayWindow.xaml / OverlayWindow.xaml.cs # tampilan dan interaksi notch
   NotchUI.csproj                 # target .NET 8 dan Windows App SDK
   Package.appxmanifest          # identitas aplikasi packaged
   ViewModels/
