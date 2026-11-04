@@ -67,8 +67,12 @@ public sealed partial class OverlayWindow : Window
         DateText.Visibility = settings.ClockEnabled ? Visibility.Visible : Visibility.Collapsed;
         DateText.Text = _coordinator.Clock.DateText;
         BatteryText.Visibility = settings.BatteryEnabled ? Visibility.Visible : Visibility.Collapsed;
-        BatteryText.Text = _coordinator.Battery.Availability == BatteryAvailability.Available
-            ? $"Battery: {_coordinator.Battery.Percentage}%{(_coordinator.Battery.IsCharging ? " · Charging" : "")}" : "Battery unavailable";
+        BatteryText.Text = _coordinator.Battery.Availability switch
+        {
+            BatteryAvailability.Available => $"Battery: {_coordinator.Battery.Percentage}%{(_coordinator.Battery.IsCharging ? " · Charging" : "")}",
+            BatteryAvailability.Unavailable => "No battery detected",
+            _ => "Battery status unavailable"
+        };
         MediaText.Visibility = settings.MediaEnabled ? Visibility.Visible : Visibility.Collapsed;
         MediaControls.Visibility = settings.MediaEnabled ? Visibility.Visible : Visibility.Collapsed;
         MediaText.Text = _coordinator.Media.Error ?? (_coordinator.Media.Availability switch
