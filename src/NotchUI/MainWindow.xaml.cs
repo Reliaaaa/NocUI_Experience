@@ -44,7 +44,7 @@ public sealed partial class MainWindow : Window
         PreviewPill.CornerRadius = new CornerRadius(settings.CornerRadius);
         static double Linear(byte c) { var v = c / 255d; return v <= 0.04045 ? v / 12.92 : Math.Pow((v + 0.055) / 1.055, 2.4); }
         var luminance = 0.2126 * Linear(color.R) + 0.7152 * Linear(color.G) + 0.0722 * Linear(color.B);
-        PreviewText.Foreground = new SolidColorBrush(luminance >= 0.179 ? Colors.Black : Colors.White);
+        PreviewText.Foreground = new SolidColorBrush(luminance >= 0.179 ? Color.FromArgb(255, 0, 0, 0) : Color.FromArgb(255, 255, 255, 255));
         SettingsError.IsOpen = !string.IsNullOrWhiteSpace(_viewModel.Error);
         SettingsError.Message = _viewModel.Error ?? "";
         _loading = false;
