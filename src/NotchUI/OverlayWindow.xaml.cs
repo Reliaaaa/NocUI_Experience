@@ -79,6 +79,7 @@ public sealed partial class OverlayWindow : Window
             _ => "No active media session"
         });
         PreviousButton.IsEnabled = _coordinator.Media.CanPrevious && !_coordinator.Media.IsBusy;
+        PlayPauseButton.Content = _coordinator.Media.IsPlaying ? "Pause" : "Play";
         PlayPauseButton.IsEnabled = _coordinator.Media.CanTogglePlayPause && !_coordinator.Media.IsBusy;
         NextButton.IsEnabled = _coordinator.Media.CanNext && !_coordinator.Media.IsBusy;
         if (_transition is null && !_changingState)
