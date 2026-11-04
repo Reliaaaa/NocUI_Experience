@@ -29,6 +29,7 @@ public sealed partial class MainWindow : Window
         WidthSlider.Value = settings.Width;
         HeightSlider.Value = settings.Height;
         RadiusSlider.Value = settings.CornerRadius;
+        OpacitySlider.Value = settings.Opacity * 100;
         ClockToggle.IsOn = settings.ClockEnabled;
         BatteryToggle.IsOn = settings.BatteryEnabled;
         MediaToggle.IsOn = settings.MediaEnabled;
@@ -45,7 +46,8 @@ public sealed partial class MainWindow : Window
         var width = WidthSlider.Value;
         var height = HeightSlider.Value;
         var radius = RadiusSlider.Value;
-        _viewModel.Update(s => s with { Width = width, Height = height, CornerRadius = radius });
+        var opacity = OpacitySlider.Value / 100;
+        _viewModel.Update(s => s with { Width = width, Height = height, CornerRadius = radius, Opacity = opacity });
     }
     private void OnColorChanged(ColorPicker sender, ColorChangedEventArgs args)
     {

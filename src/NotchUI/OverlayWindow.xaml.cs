@@ -42,7 +42,7 @@ public sealed partial class OverlayWindow : Window
         var settings = _coordinator.Settings;
         var color = settings.BackgroundColor;
         Pill.Background = new SolidColorBrush(Color.FromArgb(255, Convert.ToByte(color.Substring(1, 2), 16),
-            Convert.ToByte(color.Substring(3, 2), 16), Convert.ToByte(color.Substring(5, 2), 16)));
+            Convert.ToByte(color.Substring(3, 2), 16), Convert.ToByte(color.Substring(5, 2), 16))) { Opacity = settings.Opacity };
         var red = Convert.ToByte(color.Substring(1, 2), 16);
         var green = Convert.ToByte(color.Substring(3, 2), 16);
         var blue = Convert.ToByte(color.Substring(5, 2), 16);
