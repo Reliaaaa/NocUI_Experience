@@ -16,4 +16,7 @@ Check(normalized.Width == 320 && normalized.Height == 28 && normalized.CornerRad
 var small = new NotchSettings { CornerRadius = 32 }.Normalize(100, 20);
 Check(small.Width == 100 && small.Height == 20 && small.CornerRadius == 10, "Monitor bounds failed.");
 Check(new NotchSettings { Opacity = -1 }.Normalize().Opacity == 0.2 && new NotchSettings { Opacity = double.NaN }.Normalize().Opacity == 1, "Opacity normalization failed.");
+Check(new NotchSettings { AnimationDurationMs = 1000 }.Normalize().AnimationDurationMs == 600 && new NotchSettings { AnimationDurationMs = double.NaN }.Normalize().AnimationDurationMs == 180, "Animation duration normalization failed.");
+var behavior = new NotchSettings { OpenOnHover = false, AnimationDurationMs = 0 };
+Check(SettingsCodec.TryDecode(SettingsCodec.Encode(behavior), out var restoredBehavior) && restoredBehavior == behavior, "Behavior settings roundtrip failed.");
 Console.WriteLine("PASS: roundtrip, invalid JSON/type/version/size, missing fields, normalization and monitor bounds.");

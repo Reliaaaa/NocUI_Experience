@@ -97,8 +97,8 @@ public sealed partial class OverlayWindow : Window
         }
         ApplyGeometry();
     }
-    private void OnPointerEntered(object sender, PointerRoutedEventArgs args) => SetExpanded(true);
-    private void OnPointerExited(object sender, PointerRoutedEventArgs args) => SetExpanded(false);
+    private void OnPointerEntered(object sender, PointerRoutedEventArgs args) { if (_coordinator.Settings.OpenOnHover) SetExpanded(true); }
+    private void OnPointerExited(object sender, PointerRoutedEventArgs args) { if (_coordinator.Settings.OpenOnHover) SetExpanded(false); }
     private void OnHeaderTapped(object sender, TappedRoutedEventArgs args)
     {
         SetExpanded(!_coordinator.IsExpanded);
@@ -118,10 +118,18 @@ public sealed partial class OverlayWindow : Window
         _coordinator.SetExpanded(expanded);
         _changingState = false;
         ExpandedContent.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
+        if (_coordinator.Settings.AnimationDurationMs == 0)
+        {
+            Pill.Width = Math.Min(expanded ? Math.Max(_coordinator.Settings.Width, 430) : _coordinator.Settings.Width, _host.PrimaryWidthDip);
+            Pill.Height = expanded ? ExpandedHeight : _coordinator.Settings.Height;
+            _geometryTimer.Stop();
+            ApplyGeometry();
+            return;
+        }
         var animation = new DoubleAnimation
         {
             From = startHeight, To = expanded ? ExpandedHeight : _coordinator.Settings.Height,
-            Duration = new Duration(TimeSpan.FromMilliseconds(180)),
+            Duration = new Duration(TimeSpan.FromMilliseconds(_coordinator.Settings.AnimationDurationMs)),
             EnableDependentAnimation = true,
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
         };
@@ -129,7 +137,7 @@ public sealed partial class OverlayWindow : Window
         {
             From = startWidth,
             To = Math.Min(expanded ? Math.Max(_coordinator.Settings.Width, 430) : _coordinator.Settings.Width, _host.PrimaryWidthDip),
-            Duration = new Duration(TimeSpan.FromMilliseconds(180)),
+            Duration = new Duration(TimeSpan.FromMilliseconds(_coordinator.Settings.AnimationDurationMs)),
             EnableDependentAnimation = true,
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
         };

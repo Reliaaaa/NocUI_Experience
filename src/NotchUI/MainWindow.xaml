@@ -3,6 +3,8 @@
         <NavigationView.MenuItems>
             <NavigationViewItem Content="General &amp; Appearance" Tag="appearance" Icon="Setting" IsSelected="True" />
             <NavigationViewItem Content="Notch Widgets" Tag="widgets" Icon="AllApps" />
+            <NavigationViewItem Content="Gestures &amp; Behavior" Tag="behavior" Icon="Edit" />
+            <NavigationViewItem Content="Animations" Tag="animations" Icon="Play" />
             <NavigationViewItem Content="About" Tag="about" Icon="Help" />
         </NavigationView.MenuItems>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -58,6 +60,25 @@
                     <TextBlock Text="NotchUI" Style="{StaticResource SubtitleTextBlockStyle}" />
                     <TextBlock Text="A compact Windows desktop notch for time, battery and media." TextWrapping="Wrap" />
                     <TextBlock Text="Closing settings keeps NotchUI running. Use the system tray icon to reopen settings or exit." TextWrapping="Wrap" Opacity="0.7" />
+                </StackPanel>
+                <StackPanel x:Name="BehaviorPage" Visibility="Collapsed" Spacing="12">
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Opening the notch" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock Text="Choose whether hovering opens and closes the notch. Clicking the header always toggles it." TextWrapping="Wrap" Opacity="0.7" />
+                            <ToggleSwitch x:Name="HoverToggle" Header="Open on hover" Toggled="OnHoverChanged" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                <StackPanel x:Name="AnimationsPage" Visibility="Collapsed" Spacing="12">
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Transition speed" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock Text="Choose how long the notch takes to open and close. Set to zero to disable motion." TextWrapping="Wrap" Opacity="0.7" />
+                            <TextBlock x:Name="DurationLabel" Text="Duration" />
+                            <Slider x:Name="DurationSlider" Minimum="0" Maximum="600" StepFrequency="20" ValueChanged="OnDurationChanged" AutomationProperties.Name="Animation duration in milliseconds" />
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

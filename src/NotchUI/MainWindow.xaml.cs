@@ -39,6 +39,9 @@ public sealed partial class MainWindow : Window
         ClockToggle.IsOn = settings.ClockEnabled;
         BatteryToggle.IsOn = settings.BatteryEnabled;
         MediaToggle.IsOn = settings.MediaEnabled;
+        HoverToggle.IsOn = settings.OpenOnHover;
+        DurationSlider.Value = settings.AnimationDurationMs;
+        DurationLabel.Text = $"Duration · {settings.AnimationDurationMs:0} ms";
         var hex = settings.BackgroundColor;
         BackgroundPicker.Color = Color.FromArgb(255, Convert.ToByte(hex.Substring(1, 2), 16),
             Convert.ToByte(hex.Substring(3, 2), 16), Convert.ToByte(hex.Substring(5, 2), 16));
@@ -62,8 +65,18 @@ public sealed partial class MainWindow : Window
         AppearancePage.Visibility = page == "appearance" ? Visibility.Visible : Visibility.Collapsed;
         WidgetsPage.Visibility = page == "widgets" ? Visibility.Visible : Visibility.Collapsed;
         AboutPage.Visibility = page == "about" ? Visibility.Visible : Visibility.Collapsed;
-        PageTitle.Text = page switch { "widgets" => "Notch widgets", "about" => "About NotchUI", _ => "Appearance & hardware bounds" };
-        PageDescription.Text = page switch { "widgets" => "Choose what appears in your notch.", "about" => "Your desktop, at a glance.", _ => "Personalize your notch. Changes apply immediately." };
+        BehaviorPage.Visibility = page == "behavior" ? Visibility.Visible : Visibility.Collapsed;
+        AnimationsPage.Visibility = page == "animations" ? Visibility.Visible : Visibility.Collapsed;
+        PageTitle.Text = page switch { "widgets" => "Notch widgets", "behavior" => "Gestures & behavior", "animations" => "Animations", "about" => "About NotchUI", _ => "Appearance & hardware bounds" };
+        PageDescription.Text = page switch { "widgets" => "Choose what appears in your notch.", "behavior" => "Control how the notch responds.", "animations" => "Make transitions feel right for you.", "about" => "Your desktop, at a glance.", _ => "Personalize your notch. Changes apply immediately." };
+    }
+    private void OnHoverChanged(object sender, RoutedEventArgs args)
+    {
+        if (!_loading && _viewModel is not null) _viewModel.Update(s => s with { OpenOnHover = HoverToggle.IsOn });
+    }
+    private void OnDurationChanged(object sender, RangeBaseValueChangedEventArgs args)
+    {
+        if (!_loading && _viewModel is not null) _viewModel.Update(s => s with { AnimationDurationMs = args.NewValue });
     }
     private void OnSliderChanged(object sender, RangeBaseValueChangedEventArgs args)
     {
