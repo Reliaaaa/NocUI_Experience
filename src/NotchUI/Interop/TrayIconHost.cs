@@ -17,7 +17,7 @@ public sealed class TrayIconHost : IDisposable
     {
         _hwnd = hwnd; _showSettings = showSettings; _exit = exit; _callback = WndProc;
         _icon = new NotifyIconData { Size = (uint)Marshal.SizeOf<NotifyIconData>(), Window = hwnd, Id = 1,
-            Flags = 7, Callback = CallbackMessage, Icon = LoadIcon(0, (nint)32512), Tip = "NotchUI — berjalan", Info = "", InfoTitle = "" };
+            Flags = 7, Callback = CallbackMessage, Icon = LoadIcon(0, (nint)32512), Tip = "NocUI Experience — berjalan", Info = "", InfoTitle = "" };
         if (!SetWindowSubclass(hwnd, _callback, 2, 0)) throw new Win32Exception();
         if (!ShellNotifyIcon(0, ref _icon)) { RemoveWindowSubclass(hwnd, _callback, 2); throw new Win32Exception(); }
     }

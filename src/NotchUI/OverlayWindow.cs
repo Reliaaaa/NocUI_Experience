@@ -12,10 +12,14 @@ namespace NotchUI;
 
 public sealed partial class OverlayWindow : Window
 {
-    private const double ExpandedHeight = 150;
+    private const double ExpandedHeight = 170;
     private readonly NotchCoordinator _coordinator;
     private readonly OverlayWindowHost _host;
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _geometryTimer;
+    private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _hoverTimer;
+    private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _leaveTimer;
+    private bool _pointerInside;
+    private bool _closed;
     private Storyboard? _transition;
     private bool _changingState;
     public OverlayWindow(NotchCoordinator coordinator)
@@ -24,10 +28,19 @@ public sealed partial class OverlayWindow : Window
         _coordinator = coordinator;
         _host = new OverlayWindowHost(this);
         _host.SystemStateChanged += OnSystemStateChanged;
+        _host.DisplayChanged += OnDisplayChanged;
         _coordinator.Changed += OnCoordinatorChanged;
         _geometryTimer = DispatcherQueue.CreateTimer();
         _geometryTimer.Interval = TimeSpan.FromMilliseconds(16);
         _geometryTimer.Tick += OnGeometryTick;
+        _hoverTimer = DispatcherQueue.CreateTimer();
+        _hoverTimer.IsRepeating = false;
+        _hoverTimer.Interval = TimeSpan.FromMilliseconds(350);
+        _hoverTimer.Tick += OnHoverTimer;
+        _leaveTimer = DispatcherQueue.CreateTimer();
+        _leaveTimer.IsRepeating = false;
+        _leaveTimer.Interval = TimeSpan.FromMilliseconds(320);
+        _leaveTimer.Tick += OnLeaveTimer;
         Closed += OnClosed;
         UpdateVisuals();
     }
@@ -42,7 +55,7 @@ public sealed partial class OverlayWindow : Window
         var settings = _coordinator.Settings;
         var color = settings.BackgroundColor;
         Pill.Background = new SolidColorBrush(Color.FromArgb(255, Convert.ToByte(color.Substring(1, 2), 16),
-            Convert.ToByte(color.Substring(3, 2), 16), Convert.ToByte(color.Substring(5, 2), 16)));
+            Convert.ToByte(color.Substring(3, 2), 16), Convert.ToByte(color.Substring(5, 2), 16))) { Opacity = settings.Opacity };
         var red = Convert.ToByte(color.Substring(1, 2), 16);
         var green = Convert.ToByte(color.Substring(3, 2), 16);
         var blue = Convert.ToByte(color.Substring(5, 2), 16);
@@ -56,17 +69,20 @@ public sealed partial class OverlayWindow : Window
             ? Color.FromArgb(255, 0, 0, 0) : Color.FromArgb(255, 255, 255, 255));
         SummaryText.Foreground = foreground;
         ClockText.Foreground = foreground;
+        CompactBatteryText.Foreground = foreground;
         DateText.Foreground = foreground;
         BatteryText.Foreground = foreground;
         MediaText.Foreground = foreground;
         Pill.CornerRadius = new CornerRadius(settings.CornerRadius);
         SummaryText.Text = settings.MediaEnabled && _coordinator.Media.Availability == MediaAvailability.Active
-            ? _coordinator.Media.Title : "NotchUI";
+            ? _coordinator.Media.Title : "NocUI Experience";
         ClockText.Text = settings.ClockEnabled ? _coordinator.Clock.TimeText : "";
         ToolTipService.SetToolTip(ClockText, settings.ClockEnabled ? _coordinator.Clock.DateText : null);
         DateText.Visibility = settings.ClockEnabled ? Visibility.Visible : Visibility.Collapsed;
         DateText.Text = _coordinator.Clock.DateText;
         BatteryText.Visibility = settings.BatteryEnabled ? Visibility.Visible : Visibility.Collapsed;
+        CompactBatteryText.Text = settings.BatteryEnabled && _coordinator.Battery.Availability == BatteryAvailability.Available
+            ? $"{_coordinator.Battery.Percentage}%{(_coordinator.Battery.IsCharging ? " ⚡" : "")}" : "";
         BatteryText.Text = _coordinator.Battery.Availability switch
         {
             BatteryAvailability.Available => $"Battery: {_coordinator.Battery.Percentage}%{(_coordinator.Battery.IsCharging ? " · Charging" : "")}",
@@ -83,7 +99,8 @@ public sealed partial class OverlayWindow : Window
             _ => "No active media session"
         });
         PreviousButton.IsEnabled = _coordinator.Media.CanPrevious && !_coordinator.Media.IsBusy;
-        PlayPauseButton.Content = _coordinator.Media.IsPlaying ? "Pause" : "Play";
+        PlayPauseIcon.Glyph = _coordinator.Media.IsPlaying ? "\uE769" : "\uE768";
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(PlayPauseButton, _coordinator.Media.IsPlaying ? "Pause" : "Play");
         PlayPauseButton.IsEnabled = _coordinator.Media.CanTogglePlayPause && !_coordinator.Media.IsBusy;
         NextButton.IsEnabled = _coordinator.Media.CanNext && !_coordinator.Media.IsBusy;
         if (_transition is null && !_changingState)
@@ -93,10 +110,30 @@ public sealed partial class OverlayWindow : Window
         }
         ApplyGeometry();
     }
-    private void OnPointerEntered(object sender, PointerRoutedEventArgs args) => SetExpanded(true);
-    private void OnPointerExited(object sender, PointerRoutedEventArgs args) => SetExpanded(false);
+    private void OnPointerEntered(object sender, PointerRoutedEventArgs args)
+    {
+        _pointerInside = true;
+        _leaveTimer.Stop();
+        if (_coordinator.Settings.OpenOnHover && !_coordinator.IsExpanded) _hoverTimer.Start();
+    }
+    private void OnPointerExited(object sender, PointerRoutedEventArgs args)
+    {
+        _pointerInside = false;
+        _hoverTimer.Stop();
+        if (_coordinator.Settings.OpenOnHover && _coordinator.IsExpanded) _leaveTimer.Start();
+    }
+    private void OnHoverTimer(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
+    {
+        if (_pointerInside && _coordinator.Settings.OpenOnHover) SetExpanded(true);
+    }
+    private void OnLeaveTimer(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
+    {
+        if (!_pointerInside && _coordinator.Settings.OpenOnHover) SetExpanded(false);
+    }
     private void OnHeaderTapped(object sender, TappedRoutedEventArgs args)
     {
+        _hoverTimer.Stop();
+        _leaveTimer.Stop();
         SetExpanded(!_coordinator.IsExpanded);
         args.Handled = true;
     }
@@ -114,10 +151,18 @@ public sealed partial class OverlayWindow : Window
         _coordinator.SetExpanded(expanded);
         _changingState = false;
         ExpandedContent.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
+        if (_coordinator.Settings.AnimationDurationMs == 0)
+        {
+            Pill.Width = Math.Min(expanded ? Math.Max(_coordinator.Settings.Width, 430) : _coordinator.Settings.Width, _host.PrimaryWidthDip);
+            Pill.Height = expanded ? ExpandedHeight : _coordinator.Settings.Height;
+            _geometryTimer.Stop();
+            ApplyGeometry();
+            return;
+        }
         var animation = new DoubleAnimation
         {
             From = startHeight, To = expanded ? ExpandedHeight : _coordinator.Settings.Height,
-            Duration = new Duration(TimeSpan.FromMilliseconds(180)),
+            Duration = new Duration(TimeSpan.FromMilliseconds(_coordinator.Settings.AnimationDurationMs)),
             EnableDependentAnimation = true,
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
         };
@@ -125,7 +170,7 @@ public sealed partial class OverlayWindow : Window
         {
             From = startWidth,
             To = Math.Min(expanded ? Math.Max(_coordinator.Settings.Width, 430) : _coordinator.Settings.Width, _host.PrimaryWidthDip),
-            Duration = new Duration(TimeSpan.FromMilliseconds(180)),
+            Duration = new Duration(TimeSpan.FromMilliseconds(_coordinator.Settings.AnimationDurationMs)),
             EnableDependentAnimation = true,
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
         };
@@ -152,18 +197,25 @@ public sealed partial class OverlayWindow : Window
     }
     private void OnGeometryTick(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args) => ApplyGeometry();
     private void OnSystemStateChanged(object? sender, EventArgs args) => _coordinator.RefreshSystemState();
+    private void OnDisplayChanged(object? sender, EventArgs args) => DispatcherQueue.TryEnqueue(() => { if (!_closed) UpdateVisuals(); });
     private async void OnPreviousClicked(object sender, RoutedEventArgs args) => await _coordinator.PreviousAsync();
     private async void OnPlayPauseClicked(object sender, RoutedEventArgs args) => await _coordinator.TogglePlayPauseAsync();
     private async void OnNextClicked(object sender, RoutedEventArgs args) => await _coordinator.NextAsync();
     private void OnClosed(object sender, WindowEventArgs args)
     {
+        _closed = true;
         var transition = _transition;
         _transition = null;
         transition?.Stop();
         _coordinator.Changed -= OnCoordinatorChanged;
         _host.SystemStateChanged -= OnSystemStateChanged;
+        _host.DisplayChanged -= OnDisplayChanged;
         _geometryTimer.Stop();
         _geometryTimer.Tick -= OnGeometryTick;
+        _hoverTimer.Stop();
+        _hoverTimer.Tick -= OnHoverTimer;
+        _leaveTimer.Stop();
+        _leaveTimer.Tick -= OnLeaveTimer;
         _host.Dispose();
     }
 }

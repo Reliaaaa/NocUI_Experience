@@ -15,9 +15,12 @@ public sealed record NotchSettings
     public double Height { get; init; } = 34;
     public double CornerRadius { get; init; } = 16;
     public string BackgroundColor { get; init; } = "#000000";
+    public double Opacity { get; init; } = 1;
     public bool ClockEnabled { get; init; } = true;
     public bool BatteryEnabled { get; init; } = true;
     public bool MediaEnabled { get; init; } = true;
+    public bool OpenOnHover { get; init; } = true;
+    public double AnimationDurationMs { get; init; } = 180;
 
     public NotchSettings Normalize(double availableWidth = double.MaxValue, double availableHeight = double.MaxValue)
     {
@@ -26,7 +29,9 @@ public sealed record NotchSettings
         var width = Math.Clamp(double.IsFinite(Width) ? Width : 320, Math.Min(MinimumWidth, widthLimit), widthLimit);
         var height = Math.Clamp(double.IsFinite(Height) ? Height : 34, Math.Min(MinimumHeight, heightLimit), heightLimit);
         var radius = Math.Clamp(double.IsFinite(CornerRadius) ? CornerRadius : 16, 0, Math.Min(MaximumRadius, Math.Min(width, height) / 2));
-        return this with { Width = width, Height = height, CornerRadius = radius, BackgroundColor = NormalizeColor(BackgroundColor) };
+        var opacity = Math.Clamp(double.IsFinite(Opacity) ? Opacity : 1, 0.2, 1);
+        var duration = Math.Clamp(double.IsFinite(AnimationDurationMs) ? AnimationDurationMs : 180, 0, 600);
+        return this with { Width = width, Height = height, CornerRadius = radius, Opacity = opacity, AnimationDurationMs = duration, BackgroundColor = NormalizeColor(BackgroundColor) };
     }
 
     private static string NormalizeColor(string? color)
