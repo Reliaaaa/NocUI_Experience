@@ -1,0 +1,83 @@
+name: Windows build and package
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  self-check:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Check settings codec
+        run: dotnet run --project tests/NotchUI.Settings.SelfCheck/NotchUI.Settings.SelfCheck.csproj --configuration Release
+
+  package:
+    runs-on: windows-2022
+    needs: self-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Build unsigned MSIX (Release x64)
+        shell: pwsh
+        run: |
+          $packageDirectory = Join-Path $env:GITHUB_WORKSPACE 'artifacts\msix\'
+          dotnet msbuild src/NotchUI/NotchUI.csproj -restore `
+            -p:Configuration=Release -p:Platform=x64 -p:RuntimeIdentifier=win-x64 `
+            -p:GenerateAppxPackageOnBuild=true -p:AppxBundle=Never `
+            -p:AppxPackageSigningEnabled=false "-p:AppxPackageDir=$packageDirectory"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $packages = @(Get-ChildItem 'artifacts/msix' -Recurse -File -Include *.msix,*.msixbundle,*.appx,*.appxbundle -ErrorAction SilentlyContinue)
+          if ($packages.Count -eq 0) { throw 'Build completed without an MSIX/Appx package.' }
+          'Unsigned package created for CI inspection; signing and Windows acceptance tests remain required.' >> $env:GITHUB_STEP_SUMMARY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: notchui-unsigned-msix-x64
+          path: |
+            artifacts/msix/**/*.msix
+            artifacts/msix/**/*.msixbundle
+            artifacts/msix/**/*.appx
+            artifacts/msix/**/*.appxbundle
+          if-no-files-found: error
+
+  portable:
+    runs-on: windows-2022
+    needs: self-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Publish unpackaged application (Release x64)
+        shell: pwsh
+        run: |
+          dotnet publish src/NotchUI/NotchUI.csproj -c Release -r win-x64 --self-contained true -o artifacts/portable -p:Platform=x64 -p:WindowsPackageType=None
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (!(Test-Path artifacts/portable/NotchUI.exe)) { throw 'NotchUI.exe was not produced.' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: notchui-portable-x64
+          path: artifacts/portable/
+          if-no-files-found: error
+      - name: Build Windows installer
+        shell: pwsh
+        run: |
+          $compiler = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
+          if (!(Test-Path $compiler)) { throw 'Inno Setup 6 is not installed on this runner.' }
+          & $compiler installer/NocUIExperience.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (!(Test-Path artifacts/installer/NocUI-Experience-Setup-x64.exe)) { throw 'Installer was not produced.' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nocui-experience-installer-x64
+          path: artifacts/installer/NocUI-Experience-Setup-x64.exe
+          if-no-files-found: error
