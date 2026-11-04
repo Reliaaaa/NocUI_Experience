@@ -1,30 +1,64 @@
-<Window
-    x:Class="NotchUI.MainWindow"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="NotchUI Settings">
-    <ScrollViewer Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <StackPanel Spacing="16" Padding="32" MaxWidth="760" HorizontalAlignment="Stretch">
-            <TextBlock Text="NotchUI" Style="{StaticResource TitleTextBlockStyle}" />
-            <TextBlock Text="Customize your notch" Style="{StaticResource SubtitleTextBlockStyle}" />
-            <TextBlock Text="Changes apply immediately." Opacity="0.7" />
-            <InfoBar x:Name="SettingsError" Severity="Warning" IsOpen="False" />
-            <TextBlock Text="Appearance" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,12,0,0" />
-            <TextBlock Text="Notch width" />
-            <Slider x:Name="WidthSlider" Minimum="200" Maximum="520" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Notch width" />
-            <TextBlock Text="Notch height" />
-            <Slider x:Name="HeightSlider" Minimum="28" Maximum="64" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Notch height" />
-            <TextBlock Text="Corner radius" />
-            <Slider x:Name="RadiusSlider" Minimum="0" Maximum="32" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Corner radius" />
-            <TextBlock Text="Background opacity" />
-            <Slider x:Name="OpacitySlider" Minimum="20" Maximum="100" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Background opacity percent" />
-            <TextBlock Text="Background color" />
-            <ColorPicker x:Name="BackgroundPicker" IsAlphaEnabled="False" IsAlphaSliderVisible="False" ColorChanged="OnColorChanged" />
-            <TextBlock Text="Widgets" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,12,0,0" />
-            <ToggleSwitch x:Name="ClockToggle" Header="Clock and date" Toggled="OnModulesChanged" />
-            <ToggleSwitch x:Name="BatteryToggle" Header="Battery" Toggled="OnModulesChanged" />
-            <ToggleSwitch x:Name="MediaToggle" Header="Media controls" Toggled="OnModulesChanged" />
-            <TextBlock Text="Closing this window keeps the notch running. Use the tray icon to open settings or exit." TextWrapping="Wrap" />
-        </StackPanel>
-    </ScrollViewer>
+<Window x:Class="NotchUI.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="NotchUI Settings">
+    <NavigationView PaneTitle="NotchUI" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" SelectionChanged="OnNavigationChanged">
+        <NavigationView.MenuItems>
+            <NavigationViewItem Content="General &amp; Appearance" Tag="appearance" Icon="Setting" IsSelected="True" />
+            <NavigationViewItem Content="Notch Widgets" Tag="widgets" Icon="AllApps" />
+            <NavigationViewItem Content="About" Tag="about" Icon="Help" />
+        </NavigationView.MenuItems>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Padding="32,28,32,48" Spacing="20" MaxWidth="940" HorizontalAlignment="Stretch">
+                <TextBlock x:Name="PageTitle" Text="Appearance &amp; hardware bounds" Style="{StaticResource TitleTextBlockStyle}" TextWrapping="Wrap" />
+                <TextBlock x:Name="PageDescription" Text="Personalize your notch. Changes apply immediately." Opacity="0.7" TextWrapping="Wrap" />
+                <InfoBar x:Name="SettingsError" Severity="Warning" IsOpen="False" />
+                <StackPanel x:Name="AppearancePage" Spacing="16">
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Live preview" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock Text="A preview of the notch on your screen" Opacity="0.7" />
+                            <Border Height="130" Background="{ThemeResource ControlFillColorSecondaryBrush}" CornerRadius="8" Padding="12">
+                                <Border x:Name="PreviewPill" Height="34" Width="320" CornerRadius="16" VerticalAlignment="Top" HorizontalAlignment="Center">
+                                    <TextBlock x:Name="PreviewText" Text="NotchUI  •  Live preview" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Dimensions" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock Text="Notch width" />
+                            <Slider x:Name="WidthSlider" Minimum="200" Maximum="520" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Notch width" />
+                            <TextBlock Text="Resting height" />
+                            <Slider x:Name="HeightSlider" Minimum="28" Maximum="64" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Notch height" />
+                            <TextBlock Text="Corner radius" />
+                            <Slider x:Name="RadiusSlider" Minimum="0" Maximum="32" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Corner radius" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Color &amp; opacity" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock Text="Background opacity" />
+                            <Slider x:Name="OpacitySlider" Minimum="20" Maximum="100" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Background opacity percent" />
+                            <ColorPicker x:Name="BackgroundPicker" IsAlphaEnabled="False" IsAlphaSliderVisible="False" ColorChanged="OnColorChanged" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                <StackPanel x:Name="WidgetsPage" Visibility="Collapsed" Spacing="12">
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
+                        <StackPanel Spacing="14">
+                            <TextBlock Text="Choose your widgets" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock Text="Enable the information shown inside the notch." TextWrapping="Wrap" Opacity="0.7" />
+                            <ToggleSwitch x:Name="ClockToggle" Header="Clock and date" Toggled="OnModulesChanged" />
+                            <ToggleSwitch x:Name="BatteryToggle" Header="Battery and charging" Toggled="OnModulesChanged" />
+                            <ToggleSwitch x:Name="MediaToggle" Header="Media controls" Toggled="OnModulesChanged" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                <StackPanel x:Name="AboutPage" Visibility="Collapsed" Spacing="12">
+                    <TextBlock Text="NotchUI" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="A compact Windows desktop notch for time, battery and media." TextWrapping="Wrap" />
+                    <TextBlock Text="Closing settings keeps NotchUI running. Use the system tray icon to reopen settings or exit." TextWrapping="Wrap" Opacity="0.7" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </NavigationView>
 </Window>
