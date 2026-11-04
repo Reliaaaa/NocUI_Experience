@@ -7,6 +7,7 @@ namespace NotchUI.Services;
 public sealed class BatteryService : IDisposable
 {
     private readonly DispatcherQueueTimer _timer;
+    private bool _running;
     public BatteryState State { get; private set; } = BatteryState.Unknown;
     public event EventHandler? Changed;
     public BatteryService(DispatcherQueue dispatcher)
@@ -15,8 +16,8 @@ public sealed class BatteryService : IDisposable
         _timer.Interval = TimeSpan.FromSeconds(30);
         _timer.Tick += OnTick;
     }
-    public void Start() { Refresh(); _timer.Start(); }
-    public void Stop() => _timer.Stop();
+    public void Start() { if (_running) return; _running = true; Refresh(); if (_running) _timer.Start(); }
+    public void Stop() { _running = false; _timer.Stop(); }
     public void Refresh()
     {
         State = !GetSystemPowerStatus(out var power) ? BatteryState.Unknown
@@ -26,7 +27,7 @@ public sealed class BatteryService : IDisposable
             : new(BatteryAvailability.Available, Math.Clamp((int)power.BatteryLifePercent, 0, 100), (power.BatteryFlag & 8) != 0);
         Changed?.Invoke(this, EventArgs.Empty);
     }
-    private void OnTick(DispatcherQueueTimer sender, object args) => Refresh();
+    private void OnTick(DispatcherQueueTimer sender, object args) { if (_running) Refresh(); }
     public void Dispose() { Stop(); _timer.Tick -= OnTick; }
     [StructLayout(LayoutKind.Sequential)]
     private struct PowerStatus
