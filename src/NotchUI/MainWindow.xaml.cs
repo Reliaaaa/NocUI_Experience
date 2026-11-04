@@ -13,8 +13,10 @@ public sealed partial class MainWindow : Window
 {
     private SettingsViewModel? _viewModel;
     private bool _loading;
-    public MainWindow(NotchCoordinator coordinator)
+    private readonly Action _showNotch;
+    public MainWindow(NotchCoordinator coordinator, Action showNotch)
     {
+        _showNotch = showNotch;
         InitializeComponent();
         SystemBackdrop = new MicaBackdrop();
         AppWindow.Resize(new Windows.Graphics.SizeInt32(1100, 760));
@@ -60,6 +62,7 @@ public sealed partial class MainWindow : Window
         _loading = false;
     }
     private void OnRestoreDefaults(object sender, RoutedEventArgs args) => _viewModel?.Update(_ => new NotchSettings());
+    private void OnOpenNotch(object sender, RoutedEventArgs args) => _showNotch();
     private void OnNavigationChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         if (AppearancePage is null || args.SelectedItem is not NavigationViewItem item) return;
