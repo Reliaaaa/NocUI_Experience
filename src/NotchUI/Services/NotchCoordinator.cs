@@ -10,6 +10,8 @@ public sealed class NotchCoordinator : IDisposable
     private readonly ClockService _clock;
     private readonly BatteryService _battery;
     private readonly IMediaService _media;
+    private readonly DispatcherQueueTimer _saveTimer;
+    private bool _settingsDirty;
     public NotchSettings Settings { get; private set; }
     public ClockState Clock => _clock.State;
     public BatteryState Battery => _battery.State;
@@ -21,6 +23,10 @@ public sealed class NotchCoordinator : IDisposable
     public NotchCoordinator(ISettingsService store, DispatcherQueue dispatcher)
     {
         _store = store;
+        _saveTimer = dispatcher.CreateTimer();
+        _saveTimer.Interval = TimeSpan.FromMilliseconds(400);
+        _saveTimer.IsRepeating = false;
+        _saveTimer.Tick += OnSaveTick;
         Settings = store.Load().Normalize();
         _clock = new ClockService(dispatcher);
         _battery = new BatteryService(dispatcher);
@@ -35,8 +41,23 @@ public sealed class NotchCoordinator : IDisposable
     {
         Settings = settings.Normalize();
         ApplyModules();
-        _store.Save(Settings);
+        _settingsDirty = true;
+        _saveTimer.Stop();
+        _saveTimer.Start();
         Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void OnSaveTick(DispatcherQueueTimer sender, object args)
+    {
+        FlushSettings();
+        Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void FlushSettings()
+    {
+        _saveTimer.Stop();
+        if (!_settingsDirty) return;
+        _settingsDirty = !_store.Save(Settings);
     }
 
     public void SetExpanded(bool expanded)
@@ -59,6 +80,8 @@ public sealed class NotchCoordinator : IDisposable
     }
     public void Dispose()
     {
+        FlushSettings();
+        _saveTimer.Tick -= OnSaveTick;
         _clock.Changed -= OnChanged;
         _battery.Changed -= OnChanged;
         _media.Changed -= OnChanged;
