@@ -61,13 +61,19 @@ public sealed partial class OverlayWindow : Window
         SummaryText.Text = settings.MediaEnabled && _coordinator.Media.Availability == MediaAvailability.Active
             ? _coordinator.Media.Title : "NotchUI";
         ClockText.Text = settings.ClockEnabled ? _coordinator.Clock.TimeText : "";
+        ToolTipService.SetToolTip(ClockText, settings.ClockEnabled ? _coordinator.Clock.DateText : null);
         BatteryText.Visibility = settings.BatteryEnabled ? Visibility.Visible : Visibility.Collapsed;
         BatteryText.Text = _coordinator.Battery.Availability == BatteryAvailability.Available
             ? $"Battery: {_coordinator.Battery.Percentage}%{(_coordinator.Battery.IsCharging ? " · Charging" : "")}" : "Battery unavailable";
         MediaText.Visibility = settings.MediaEnabled ? Visibility.Visible : Visibility.Collapsed;
         MediaControls.Visibility = settings.MediaEnabled ? Visibility.Visible : Visibility.Collapsed;
-        MediaText.Text = _coordinator.Media.Availability == MediaAvailability.Active
-            ? $"{_coordinator.Media.Title} — {_coordinator.Media.Artist}" : "No active media session";
+        MediaText.Text = _coordinator.Media.Error ?? (_coordinator.Media.Availability switch
+        {
+            MediaAvailability.Active => $"{_coordinator.Media.Title} — {_coordinator.Media.Artist}",
+            MediaAvailability.Loading => "Loading media…",
+            MediaAvailability.Error => "Media unavailable. Disable and re-enable the module to retry.",
+            _ => "No active media session"
+        });
         PreviousButton.IsEnabled = _coordinator.Media.CanPrevious && !_coordinator.Media.IsBusy;
         PlayPauseButton.IsEnabled = _coordinator.Media.CanTogglePlayPause && !_coordinator.Media.IsBusy;
         NextButton.IsEnabled = _coordinator.Media.CanNext && !_coordinator.Media.IsBusy;
