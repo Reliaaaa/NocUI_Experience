@@ -31,7 +31,10 @@ public sealed partial class OverlayWindow : Window
         UpdateVisuals();
     }
 
-    public void ApplyGeometry() => _host.SetGeometry(Pill.Width, Pill.Height, _coordinator.Settings.CornerRadius);
+    public void ApplyGeometry() => _host.SetGeometry(
+        _transition is not null && Pill.ActualWidth > 0 ? Pill.ActualWidth : Pill.Width,
+        _transition is not null && Pill.ActualHeight > 0 ? Pill.ActualHeight : Pill.Height,
+        _coordinator.Settings.CornerRadius);
     private void OnCoordinatorChanged(object? sender, EventArgs args) => UpdateVisuals();
     private void UpdateVisuals()
     {
@@ -139,6 +142,9 @@ public sealed partial class OverlayWindow : Window
     private async void OnNextClicked(object sender, RoutedEventArgs args) => await _coordinator.NextAsync();
     private void OnClosed(object sender, WindowEventArgs args)
     {
+        var transition = _transition;
+        _transition = null;
+        transition?.Stop();
         _coordinator.Changed -= OnCoordinatorChanged;
         _host.SystemStateChanged -= OnSystemStateChanged;
         _geometryTimer.Stop();
