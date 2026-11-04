@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
 using NotchUI.Services;
+using NotchUI.Models;
 using NotchUI.ViewModels;
 using Windows.UI;
 
@@ -31,6 +32,10 @@ public sealed partial class MainWindow : Window
         HeightSlider.Value = settings.Height;
         RadiusSlider.Value = settings.CornerRadius;
         OpacitySlider.Value = settings.Opacity * 100;
+        WidthLabel.Text = $"Notch width · {settings.Width:0} DIP";
+        HeightLabel.Text = $"Resting height · {settings.Height:0} DIP";
+        RadiusLabel.Text = $"Corner radius · {settings.CornerRadius:0} DIP";
+        OpacityLabel.Text = $"Background opacity · {settings.Opacity:P0}";
         ClockToggle.IsOn = settings.ClockEnabled;
         BatteryToggle.IsOn = settings.BatteryEnabled;
         MediaToggle.IsOn = settings.MediaEnabled;
@@ -49,6 +54,7 @@ public sealed partial class MainWindow : Window
         SettingsError.Message = _viewModel.Error ?? "";
         _loading = false;
     }
+    private void OnRestoreDefaults(object sender, RoutedEventArgs args) => _viewModel?.Update(_ => new NotchSettings());
     private void OnNavigationChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         if (AppearancePage is null || args.SelectedItem is not NavigationViewItem item) return;

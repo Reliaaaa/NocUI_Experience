@@ -12,7 +12,7 @@ namespace NotchUI;
 
 public sealed partial class OverlayWindow : Window
 {
-    private const double ExpandedHeight = 150;
+    private const double ExpandedHeight = 170;
     private readonly NotchCoordinator _coordinator;
     private readonly OverlayWindowHost _host;
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _geometryTimer;
@@ -56,6 +56,7 @@ public sealed partial class OverlayWindow : Window
             ? Color.FromArgb(255, 0, 0, 0) : Color.FromArgb(255, 255, 255, 255));
         SummaryText.Foreground = foreground;
         ClockText.Foreground = foreground;
+        CompactBatteryText.Foreground = foreground;
         DateText.Foreground = foreground;
         BatteryText.Foreground = foreground;
         MediaText.Foreground = foreground;
@@ -67,6 +68,8 @@ public sealed partial class OverlayWindow : Window
         DateText.Visibility = settings.ClockEnabled ? Visibility.Visible : Visibility.Collapsed;
         DateText.Text = _coordinator.Clock.DateText;
         BatteryText.Visibility = settings.BatteryEnabled ? Visibility.Visible : Visibility.Collapsed;
+        CompactBatteryText.Text = settings.BatteryEnabled && _coordinator.Battery.Availability == BatteryAvailability.Available
+            ? $"{_coordinator.Battery.Percentage}%{(_coordinator.Battery.IsCharging ? " ⚡" : "")}" : "";
         BatteryText.Text = _coordinator.Battery.Availability switch
         {
             BatteryAvailability.Available => $"Battery: {_coordinator.Battery.Percentage}%{(_coordinator.Battery.IsCharging ? " · Charging" : "")}",
@@ -83,7 +86,8 @@ public sealed partial class OverlayWindow : Window
             _ => "No active media session"
         });
         PreviousButton.IsEnabled = _coordinator.Media.CanPrevious && !_coordinator.Media.IsBusy;
-        PlayPauseButton.Content = _coordinator.Media.IsPlaying ? "Pause" : "Play";
+        PlayPauseIcon.Glyph = _coordinator.Media.IsPlaying ? "\uE769" : "\uE768";
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(PlayPauseButton, _coordinator.Media.IsPlaying ? "Pause" : "Play");
         PlayPauseButton.IsEnabled = _coordinator.Media.CanTogglePlayPause && !_coordinator.Media.IsBusy;
         NextButton.IsEnabled = _coordinator.Media.CanNext && !_coordinator.Media.IsBusy;
         if (_transition is null && !_changingState)

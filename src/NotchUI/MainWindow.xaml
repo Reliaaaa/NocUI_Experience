@@ -25,22 +25,23 @@
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
                         <StackPanel Spacing="12">
                             <TextBlock Text="Dimensions" Style="{StaticResource SubtitleTextBlockStyle}" />
-                            <TextBlock Text="Notch width" />
+                            <TextBlock x:Name="WidthLabel" Text="Notch width" />
                             <Slider x:Name="WidthSlider" Minimum="200" Maximum="520" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Notch width" />
-                            <TextBlock Text="Resting height" />
+                            <TextBlock x:Name="HeightLabel" Text="Resting height" />
                             <Slider x:Name="HeightSlider" Minimum="28" Maximum="64" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Notch height" />
-                            <TextBlock Text="Corner radius" />
+                            <TextBlock x:Name="RadiusLabel" Text="Corner radius" />
                             <Slider x:Name="RadiusSlider" Minimum="0" Maximum="32" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Corner radius" />
                         </StackPanel>
                     </Border>
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
                         <StackPanel Spacing="12">
                             <TextBlock Text="Color &amp; opacity" Style="{StaticResource SubtitleTextBlockStyle}" />
-                            <TextBlock Text="Background opacity" />
+                            <TextBlock x:Name="OpacityLabel" Text="Background opacity" />
                             <Slider x:Name="OpacitySlider" Minimum="20" Maximum="100" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Background opacity percent" />
                             <ColorPicker x:Name="BackgroundPicker" IsAlphaEnabled="False" IsAlphaSliderVisible="False" ColorChanged="OnColorChanged" />
                         </StackPanel>
                     </Border>
+                    <Button Content="Restore defaults" HorizontalAlignment="Left" Click="OnRestoreDefaults" />
                 </StackPanel>
                 <StackPanel x:Name="WidgetsPage" Visibility="Collapsed" Spacing="12">
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
