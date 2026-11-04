@@ -61,6 +61,9 @@ public sealed partial class MainWindow
         BackgroundPicker = new ColorPicker { IsAlphaEnabled = false, IsAlphaSliderVisible = false };
         colors.Children.Add(OpacityLabel); colors.Children.Add(OpacitySlider); colors.Children.Add(new Expander { Header = "Choose a background color", Content = BackgroundPicker }); AppearancePage.Children.Add(Card(colors));
         var reset = new Button { Content = "Restore defaults", HorizontalAlignment = HorizontalAlignment.Left }; reset.Click += OnRestoreDefaults; AppearancePage.Children.Add(reset);
+        var openNotch = new Button { Content = "Open notch with keyboard", HorizontalAlignment = HorizontalAlignment.Left };
+        openNotch.Click += (_, _) => _showNotch();
+        AppearancePage.Children.Add(openNotch);
         var widgets = Panel(14); widgets.Children.Add(Heading("Choose your widgets")); widgets.Children.Add(Label("Enable the information shown inside the notch."));
         ClockToggle = new ToggleSwitch { Header = "Clock and date" }; BatteryToggle = new ToggleSwitch { Header = "Battery and charging" }; MediaToggle = new ToggleSwitch { Header = "Media controls" };
         widgets.Children.Add(ClockToggle); widgets.Children.Add(BatteryToggle); widgets.Children.Add(MediaToggle); WidgetsPage.Children.Add(Card(widgets));

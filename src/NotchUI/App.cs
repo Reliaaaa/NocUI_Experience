@@ -64,11 +64,13 @@ public partial class App : Application
         if (_coordinator is null) return;
         if (_settingsWindow is null)
         {
-            _settingsWindow = new MainWindow(_coordinator);
+            _settingsWindow = new MainWindow(_coordinator, ShowNotch);
             _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         }
         _settingsWindow.Activate();
     }
+
+    private void ShowNotch() => _overlayWindow?.OpenForKeyboard();
 
     private void Shutdown()
     {

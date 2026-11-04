@@ -19,6 +19,7 @@ public sealed partial class OverlayWindow : Window
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _hoverTimer;
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _leaveTimer;
     private bool _pointerInside;
+    private bool _windowActive;
     private bool _closed;
     private Storyboard? _transition;
     private bool _changingState;
@@ -41,6 +42,7 @@ public sealed partial class OverlayWindow : Window
         _leaveTimer.IsRepeating = false;
         _leaveTimer.Interval = TimeSpan.FromMilliseconds(320);
         _leaveTimer.Tick += OnLeaveTimer;
+        Activated += OnWindowActivated;
         Closed += OnClosed;
         UpdateVisuals();
     }
@@ -128,14 +130,38 @@ public sealed partial class OverlayWindow : Window
     }
     private void OnLeaveTimer(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
     {
-        if (!_pointerInside && _coordinator.Settings.OpenOnHover) SetExpanded(false);
+        if (!_pointerInside && _coordinator.Settings.OpenOnHover && !HasKeyboardFocus()) SetExpanded(false);
     }
-    private void OnHeaderTapped(object sender, TappedRoutedEventArgs args)
+    private bool HasKeyboardFocus()
+    {
+        if (!_windowActive || Pill.XamlRoot is null) return false;
+        var focused = FocusManager.GetFocusedElement(Pill.XamlRoot) as DependencyObject;
+        while (focused is not null)
+        {
+            if (focused == Pill) return true;
+            focused = VisualTreeHelper.GetParent(focused);
+        }
+        return false;
+    }
+    private void OnWindowActivated(object sender, WindowActivatedEventArgs args)
+    {
+        _windowActive = args.WindowActivationState != WindowActivationState.Deactivated;
+        if (!_windowActive && !_pointerInside && _coordinator.Settings.OpenOnHover && _coordinator.IsExpanded)
+            _leaveTimer.Start();
+    }
+    private void OnHeaderClicked(object sender, RoutedEventArgs args)
     {
         _hoverTimer.Stop();
         _leaveTimer.Stop();
         SetExpanded(!_coordinator.IsExpanded);
-        args.Handled = true;
+    }
+    public void OpenForKeyboard()
+    {
+        _hoverTimer.Stop();
+        _leaveTimer.Stop();
+        SetExpanded(true);
+        Activate();
+        HeaderButton.Focus(FocusState.Keyboard);
     }
     private void SetExpanded(bool expanded)
     {
@@ -204,6 +230,7 @@ public sealed partial class OverlayWindow : Window
     private void OnClosed(object sender, WindowEventArgs args)
     {
         _closed = true;
+        Activated -= OnWindowActivated;
         var transition = _transition;
         _transition = null;
         transition?.Stop();

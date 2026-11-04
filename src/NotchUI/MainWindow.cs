@@ -13,8 +13,10 @@ public sealed partial class MainWindow : Window
 {
     private SettingsViewModel? _viewModel;
     private bool _loading;
-    public MainWindow(NotchCoordinator coordinator)
+    private readonly Action _showNotch;
+    public MainWindow(NotchCoordinator coordinator, Action showNotch)
     {
+        _showNotch = showNotch;
         InitializeComponent();
         SystemBackdrop = new MicaBackdrop();
         AppWindow.Resize(new Windows.Graphics.SizeInt32(1100, 760));

@@ -13,6 +13,7 @@ public sealed partial class OverlayWindow
     private TextBlock SummaryText = null!, ClockText = null!, CompactBatteryText = null!, DateText = null!, BatteryText = null!, MediaText = null!;
     private StackPanel ExpandedContent = null!, MediaControls = null!;
     private Button PreviousButton = null!, PlayPauseButton = null!, NextButton = null!;
+    private Button HeaderButton = null!;
     private FontIcon PlayPauseIcon = null!;
 
     private void InitializeComponent()
@@ -28,7 +29,9 @@ public sealed partial class OverlayWindow
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         Grid.SetColumn(ClockText, 1); Grid.SetColumn(CompactBatteryText, 2);
         header.Children.Add(SummaryText); header.Children.Add(ClockText); header.Children.Add(CompactBatteryText);
-        header.Tapped += OnHeaderTapped;
+        HeaderButton = new Button { Content = header, HorizontalContentAlignment = HorizontalAlignment.Stretch, HorizontalAlignment = HorizontalAlignment.Stretch, Padding = new Thickness(0), Background = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0)), BorderThickness = new Thickness(0), MinHeight = 0 };
+        AutomationProperties.SetName(HeaderButton, "Open or close notch");
+        HeaderButton.Click += OnHeaderClicked;
         DateText = Label(); DateText.Opacity = 0.75;
         BatteryText = Label(); BatteryText.Opacity = 0.75;
         MediaText = Label(true);
@@ -45,7 +48,7 @@ public sealed partial class OverlayWindow
         ExpandedContent = new StackPanel { Visibility = Visibility.Collapsed, Spacing = 4 };
         ExpandedContent.Children.Add(DateText); ExpandedContent.Children.Add(BatteryText); ExpandedContent.Children.Add(MediaText); ExpandedContent.Children.Add(MediaControls);
         var content = new StackPanel { Spacing = 8, Padding = new Thickness(16, 6, 16, 6) };
-        content.Children.Add(header); content.Children.Add(ExpandedContent);
+        content.Children.Add(HeaderButton); content.Children.Add(ExpandedContent);
         Pill = new Border { Background = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0)), HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Top, Child = content };
         Pill.PointerEntered += OnPointerEntered; Pill.PointerExited += OnPointerExited;
         var root = new Grid { Background = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0)) };
