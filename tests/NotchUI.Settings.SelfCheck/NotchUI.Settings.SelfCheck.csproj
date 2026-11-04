@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>12</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/NotchUI/Models/NotchSettings.cs" Link="NotchSettings.cs" />
+    <Compile Include="../../src/NotchUI/Services/SettingsCodec.cs" Link="SettingsCodec.cs" />
+  </ItemGroup>
+</Project>

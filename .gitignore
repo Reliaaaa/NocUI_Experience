@@ -1,0 +1,24 @@
+# .NET / Visual Studio generated output
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+TestResults/
+
+# Windows packaging output and signing material
+**/AppPackages/
+**/BundleArtifacts/
+artifacts/
+*.appx
+*.appxbundle
+*.msix
+*.msixbundle
+*.pfx
+*.cer
+
+# Local editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
