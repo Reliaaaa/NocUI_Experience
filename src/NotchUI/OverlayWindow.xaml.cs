@@ -75,7 +75,7 @@ public sealed partial class OverlayWindow : Window
         MediaText.Foreground = foreground;
         Pill.CornerRadius = new CornerRadius(settings.CornerRadius);
         SummaryText.Text = settings.MediaEnabled && _coordinator.Media.Availability == MediaAvailability.Active
-            ? _coordinator.Media.Title : "NotchUI";
+            ? _coordinator.Media.Title : "NocUI Experience";
         ClockText.Text = settings.ClockEnabled ? _coordinator.Clock.TimeText : "";
         ToolTipService.SetToolTip(ClockText, settings.ClockEnabled ? _coordinator.Clock.DateText : null);
         DateText.Visibility = settings.ClockEnabled ? Visibility.Visible : Visibility.Collapsed;

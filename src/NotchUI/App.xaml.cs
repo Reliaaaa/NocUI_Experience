@@ -51,7 +51,7 @@ public partial class App : Application
                 File.WriteAllText(logPath, exception.ToString());
             }
             catch (Exception) { logPath = "(log tidak dapat disimpan)"; }
-            MessageBox(0, $"NotchUI gagal dimulai: {exception.Message}\n\nLog: {logPath}", "NotchUI", 0x10);
+            MessageBox(0, $"NocUI Experience gagal dimulai: {exception.Message}\n\nLog: {logPath}", "NocUI Experience", 0x10);
             Shutdown();
         }
     }

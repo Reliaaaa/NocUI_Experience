@@ -30,11 +30,11 @@ public sealed partial class MainWindow
     }
     private void InitializeComponent()
     {
-        Title = "NotchUI Settings";
+        Title = "NocUI Experience Settings";
         var nav = new NavigationView { Background = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0)), IsSettingsVisible = false, IsBackButtonVisible = NavigationViewBackButtonVisible.Collapsed };
         var brand = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 12, Margin = new Thickness(12, 12, 0, 20) };
         brand.Children.Add(new Image { Source = new BitmapImage(new Uri("ms-appx:///Assets/Square44x44Logo.png")), Width = 38, Height = 38 });
-        var brandText = Panel(0); brandText.Children.Add(Heading("NotchUI")); brandText.Children.Add(Label("Windows desktop", 12)); brand.Children.Add(brandText); nav.PaneHeader = brand;
+        var brandText = Panel(0); brandText.Children.Add(Heading("NocUI Experience")); brandText.Children.Add(Label("Windows desktop", 12)); brand.Children.Add(brandText); nav.PaneHeader = brand;
         NavigationViewItem Item(string text, string tag, Symbol icon) => new() { Content = text, Tag = tag, Icon = new SymbolIcon(icon) };
         var appearanceItem = Item("General & Appearance", "appearance", Symbol.Setting);
         nav.MenuItems.Add(appearanceItem); nav.MenuItems.Add(Item("Notch Widgets", "widgets", Symbol.AllApps));
@@ -47,7 +47,7 @@ public sealed partial class MainWindow
         AppearancePage = Panel(16); WidgetsPage = Panel(); AboutPage = Panel(); BehaviorPage = Panel(); AnimationsPage = Panel();
         WidgetsPage.Visibility = AboutPage.Visibility = BehaviorPage.Visibility = AnimationsPage.Visibility = Visibility.Collapsed;
         var preview = Panel(); preview.Children.Add(Heading("Live preview")); preview.Children.Add(Label("A preview of the notch on your screen"));
-        PreviewText = new TextBlock { Text = "NotchUI  •  Live preview", HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis };
+        PreviewText = new TextBlock { Text = "NocUI Experience  •  Live preview", HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis };
         PreviewPill = new Border { Width = 320, Height = 34, CornerRadius = new CornerRadius(16), HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Top, Child = PreviewText };
         var gradient = new LinearGradientBrush { StartPoint = new Windows.Foundation.Point(0, 0), EndPoint = new Windows.Foundation.Point(1, 1) };
         gradient.GradientStops.Add(new GradientStop { Color = Color.FromArgb(255, 34, 48, 75), Offset = 0 });
@@ -66,7 +66,7 @@ public sealed partial class MainWindow
         widgets.Children.Add(ClockToggle); widgets.Children.Add(BatteryToggle); widgets.Children.Add(MediaToggle); WidgetsPage.Children.Add(Card(widgets));
         var behavior = Panel(); behavior.Children.Add(Heading("Opening the notch")); behavior.Children.Add(Label("Hover briefly to open the notch; it closes shortly after you leave. Clicking the header toggles it immediately.")); HoverToggle = new ToggleSwitch { Header = "Open on hover" }; behavior.Children.Add(HoverToggle); BehaviorPage.Children.Add(Card(behavior));
         var animations = Panel(); animations.Children.Add(Heading("Transition speed")); animations.Children.Add(Label("Choose how long the notch takes to open and close. Set to zero to disable motion.")); DurationLabel = Label("Duration"); DurationSlider = MakeSlider(0, 600, 20, "Animation duration in milliseconds"); animations.Children.Add(DurationLabel); animations.Children.Add(DurationSlider); AnimationsPage.Children.Add(Card(animations));
-        var about = Panel(); about.Children.Add(new Image { Source = new BitmapImage(new Uri("ms-appx:///Assets/Square150x150Logo.png")), Width = 72, Height = 72, HorizontalAlignment = HorizontalAlignment.Left }); about.Children.Add(Heading("NotchUI")); about.Children.Add(Label("A compact Windows desktop notch for time, battery and media.")); about.Children.Add(Label("Closing settings keeps NotchUI running. Use the system tray icon to reopen settings or exit.")); AboutPage.Children.Add(Card(about));
+        var about = Panel(); about.Children.Add(new Image { Source = new BitmapImage(new Uri("ms-appx:///Assets/Square150x150Logo.png")), Width = 72, Height = 72, HorizontalAlignment = HorizontalAlignment.Left }); about.Children.Add(Heading("NocUI Experience")); about.Children.Add(Label("A compact Windows desktop notch for time, battery and media.")); about.Children.Add(Label("Closing settings keeps NocUI Experience running. Use the system tray icon to reopen settings or exit.")); AboutPage.Children.Add(Card(about));
         root.Children.Add(AppearancePage); root.Children.Add(WidgetsPage); root.Children.Add(BehaviorPage); root.Children.Add(AnimationsPage); root.Children.Add(AboutPage);
         nav.Content = new ScrollViewer { Content = root, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
         nav.SelectionChanged += OnNavigationChanged; nav.SelectedItem = appearanceItem;
