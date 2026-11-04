@@ -9,7 +9,6 @@
     <UseWinUI>true</UseWinUI>
     <WindowsPackageType Condition="'$(WindowsPackageType)' == ''">MSIX</WindowsPackageType>
     <EnableMsixTooling>true</EnableMsixTooling>
-    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(WindowsPackageType)' == 'None'">
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>

@@ -14,11 +14,7 @@ public partial class App : Application
     private TrayIconHost? _tray;
     private NotchCoordinator? _coordinator;
 
-    public App()
-    {
-        Resources = new ResourceDictionary();
-        Resources.MergedDictionaries.Add(new Microsoft.UI.Xaml.Controls.XamlControlsResources());
-    }
+    public App() => InitializeComponent();
 
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
