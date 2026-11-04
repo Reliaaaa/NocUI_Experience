@@ -16,6 +16,8 @@ public sealed partial class MainWindow : Window
     public MainWindow(NotchCoordinator coordinator)
     {
         InitializeComponent();
+        SystemBackdrop = new MicaBackdrop();
+        AppWindow.Resize(new Windows.Graphics.SizeInt32(1100, 760));
         _viewModel = new SettingsViewModel(coordinator);
         coordinator.Changed += OnCoordinatorChanged;
         Closed += (_, _) => coordinator.Changed -= OnCoordinatorChanged;

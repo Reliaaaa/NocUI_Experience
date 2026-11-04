@@ -1,5 +1,5 @@
 <Window x:Class="NotchUI.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="NotchUI Settings">
-    <NavigationView PaneTitle="NotchUI" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" SelectionChanged="OnNavigationChanged">
+    <NavigationView PaneTitle="NotchUI" Background="Transparent" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" SelectionChanged="OnNavigationChanged">
         <NavigationView.MenuItems>
             <NavigationViewItem Content="General &amp; Appearance" Tag="appearance" Icon="Setting" IsSelected="True" />
             <NavigationViewItem Content="Notch Widgets" Tag="widgets" Icon="AllApps" />
@@ -15,7 +15,10 @@
                 <StackPanel x:Name="AppearancePage" Spacing="16">
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Live preview" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <FontIcon Glyph="&#xE7F4;" Foreground="{ThemeResource SystemAccentColorPrimaryBrush}" />
+                                <TextBlock Text="Live preview" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            </StackPanel>
                             <TextBlock Text="A preview of the notch on your screen" Opacity="0.7" />
                             <Border Height="130" Background="{ThemeResource ControlFillColorSecondaryBrush}" CornerRadius="8" Padding="12">
                                 <Border x:Name="PreviewPill" Height="34" Width="320" CornerRadius="16" VerticalAlignment="Top" HorizontalAlignment="Center">
@@ -26,7 +29,10 @@
                     </Border>
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Dimensions" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <FontIcon Glyph="&#xE8A9;" Foreground="{ThemeResource SystemAccentColorPrimaryBrush}" />
+                                <TextBlock Text="Dimensions" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            </StackPanel>
                             <TextBlock x:Name="WidthLabel" Text="Notch width" />
                             <Slider x:Name="WidthSlider" Minimum="200" Maximum="520" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Notch width" />
                             <TextBlock x:Name="HeightLabel" Text="Resting height" />
@@ -37,7 +43,10 @@
                     </Border>
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Color &amp; opacity" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <FontIcon Glyph="&#xE790;" Foreground="{ThemeResource SystemAccentColorPrimaryBrush}" />
+                                <TextBlock Text="Color &amp; opacity" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            </StackPanel>
                             <TextBlock x:Name="OpacityLabel" Text="Background opacity" />
                             <Slider x:Name="OpacitySlider" Minimum="20" Maximum="100" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Background opacity percent" />
                             <ColorPicker x:Name="BackgroundPicker" IsAlphaEnabled="False" IsAlphaSliderVisible="False" ColorChanged="OnColorChanged" />
