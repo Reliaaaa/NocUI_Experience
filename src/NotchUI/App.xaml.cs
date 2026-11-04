@@ -20,7 +20,7 @@ public partial class App : Application
         if (!instance.IsCurrent)
         {
             await instance.RedirectActivationToAsync(AppInstance.GetCurrent().GetActivatedEventArgs());
-            Exit();
+            Shutdown();
             return;
         }
         var dispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
@@ -30,7 +30,7 @@ public partial class App : Application
         _overlayWindow = new OverlayWindow(_coordinator);
         _overlayWindow.Activate();
         _overlayWindow.ApplyGeometry();
-        _tray = new TrayIconHost(WinRT.Interop.WindowNative.GetWindowHandle(_overlayWindow), ShowSettings, Exit);
+        _tray = new TrayIconHost(WinRT.Interop.WindowNative.GetWindowHandle(_overlayWindow), ShowSettings, Shutdown);
         ShowSettings();
     }
 
@@ -45,7 +45,7 @@ public partial class App : Application
         _settingsWindow.Activate();
     }
 
-    private void Exit()
+    private void Shutdown()
     {
         _tray?.Dispose();
         _tray = null;
