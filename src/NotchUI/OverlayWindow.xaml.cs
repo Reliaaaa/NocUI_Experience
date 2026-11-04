@@ -12,6 +12,7 @@ namespace NotchUI;
 
 public sealed partial class OverlayWindow : Window
 {
+    private const double ExpandedHeight = 150;
     private readonly NotchCoordinator _coordinator;
     private readonly OverlayWindowHost _host;
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _geometryTimer;
@@ -55,6 +56,7 @@ public sealed partial class OverlayWindow : Window
             ? Color.FromArgb(255, 0, 0, 0) : Color.FromArgb(255, 255, 255, 255));
         SummaryText.Foreground = foreground;
         ClockText.Foreground = foreground;
+        DateText.Foreground = foreground;
         BatteryText.Foreground = foreground;
         MediaText.Foreground = foreground;
         Pill.CornerRadius = new CornerRadius(settings.CornerRadius);
@@ -62,6 +64,8 @@ public sealed partial class OverlayWindow : Window
             ? _coordinator.Media.Title : "NotchUI";
         ClockText.Text = settings.ClockEnabled ? _coordinator.Clock.TimeText : "";
         ToolTipService.SetToolTip(ClockText, settings.ClockEnabled ? _coordinator.Clock.DateText : null);
+        DateText.Visibility = settings.ClockEnabled ? Visibility.Visible : Visibility.Collapsed;
+        DateText.Text = _coordinator.Clock.DateText;
         BatteryText.Visibility = settings.BatteryEnabled ? Visibility.Visible : Visibility.Collapsed;
         BatteryText.Text = _coordinator.Battery.Availability == BatteryAvailability.Available
             ? $"Battery: {_coordinator.Battery.Percentage}%{(_coordinator.Battery.IsCharging ? " · Charging" : "")}" : "Battery unavailable";
@@ -80,7 +84,7 @@ public sealed partial class OverlayWindow : Window
         if (_transition is null && !_changingState)
         {
             Pill.Width = Math.Min(_coordinator.IsExpanded ? Math.Max(settings.Width, 430) : settings.Width, _host.PrimaryWidthDip);
-            Pill.Height = _coordinator.IsExpanded ? 116 : settings.Height;
+            Pill.Height = _coordinator.IsExpanded ? ExpandedHeight : settings.Height;
         }
         ApplyGeometry();
     }
@@ -107,7 +111,7 @@ public sealed partial class OverlayWindow : Window
         ExpandedContent.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
         var animation = new DoubleAnimation
         {
-            From = startHeight, To = expanded ? 116 : _coordinator.Settings.Height,
+            From = startHeight, To = expanded ? ExpandedHeight : _coordinator.Settings.Height,
             Duration = new Duration(TimeSpan.FromMilliseconds(180)),
             EnableDependentAnimation = true,
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
