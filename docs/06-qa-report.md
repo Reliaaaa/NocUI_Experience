@@ -12,14 +12,14 @@ P1 juga belum tertutup. F17 (perubahan display/DPI) dan F18 (reduced motion) did
 
 | Area | Metode | Hasil | Status |
 | --- | --- | --- | --- |
-| Inventaris docs 01–05 dan sumber | Inspeksi file dan kontrak | Docs features, architecture, design, database tersedia; kode saat ini hanya model/services/interop dan self-check. Dokumen 04 tidak ada dalam workspace. | Ditemukan gap |
+| Inventaris docs 01–05 dan sumber | Inspeksi file dan kontrak | Dokumen 01–05, proyek WinUI, jendela, service, manifest, dan self-check tersedia. | Ada; build belum diverifikasi |
 | Build/test .NET | `dotnet run --project tests/NotchUI.Settings.SelfCheck` tidak dapat dijalankan | `dotnet`, `csc`, dan `mcs` tidak tersedia di PATH lingkungan ini. | Blocked (toolchain) |
 | Codec settings | Review statis | Ada roundtrip, batas payload, version check, fallback default, normalisasi NaN/infinity, ukuran/radius/warna. Self-check mencakup kasus tersebut tetapi belum dieksekusi. | Review saja |
 | Penyimpanan LocalSettings | Review statis | Main key dan LastGood, penolakan versi masa depan, penyimpanan satu payload, penanganan exception tampak konsisten dengan docs. Integrasi WinRT dan kegagalan storage belum bisa disimulasikan. | Review saja |
 | Jam/baterai/media | Review statis | Timer jam selaras pergantian menit; baterai membedakan unavailable/unknown; media membersihkan sesi dan menjaga hasil async dengan generation/version. Belum ada uji runtime Windows atau GSMTC. | Review saja |
-| Overlay/tray Win32 | Review statis | Native adapter tersedia, namun tidak terhubung pada jendela aplikasi karena shell belum ada. Click-through lintas proses, region, taskbar restart, menu, DPI, dan lifetime belum diuji. | Belum terverifikasi |
-| UI reference | Inventaris tujuh pasang screenshot/HTML serta dua DESIGN.md | Referensi konsisten dengan kontrak visual docs/03; HTML adalah mockup dan bukan UI aplikasi. Tidak ada kontrol XAML untuk dibandingkan. | Review saja |
-| Static checks | `rg` untuk TODO/implementasi dan file proyek | Tidak ditemukan aplikasi runnable; satu edge case radius nol pada hit test ditemukan dan diperbaiki. Tidak menjalankan analyzer/compiler. | Sebagian |
+| Overlay/tray Win32 | Review statis | Native adapter terhubung ke shell. Click-through lintas proses, region, taskbar restart, menu, DPI, dan lifetime belum diuji. | Belum terverifikasi |
+| UI reference | Inventaris tujuh pasang screenshot/HTML serta dua DESIGN.md | Referensi tersedia dan UI XAML telah dibuat; kesesuaian visual belum diuji pada Windows. | Review saja |
+| Static checks | Inspeksi source | Edge case radius nol pada hit test ditemukan dan diperbaiki. Tidak menjalankan analyzer/compiler. | Sebagian |
 | XML/XAML/project/manifest | Python `xml.etree.ElementTree` parse | App.xaml, MainWindow.xaml, OverlayWindow.xaml, NotchUI.csproj, Package.appxmanifest valid sebagai XML. Ini bukan validasi XAML compiler atau manifest schema Windows. | Lulus parse |
 
 ## Temuan
@@ -27,11 +27,11 @@ P1 juga belum tertutup. F17 (perubahan display/DPI) dan F18 (reduced motion) did
 | ID | Severity | Status | Temuan / dampak |
 | --- | --- | --- | --- |
 | QA-001 | P1 (edge case) | Fixed | `OverlayWindowHost` melakukan uji rounded-rectangle dengan radius nol. Rumus awal hanya menerima titik yang tepat pada sudut (0,0), walau region HWND berbentuk persegi panjang; notch beradius nol praktis tidak dapat diklik. Ditambahkan jalur hit test persegi panjang pada radius nol di `src/NotchUI/Interop/OverlayWindowHost.cs`. Perlu validasi runtime Windows karena toolchain tidak tersedia. |
-| QA-002 | P0 | Open / release blocker | Tidak ada proyek aplikasi WinUI maupun bootstrap, jendela, XAML, view model, manifest, dan integrasi service. Karena itu fitur F01–F16 tidak dapat dibangun atau dibuktikan sebagai produk terintegrasi. Pekerjaan backend tidak cukup untuk menyatakan P0 selesai. |
+| QA-002 | P0 | Source tersedia; verifikasi terbuka | Proyek WinUI, bootstrap, jendela, manifest, dan integrasi service sudah ditambahkan. Build serta penerimaan F01–F16 masih memerlukan Windows. |
 | QA-003 | P0 (verification) | Open | Tidak ada .NET SDK/compiler di lingkungan QA; self-check tidak dijalankan. Kegagalan ini adalah keterbatasan lingkungan, bukan bukti tes gagal. Jalankan self-check pada mesin .NET 8 sebelum merge/release. |
 | QA-004 | P1 | Open / deferred by scope | F17 monitor/DPI dinamis dan F18 reduced motion tidak ada dalam sumber. Docs secara eksplisit menjadwalkannya setelah MVP; tandai belum selesai, bukan penerimaan MVP. |
-| QA-005 | P0 | Open | `NotchCoordinator.UpdateSettings` langsung memanggil `Save` pada setiap perubahan slider. Tidak ada debounce atau flush terjadwal seperti docs/05; banyak penulisan saat drag dan UI berpotensi tersendat. |
-| QA-006 | P0 | Open | `OverlayWindow` mengubah tinggi visual saat expanded tetapi `OverlayWindowHost` hanya memperbarui HWND melalui `SetGeometry` setelah animasi; timer 16ms memanggil geometri dari `Pill.Height`, tetapi method `ApplyGeometry` memakai Pill.Width dan Pill.Height ya. Area interaktif per-frame ada. Namun konten expanded dibuat Visible setelah masuk keadaan expanded, tanpa memastikan transisi/target ruang monitor. Perlu runtime Windows. |
+| QA-005 | P0 | Perbaikan source; belum diuji | Penyimpanan sekarang memakai debounce 400 ms dan flush saat dispose. Kegagalan tulis dan keluar saat debounce tertunda masih perlu diuji di Windows. |
+| QA-006 | P0 | Perbaikan source; belum diuji | Geometri diperbarui selama animasi menggunakan ukuran visual. Kesesuaian area interaktif dan ruang monitor perlu diuji pada Windows. |
 
 ## Risiko dan kasus tepi yang perlu diuji pada Windows
 

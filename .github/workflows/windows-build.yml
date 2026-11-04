@@ -24,24 +24,10 @@ jobs:
     needs: self-check
     steps:
       - uses: actions/checkout@v4
-      - name: Detect packaged WinUI project
-        id: app
-        shell: pwsh
-        run: |
-          $project = 'src/NotchUI/NotchUI.csproj'
-          $manifest = 'src/NotchUI/Package.appxmanifest'
-          if ((Test-Path $project) -and (Test-Path $manifest)) {
-            'available=true' >> $env:GITHUB_OUTPUT
-          } else {
-            'available=false' >> $env:GITHUB_OUTPUT
-            'MSIX packaging skipped: packaged WinUI project and manifest are not both present.' >> $env:GITHUB_STEP_SUMMARY
-          }
       - uses: actions/setup-dotnet@v4
-        if: steps.app.outputs.available == 'true'
         with:
           dotnet-version: 8.0.x
       - name: Build unsigned MSIX (Release x64)
-        if: steps.app.outputs.available == 'true'
         shell: pwsh
         run: |
           $packageDirectory = Join-Path $env:GITHUB_WORKSPACE 'artifacts\msix\'
@@ -54,7 +40,6 @@ jobs:
           if ($packages.Count -eq 0) { throw 'Build completed without an MSIX/Appx package.' }
           'Unsigned package created for CI inspection; signing and Windows acceptance tests remain required.' >> $env:GITHUB_STEP_SUMMARY
       - uses: actions/upload-artifact@v4
-        if: steps.app.outputs.available == 'true'
         with:
           name: notchui-unsigned-msix-x64
           path: |
@@ -62,4 +47,24 @@ jobs:
             artifacts/msix/**/*.msixbundle
             artifacts/msix/**/*.appx
             artifacts/msix/**/*.appxbundle
+          if-no-files-found: error
+
+  portable:
+    runs-on: windows-2022
+    needs: self-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Publish unpackaged application (Release x64)
+        shell: pwsh
+        run: |
+          dotnet publish src/NotchUI/NotchUI.csproj -c Release -r win-x64 --self-contained true -o artifacts/portable -p:Platform=x64 -p:WindowsPackageType=None
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (!(Test-Path artifacts/portable/NotchUI.exe)) { throw 'NotchUI.exe was not produced.' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: notchui-portable-x64
+          path: artifacts/portable/
           if-no-files-found: error

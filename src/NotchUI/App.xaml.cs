@@ -2,6 +2,8 @@ using Microsoft.UI.Xaml;
 using NotchUI.Interop;
 using NotchUI.Services;
 using Microsoft.Windows.AppLifecycle;
+using System.IO;
+using System.Runtime.InteropServices;
 
 namespace NotchUI;
 
@@ -16,11 +18,13 @@ public partial class App : Application
 
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
+        try
+        {
         var instance = AppInstance.FindOrRegisterForKey("NotchUI.Main");
         if (!instance.IsCurrent)
         {
             await instance.RedirectActivationToAsync(AppInstance.GetCurrent().GetActivatedEventArgs());
-            Exit();
+            Shutdown();
             return;
         }
         var dispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
@@ -30,9 +34,26 @@ public partial class App : Application
         _overlayWindow = new OverlayWindow(_coordinator);
         _overlayWindow.Activate();
         _overlayWindow.ApplyGeometry();
-        _tray = new TrayIconHost(WinRT.Interop.WindowNative.GetWindowHandle(_overlayWindow), ShowSettings, Exit);
+        _tray = new TrayIconHost(WinRT.Interop.WindowNative.GetWindowHandle(_overlayWindow), ShowSettings, Shutdown);
         ShowSettings();
+        }
+        catch (Exception exception)
+        {
+            var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NotchUI");
+            var logPath = Path.Combine(directory, "startup-error.log");
+            try
+            {
+                Directory.CreateDirectory(directory);
+                File.WriteAllText(logPath, exception.ToString());
+            }
+            catch (Exception) { logPath = "(log tidak dapat disimpan)"; }
+            MessageBox(0, $"NotchUI gagal dimulai: {exception.Message}\n\nLog: {logPath}", "NotchUI", 0x10);
+            Shutdown();
+        }
     }
+
+    [DllImport("user32.dll", EntryPoint = "MessageBoxW", CharSet = CharSet.Unicode)]
+    private static extern int MessageBox(nint hwnd, string text, string caption, uint type);
 
     private void ShowSettings()
     {
@@ -45,7 +66,7 @@ public partial class App : Application
         _settingsWindow.Activate();
     }
 
-    private void Exit()
+    private void Shutdown()
     {
         _tray?.Dispose();
         _tray = null;

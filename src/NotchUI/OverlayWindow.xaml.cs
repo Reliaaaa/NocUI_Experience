@@ -12,6 +12,7 @@ namespace NotchUI;
 
 public sealed partial class OverlayWindow : Window
 {
+    private const double ExpandedHeight = 150;
     private readonly NotchCoordinator _coordinator;
     private readonly OverlayWindowHost _host;
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _geometryTimer;
@@ -31,7 +32,10 @@ public sealed partial class OverlayWindow : Window
         UpdateVisuals();
     }
 
-    public void ApplyGeometry() => _host.SetGeometry(Pill.Width, Pill.Height, _coordinator.Settings.CornerRadius);
+    public void ApplyGeometry() => _host.SetGeometry(
+        _transition is not null && Pill.ActualWidth > 0 ? Pill.ActualWidth : Pill.Width,
+        _transition is not null && Pill.ActualHeight > 0 ? Pill.ActualHeight : Pill.Height,
+        _coordinator.Settings.CornerRadius);
     private void OnCoordinatorChanged(object? sender, EventArgs args) => UpdateVisuals();
     private void UpdateVisuals()
     {
@@ -52,26 +56,40 @@ public sealed partial class OverlayWindow : Window
             ? Color.FromArgb(255, 0, 0, 0) : Color.FromArgb(255, 255, 255, 255));
         SummaryText.Foreground = foreground;
         ClockText.Foreground = foreground;
+        DateText.Foreground = foreground;
         BatteryText.Foreground = foreground;
         MediaText.Foreground = foreground;
         Pill.CornerRadius = new CornerRadius(settings.CornerRadius);
         SummaryText.Text = settings.MediaEnabled && _coordinator.Media.Availability == MediaAvailability.Active
             ? _coordinator.Media.Title : "NotchUI";
         ClockText.Text = settings.ClockEnabled ? _coordinator.Clock.TimeText : "";
+        ToolTipService.SetToolTip(ClockText, settings.ClockEnabled ? _coordinator.Clock.DateText : null);
+        DateText.Visibility = settings.ClockEnabled ? Visibility.Visible : Visibility.Collapsed;
+        DateText.Text = _coordinator.Clock.DateText;
         BatteryText.Visibility = settings.BatteryEnabled ? Visibility.Visible : Visibility.Collapsed;
-        BatteryText.Text = _coordinator.Battery.Availability == BatteryAvailability.Available
-            ? $"Battery: {_coordinator.Battery.Percentage}%{(_coordinator.Battery.IsCharging ? " · Charging" : "")}" : "Battery unavailable";
+        BatteryText.Text = _coordinator.Battery.Availability switch
+        {
+            BatteryAvailability.Available => $"Battery: {_coordinator.Battery.Percentage}%{(_coordinator.Battery.IsCharging ? " · Charging" : "")}",
+            BatteryAvailability.Unavailable => "No battery detected",
+            _ => "Battery status unavailable"
+        };
         MediaText.Visibility = settings.MediaEnabled ? Visibility.Visible : Visibility.Collapsed;
         MediaControls.Visibility = settings.MediaEnabled ? Visibility.Visible : Visibility.Collapsed;
-        MediaText.Text = _coordinator.Media.Availability == MediaAvailability.Active
-            ? $"{_coordinator.Media.Title} — {_coordinator.Media.Artist}" : "No active media session";
+        MediaText.Text = _coordinator.Media.Error ?? (_coordinator.Media.Availability switch
+        {
+            MediaAvailability.Active => $"{_coordinator.Media.Title} — {_coordinator.Media.Artist}",
+            MediaAvailability.Loading => "Loading media…",
+            MediaAvailability.Error => "Media unavailable. Disable and re-enable the module to retry.",
+            _ => "No active media session"
+        });
         PreviousButton.IsEnabled = _coordinator.Media.CanPrevious && !_coordinator.Media.IsBusy;
+        PlayPauseButton.Content = _coordinator.Media.IsPlaying ? "Pause" : "Play";
         PlayPauseButton.IsEnabled = _coordinator.Media.CanTogglePlayPause && !_coordinator.Media.IsBusy;
         NextButton.IsEnabled = _coordinator.Media.CanNext && !_coordinator.Media.IsBusy;
         if (_transition is null && !_changingState)
         {
             Pill.Width = Math.Min(_coordinator.IsExpanded ? Math.Max(settings.Width, 430) : settings.Width, _host.PrimaryWidthDip);
-            Pill.Height = _coordinator.IsExpanded ? 116 : settings.Height;
+            Pill.Height = _coordinator.IsExpanded ? ExpandedHeight : settings.Height;
         }
         ApplyGeometry();
     }
@@ -98,7 +116,7 @@ public sealed partial class OverlayWindow : Window
         ExpandedContent.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
         var animation = new DoubleAnimation
         {
-            From = startHeight, To = expanded ? 116 : _coordinator.Settings.Height,
+            From = startHeight, To = expanded ? ExpandedHeight : _coordinator.Settings.Height,
             Duration = new Duration(TimeSpan.FromMilliseconds(180)),
             EnableDependentAnimation = true,
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
@@ -139,6 +157,9 @@ public sealed partial class OverlayWindow : Window
     private async void OnNextClicked(object sender, RoutedEventArgs args) => await _coordinator.NextAsync();
     private void OnClosed(object sender, WindowEventArgs args)
     {
+        var transition = _transition;
+        _transition = null;
+        transition?.Stop();
         _coordinator.Changed -= OnCoordinatorChanged;
         _host.SystemStateChanged -= OnSystemStateChanged;
         _geometryTimer.Stop();
