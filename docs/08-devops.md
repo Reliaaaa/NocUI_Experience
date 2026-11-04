@@ -2,7 +2,7 @@
 
 ## Kondisi awal
 
-Per 2026-11-04, hanya `tests/NotchUI.Settings.SelfCheck/NotchUI.Settings.SelfCheck.csproj` yang merupakan proyek .NET. Source di `src/NotchUI` belum mempunyai `NotchUI.csproj`, `App.xaml`, `MainWindow.xaml`, `OverlayWindow.xaml`, view model, atau `Package.appxmanifest`. Karena itu belum ada aplikasi yang dapat dibangun, MSIX yang dapat dikemas, atau hasil uji Windows yang bisa diklaim. Lingkungan kerja ini tidak menyediakan `dotnet` maupun toolchain Windows; pemeriksaan lokal terbatas pada inspeksi statis. Lihat juga `06-qa-report.md`.
+Source kini memiliki proyek packaged WinUI di `src/NotchUI`, tetapi build Windows belum dijalankan di lingkungan ini karena tidak tersedia `dotnet` atau toolchain Windows. Pemeriksaan lokal terbatas pada inspeksi statis. Lihat juga `06-qa-report.md`.
 
 ## Prasyarat pengembang Windows
 
@@ -18,13 +18,12 @@ Per 2026-11-04, hanya `tests/NotchUI.Settings.SelfCheck/NotchUI.Settings.SelfChe
 
 ## Pipeline dan artefak
 
-Workflow Windows berjalan pada push, pull request, dan pemicu manual. Job self-check aktif untuk keadaan repo saat ini. Job paket memeriksa keberadaan proyek aplikasi dan manifest; jika keduanya belum ada, langkah build/upload dilewati dan ringkasan job mencatat blocker. Setelah keduanya tersedia, runner menjalankan MSBuild Release x64 dengan `GenerateAppxPackageOnBuild=true` dan signing dimatikan, lalu mengunggah MSIX sebagai artefak CI sementara. Artefak unsigned itu adalah bahan inspeksi, **bukan installer siap rilis**. Periksa nama dan isi paket sebelum menggunakannya.
+Workflow Windows berjalan pada push, pull request, dan pemicu manual. Job self-check aktif untuk keadaan repo saat ini. Job paket selalu menjalankan MSBuild Release x64 dengan `GenerateAppxPackageOnBuild=true` dan signing dimatikan; kegagalan proyek atau manifest membuat CI gagal, sehingga pipeline tidak dapat memberi status hijau palsu. MSIX unsigned yang diunggah hanya bahan inspeksi, **bukan installer siap rilis**.
 
 Untuk rilis, atur identitas paket/publisher di manifest, buat atau gunakan sertifikat yang dipercaya target, tandatangani paket pada proses rilis terkontrol, verifikasi signature serta instalasi, dan lakukan smoke test pada Windows target. Publikasi GitHub Release atau toko aplikasi memerlukan keputusan kanal distribusi dan otorisasi tersendiri; pipeline ini tidak memublikasikan apa pun. Jangan menaruh sertifikat atau password signing di source, log, atau artefak CI.
 
 ## Blocker sebelum rilis
 
-- Shell packaged WinUI dan integrasi service belum ada; F01–F16 tidak dapat diterima end-to-end.
 - Build dan self-check belum dieksekusi pada toolchain .NET 8/Windows dalam lingkungan ini.
 - Uji manual Windows untuk HWND, tray, GSMTC, transparansi, hit test, dan performa belum dilakukan.
 - Identitas paket, sertifikat signing, dan kanal distribusi belum ditetapkan.
