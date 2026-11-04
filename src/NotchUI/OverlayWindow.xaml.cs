@@ -16,6 +16,10 @@ public sealed partial class OverlayWindow : Window
     private readonly NotchCoordinator _coordinator;
     private readonly OverlayWindowHost _host;
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _geometryTimer;
+    private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _hoverTimer;
+    private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _leaveTimer;
+    private bool _pointerInside;
+    private bool _closed;
     private Storyboard? _transition;
     private bool _changingState;
     public OverlayWindow(NotchCoordinator coordinator)
@@ -24,10 +28,19 @@ public sealed partial class OverlayWindow : Window
         _coordinator = coordinator;
         _host = new OverlayWindowHost(this);
         _host.SystemStateChanged += OnSystemStateChanged;
+        _host.DisplayChanged += OnDisplayChanged;
         _coordinator.Changed += OnCoordinatorChanged;
         _geometryTimer = DispatcherQueue.CreateTimer();
         _geometryTimer.Interval = TimeSpan.FromMilliseconds(16);
         _geometryTimer.Tick += OnGeometryTick;
+        _hoverTimer = DispatcherQueue.CreateTimer();
+        _hoverTimer.IsRepeating = false;
+        _hoverTimer.Interval = TimeSpan.FromMilliseconds(350);
+        _hoverTimer.Tick += OnHoverTimer;
+        _leaveTimer = DispatcherQueue.CreateTimer();
+        _leaveTimer.IsRepeating = false;
+        _leaveTimer.Interval = TimeSpan.FromMilliseconds(320);
+        _leaveTimer.Tick += OnLeaveTimer;
         Closed += OnClosed;
         UpdateVisuals();
     }
@@ -97,10 +110,30 @@ public sealed partial class OverlayWindow : Window
         }
         ApplyGeometry();
     }
-    private void OnPointerEntered(object sender, PointerRoutedEventArgs args) { if (_coordinator.Settings.OpenOnHover) SetExpanded(true); }
-    private void OnPointerExited(object sender, PointerRoutedEventArgs args) { if (_coordinator.Settings.OpenOnHover) SetExpanded(false); }
+    private void OnPointerEntered(object sender, PointerRoutedEventArgs args)
+    {
+        _pointerInside = true;
+        _leaveTimer.Stop();
+        if (_coordinator.Settings.OpenOnHover && !_coordinator.IsExpanded) _hoverTimer.Start();
+    }
+    private void OnPointerExited(object sender, PointerRoutedEventArgs args)
+    {
+        _pointerInside = false;
+        _hoverTimer.Stop();
+        if (_coordinator.Settings.OpenOnHover && _coordinator.IsExpanded) _leaveTimer.Start();
+    }
+    private void OnHoverTimer(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
+    {
+        if (_pointerInside && _coordinator.Settings.OpenOnHover) SetExpanded(true);
+    }
+    private void OnLeaveTimer(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
+    {
+        if (!_pointerInside && _coordinator.Settings.OpenOnHover) SetExpanded(false);
+    }
     private void OnHeaderTapped(object sender, TappedRoutedEventArgs args)
     {
+        _hoverTimer.Stop();
+        _leaveTimer.Stop();
         SetExpanded(!_coordinator.IsExpanded);
         args.Handled = true;
     }
@@ -164,18 +197,25 @@ public sealed partial class OverlayWindow : Window
     }
     private void OnGeometryTick(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args) => ApplyGeometry();
     private void OnSystemStateChanged(object? sender, EventArgs args) => _coordinator.RefreshSystemState();
+    private void OnDisplayChanged(object? sender, EventArgs args) => DispatcherQueue.TryEnqueue(() => { if (!_closed) UpdateVisuals(); });
     private async void OnPreviousClicked(object sender, RoutedEventArgs args) => await _coordinator.PreviousAsync();
     private async void OnPlayPauseClicked(object sender, RoutedEventArgs args) => await _coordinator.TogglePlayPauseAsync();
     private async void OnNextClicked(object sender, RoutedEventArgs args) => await _coordinator.NextAsync();
     private void OnClosed(object sender, WindowEventArgs args)
     {
+        _closed = true;
         var transition = _transition;
         _transition = null;
         transition?.Stop();
         _coordinator.Changed -= OnCoordinatorChanged;
         _host.SystemStateChanged -= OnSystemStateChanged;
+        _host.DisplayChanged -= OnDisplayChanged;
         _geometryTimer.Stop();
         _geometryTimer.Tick -= OnGeometryTick;
+        _hoverTimer.Stop();
+        _hoverTimer.Tick -= OnHoverTimer;
+        _leaveTimer.Stop();
+        _leaveTimer.Tick -= OnLeaveTimer;
         _host.Dispose();
     }
 }

@@ -97,7 +97,7 @@
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
                         <StackPanel Spacing="12">
                             <TextBlock Text="Opening the notch" Style="{StaticResource SubtitleTextBlockStyle}" />
-                            <TextBlock Text="Choose whether hovering opens and closes the notch. Clicking the header always toggles it." TextWrapping="Wrap" Opacity="0.7" />
+                            <TextBlock Text="Hover briefly to open the notch; it closes shortly after you leave. Clicking the header toggles it immediately." TextWrapping="Wrap" Opacity="0.7" />
                             <ToggleSwitch x:Name="HoverToggle" Header="Open on hover" Toggled="OnHoverChanged" />
                         </StackPanel>
                     </Border>

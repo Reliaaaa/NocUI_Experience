@@ -4,3 +4,5 @@
 - [Poni](https://github.com/liimalim/Poni) pada snapshot yang tersedia berisi dokumentasi, aset dan terjemahan, tanpa source implementasi jendela. Karena itu mekanisme overlay Poni tidak dapat diverifikasi dari repository tersebut.
 
 Opasitas mengatur brush latar notch, bukan teks atau kontrol. Transparansi, interaksi, performa animasi, dan tampilan harus diuji pada Windows; build CI saja tidak membuktikannya.
+
+Interaksi hover NotchUI mengikuti ide penundaan buka/tutup gili (350/320 ms) untuk menghindari pembukaan tidak sengaja; implementasi menggunakan DispatcherQueueTimer WinUI dan tidak menyalin source gili.
