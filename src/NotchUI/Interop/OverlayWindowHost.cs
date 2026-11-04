@@ -12,6 +12,7 @@ public sealed class OverlayWindowHost : IDisposable
     private readonly SubclassProc _callback;
     private double _width, _height, _radius;
     public event EventHandler? SystemStateChanged;
+    public event EventHandler? DisplayChanged;
     public OverlayWindowHost(Window window)
     {
         _hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
@@ -57,6 +58,7 @@ public sealed class OverlayWindowHost : IDisposable
             return inside ? 1 : -1;
         }
         if (message is 0x001E or 0x0218) SystemStateChanged?.Invoke(this, EventArgs.Empty);
+        if (message is 0x007E or 0x02E0) DisplayChanged?.Invoke(this, EventArgs.Empty);
         return DefSubclassProc(hwnd, message, wParam, lParam);
     }
     public void Dispose() => RemoveWindowSubclass(_hwnd, _callback, 1);
