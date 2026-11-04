@@ -25,7 +25,7 @@
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
                         <StackPanel Spacing="12">
                             <StackPanel Orientation="Horizontal" Spacing="10">
-                                <FontIcon Glyph="&#xE7F4;" Foreground="{ThemeResource SystemAccentColorPrimaryBrush}" />
+                                <FontIcon Glyph="&#xE7F4;" Foreground="#0078D4" />
                                 <TextBlock Text="Live preview" Style="{StaticResource SubtitleTextBlockStyle}" />
                             </StackPanel>
                             <TextBlock Text="A preview of the notch on your screen" Opacity="0.7" />
@@ -46,7 +46,7 @@
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
                         <StackPanel Spacing="12">
                             <StackPanel Orientation="Horizontal" Spacing="10">
-                                <FontIcon Glyph="&#xE8A9;" Foreground="{ThemeResource SystemAccentColorPrimaryBrush}" />
+                                <FontIcon Glyph="&#xE8A9;" Foreground="#0078D4" />
                                 <TextBlock Text="Dimensions" Style="{StaticResource SubtitleTextBlockStyle}" />
                             </StackPanel>
                             <TextBlock x:Name="WidthLabel" Text="Notch width" />
@@ -60,7 +60,7 @@
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
                         <StackPanel Spacing="12">
                             <StackPanel Orientation="Horizontal" Spacing="10">
-                                <FontIcon Glyph="&#xE790;" Foreground="{ThemeResource SystemAccentColorPrimaryBrush}" />
+                                <FontIcon Glyph="&#xE790;" Foreground="#0078D4" />
                                 <TextBlock Text="Color &amp; opacity" Style="{StaticResource SubtitleTextBlockStyle}" />
                             </StackPanel>
                             <TextBlock x:Name="OpacityLabel" Text="Background opacity" />
