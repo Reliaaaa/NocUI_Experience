@@ -1,6 +1,9 @@
 using System;
 using NotchUI.Models;
 using Windows.Storage;
+#if UNPACKAGED
+using System.IO;
+#endif
 
 namespace NotchUI.Services;
 
@@ -21,6 +24,20 @@ public sealed class SettingsService : ISettingsService
             _unsupportedVersion = false;
             try
             {
+#if UNPACKAGED
+                var path = SettingsPath;
+                if (!File.Exists(path)) return new NotchSettings();
+                var payload = File.ReadAllText(path);
+                if (SettingsCodec.TryDecode(payload, out var settings)) return settings;
+                if (IsFutureVersion(payload))
+                {
+                    _unsupportedVersion = true;
+                    LastError = "Versi pengaturan lebih baru. Pengaturan sesi ini tidak akan menimpa data tersebut.";
+                    return new NotchSettings();
+                }
+                LastError = "Pengaturan rusak; nilai default digunakan.";
+                return new NotchSettings();
+#else
                 var values = ApplicationData.Current.LocalSettings.Values;
                 if (!values.ContainsKey(CurrentKey)) return new NotchSettings();
                 var payload = values[CurrentKey] as string;
@@ -35,6 +52,7 @@ public sealed class SettingsService : ISettingsService
                 LastError = "Pengaturan rusak; cadangan atau nilai default digunakan.";
                 return SettingsCodec.TryDecode(values.TryGetValue(RecoveryKey, out var recovery) ? recovery as string : null, out var recovered)
                     ? recovered : new NotchSettings();
+#endif
             }
             catch (Exception exception) when (exception is not OutOfMemoryException)
             {
@@ -52,11 +70,18 @@ public sealed class SettingsService : ISettingsService
             try
             {
                 var payload = SettingsCodec.Encode(settings);
+#if UNPACKAGED
+                Directory.CreateDirectory(Path.GetDirectoryName(SettingsPath)!);
+                var temporary = SettingsPath + ".tmp";
+                File.WriteAllText(temporary, payload);
+                File.Move(temporary, SettingsPath, true);
+#else
                 var values = ApplicationData.Current.LocalSettings.Values;
                 if (values.TryGetValue(CurrentKey, out var previous) && previous is string previousPayload && SettingsCodec.TryDecode(previousPayload, out _))
                     values[RecoveryKey] = previousPayload;
                 // Single value assignment prevents half-updated preference fields.
                 values[CurrentKey] = payload;
+#endif
                 LastError = null;
                 return true;
             }
@@ -67,6 +92,11 @@ public sealed class SettingsService : ISettingsService
             }
         }
     }
+
+#if UNPACKAGED
+    private static string SettingsPath => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NotchUI", "settings.json");
+#endif
 
     private static bool IsFutureVersion(string? payload)
     {
