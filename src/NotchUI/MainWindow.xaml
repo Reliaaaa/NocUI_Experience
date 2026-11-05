@@ -69,21 +69,39 @@
                 </StackPanel>
                 <StackPanel x:Name="WidgetsPage" Visibility="Collapsed" Spacing="12">
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="16" Padding="20">
-                        <StackPanel Spacing="8">
-                            <ToggleSwitch x:Name="ClockToggle" Header="Clock and date" Toggled="OnModulesChanged" AutomationProperties.Name="Clock and date widget" />
-                            <TextBlock Text="Display the current time and date." TextWrapping="Wrap" Opacity="0.7" />
-                        </StackPanel>
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <StackPanel Spacing="8" VerticalAlignment="Center">
+                                <TextBlock Text="Clock and date" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" />
+                                <TextBlock Text="Display the current time and date." TextWrapping="Wrap" Opacity="0.7" />
+                            </StackPanel>
+                            <ToggleSwitch x:Name="ClockToggle" Grid.Column="1" VerticalAlignment="Center" Toggled="OnModulesChanged" AutomationProperties.Name="Clock and date widget" />
+                        </Grid>
+                    </Border>
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="16" Padding="20">
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <StackPanel Spacing="8" VerticalAlignment="Center">
+                                <TextBlock Text="Battery and charging" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" />
+                                <TextBlock Text="Show battery level and charging status." TextWrapping="Wrap" Opacity="0.7" />
+                            </StackPanel>
+                            <ToggleSwitch x:Name="BatteryToggle" Grid.Column="1" VerticalAlignment="Center" Toggled="OnModulesChanged" AutomationProperties.Name="Battery and charging widget" />
+                        </Grid>
+                    </Border>
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="16" Padding="20">
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <StackPanel Spacing="8" VerticalAlignment="Center">
+                                <TextBlock Text="Media controls" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" />
+                                <TextBlock Text="Control the active media session." TextWrapping="Wrap" Opacity="0.7" />
+                            </StackPanel>
+                            <ToggleSwitch x:Name="MediaToggle" Grid.Column="1" VerticalAlignment="Center" Toggled="OnModulesChanged" AutomationProperties.Name="Media controls widget" />
+                        </Grid>
                     </Border>
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="16" Padding="20">
                         <StackPanel Spacing="8">
-                            <ToggleSwitch x:Name="BatteryToggle" Header="Battery and charging" Toggled="OnModulesChanged" AutomationProperties.Name="Battery and charging widget" />
-                            <TextBlock Text="Show battery level and charging status." TextWrapping="Wrap" Opacity="0.7" />
-                        </StackPanel>
-                    </Border>
-                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="16" Padding="20">
-                        <StackPanel Spacing="8">
-                            <ToggleSwitch x:Name="MediaToggle" Header="Media controls" Toggled="OnModulesChanged" AutomationProperties.Name="Media controls widget" />
-                            <TextBlock Text="Control the active media session." TextWrapping="Wrap" Opacity="0.7" />
+                            <TextBlock Text="Widgets in the notch" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <TextBlock Text="Enabled widgets appear in the notch when information is available." TextWrapping="Wrap" Opacity="0.7" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
