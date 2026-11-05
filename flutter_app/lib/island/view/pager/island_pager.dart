@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../app/app_info.dart';
 import '../../../design/theme/island_theme.dart';
 import '../../../design/tokens/db_colors.dart';
 import '../../../design/tokens/db_dimens.dart';
@@ -192,7 +193,7 @@ class _IslandPagerState extends State<IslandPager> {
               bottom: DbSpace.sm,
               child: IgnorePointer(
                 child: Text(
-                  'Developer · Reliaaaa',
+                  'Developer · ${AppInfo.developer}',
                   style: DbType.fineprint.copyWith(
                     color: IslandTheme.of(context)
                         .palette

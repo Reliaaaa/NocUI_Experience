@@ -1,6 +1,6 @@
 # NocUI Experience
 
-NocUI Experience adalah aplikasi desktop Windows dengan notch interaktif, berbasis Flutter dan integrasi native Windows. Implementasi utama berada di [`flutter_app/`](flutter_app/) dan menggunakan source notchX / DynamicBar dengan izin yang disampaikan pengguna; atribusi source dipertahankan di dalam folder tersebut.
+NocUI Experience adalah aplikasi desktop Windows dengan notch interaktif, berbasis Flutter dan integrasi native Windows. Implementasi utama berada di [`flutter_app/`](flutter_app/).
 
 ## Build dan pengujian
 

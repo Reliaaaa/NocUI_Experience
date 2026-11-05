@@ -206,23 +206,3 @@ reporting and no account.
 Clipboard monitoring is off until you turn it on, and even then reports only
 *that* something was copied unless you separately enable text previews. Nothing
 leaves your machine.
-
-## About the developer
-
-**Rahoz Osman**
-
-| | |
-|---|---|
-| Email | [hozahoza2001@gmail.com](mailto:hozahoza2001@gmail.com) |
-| Phone | 07502076151 |
-
-DynamicBar is original work: the design, the motion language, the state machine
-and every line of the Windows integration layer. Issues and suggestions are
-welcome.
-
-## Licence
-
-Copyright © 2026 Rahoz Osman. All rights reserved.
-
-The code in this repository is original work. See `Settings → About` inside the
-application for the licences of the framework it is built on.

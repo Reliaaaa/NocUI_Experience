@@ -115,7 +115,7 @@ class DbType {
     letterSpacing: 1.4,
   );
 
-  /// The smallest thing in the product: the copyright line at the foot of every
+  /// The smallest thing in the product: the developer label at the foot of every
   /// page. Deliberately at the threshold of legibility - it is a signature, not
   /// a message.
   static const TextStyle fineprint = TextStyle(
