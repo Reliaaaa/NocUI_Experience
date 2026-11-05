@@ -64,9 +64,9 @@ class SettingsStore {
     _writeAllowed = false;
     try {
       final File target = file;
-      if (!await target.exists()) {
+      if (!target.existsSync()) {
         final legacy = _legacyFile;
-        if (legacy != null && await legacy.exists()) {
+        if (legacy != null && legacy.existsSync()) {
           final decoded = await _readBounded(legacy);
           if (decoded is! Map || decoded['SchemaVersion'] != 1 || decoded['Settings'] is! Map) {
             _log.warn('Legacy settings could not be safely migrated; saving is disabled.');

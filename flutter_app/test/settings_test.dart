@@ -152,7 +152,7 @@ void main() {
       );
       await store.load();
       expect(await store.save(AppSettings.defaults), isFalse);
-      expect(await store.file.exists(), isFalse);
+      expect(store.file.existsSync(), isFalse);
     });
   });
 }
