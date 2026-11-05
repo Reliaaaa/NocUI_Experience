@@ -24,7 +24,7 @@ constexpr UINT kPointerStateMessage = WM_APP + 0x303;
 /// user context). There is exactly one IslandWindow per process.
 IslandWindow* g_island_window = nullptr;
 constexpr const wchar_t kWindowClassName[] = L"DynamicBarIslandStage";
-constexpr const wchar_t kWindowTitle[] = L"DynamicBar";
+constexpr const wchar_t kWindowTitle[] = L"NocUI Experience";
 
 struct MonitorSearch {
   std::string wanted_id;

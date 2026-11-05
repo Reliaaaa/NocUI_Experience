@@ -1,8 +1,6 @@
-name: Windows build and package
+name: Legacy WinUI build (manual)
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -41,7 +39,7 @@ jobs:
           'Unsigned package created for CI inspection; signing and Windows acceptance tests remain required.' >> $env:GITHUB_STEP_SUMMARY
       - uses: actions/upload-artifact@v4
         with:
-          name: notchui-unsigned-msix-x64
+          name: legacy-winui-unsigned-msix-x64
           path: |
             artifacts/msix/**/*.msix
             artifacts/msix/**/*.msixbundle
@@ -65,7 +63,7 @@ jobs:
           if (!(Test-Path artifacts/portable/NotchUI.exe)) { throw 'NotchUI.exe was not produced.' }
       - uses: actions/upload-artifact@v4
         with:
-          name: notchui-portable-x64
+          name: legacy-winui-portable-x64
           path: artifacts/portable/
           if-no-files-found: error
       - name: Build Windows installer
@@ -78,6 +76,6 @@ jobs:
           if (!(Test-Path artifacts/installer/NocUI-Experience-Setup-x64.exe)) { throw 'Installer was not produced.' }
       - uses: actions/upload-artifact@v4
         with:
-          name: nocui-experience-installer-x64
+          name: legacy-winui-installer-x64
           path: artifacts/installer/NocUI-Experience-Setup-x64.exe
           if-no-files-found: error

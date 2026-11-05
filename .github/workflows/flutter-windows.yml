@@ -1,4 +1,4 @@
-name: Flutter Windows validation
+name: Windows build and package
 
 on:
   push:
@@ -41,21 +41,21 @@ jobs:
           'Flutter build and tests completed; Windows runtime, installation, and acceptance testing remain required.' >> $env:GITHUB_STEP_SUMMARY
       - uses: actions/upload-artifact@v4
         with:
-          name: nocui-flutter-windows-x64-preview
+          name: nocui-portable-x64
           path: flutter_app/build/windows/x64/runner/Release/
           if-no-files-found: error
-      - name: Build Flutter preview installer
+      - name: Build Windows installer
         working-directory: .
         shell: pwsh
         run: |
           $compiler = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
           if (!(Test-Path $compiler)) { throw 'Inno Setup 6 is not installed on this runner.' }
-          & $compiler installer/NocUIFlutterPreview.iss
+          & $compiler installer/NocUIFlutter.iss
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          if (!(Test-Path 'artifacts/flutter-installer/NocUI-Experience-Flutter-Preview-Setup-x64.exe')) { throw 'Flutter preview installer was not produced.' }
-          'The unsigned Flutter preview installer was compiled; installation and runtime have not been tested.' >> $env:GITHUB_STEP_SUMMARY
+          if (!(Test-Path 'artifacts/flutter-installer/NocUI-Experience-Setup-x64.exe')) { throw 'Flutter installer was not produced.' }
+          'The unsigned Flutter installer was compiled; installation and runtime have not been tested.' >> $env:GITHUB_STEP_SUMMARY
       - uses: actions/upload-artifact@v4
         with:
-          name: nocui-flutter-preview-installer-x64
-          path: artifacts/flutter-installer/NocUI-Experience-Flutter-Preview-Setup-x64.exe
+          name: nocui-experience-installer-x64
+          path: artifacts/flutter-installer/NocUI-Experience-Setup-x64.exe
           if-no-files-found: error

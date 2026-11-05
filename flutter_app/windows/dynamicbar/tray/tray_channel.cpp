@@ -247,13 +247,13 @@ void TrayChannel::HandleMethodCall(
 
   if (method == "install") {
     if (FindValue(args, "tooltip") != nullptr) {
-      tooltip_ = Utf16FromUtf8(GetString(args, "tooltip", "Notch X"));
+      tooltip_ = Utf16FromUtf8(GetString(args, "tooltip", "NocUI Experience"));
     }
     result->Success(EncodableValue(AddIcon()));
     return;
   }
   if (method == "setTooltip") {
-    tooltip_ = Utf16FromUtf8(GetString(args, "tooltip", "Notch X"));
+    tooltip_ = Utf16FromUtf8(GetString(args, "tooltip", "NocUI Experience"));
     UpdateTooltip();
     result->Success();
     return;

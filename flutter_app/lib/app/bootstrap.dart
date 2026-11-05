@@ -169,7 +169,7 @@ Future<AppServices> _buildServices() async {
 
   if (!Platform.isWindows) {
     _log.warn(
-      'DynamicBar targets Windows; native integration is unavailable here.',
+      'NocUI Experience targets Windows; native integration is unavailable here.',
     );
   }
 
