@@ -184,13 +184,12 @@ void main() {
       expect(defaults.clipboardPreviewEnabled, isFalse);
     });
 
-    test('the default shortcut is a real, parseable binding', () {
+    test('global shortcuts are disabled by default', () {
       final HotkeyBinding? binding = HotkeyBinding.parse(
         'toggle',
         AppSettings.defaults.hotkeyToggle,
       );
-      expect(binding, isNotNull);
-      expect(binding!.isValid, isTrue);
+      expect(binding, isNull);
     });
   });
 
