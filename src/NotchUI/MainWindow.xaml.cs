@@ -73,8 +73,8 @@ public sealed partial class MainWindow : Window
         AboutPage.Visibility = page == "about" ? Visibility.Visible : Visibility.Collapsed;
         BehaviorPage.Visibility = page == "behavior" ? Visibility.Visible : Visibility.Collapsed;
         AnimationsPage.Visibility = page == "animations" ? Visibility.Visible : Visibility.Collapsed;
-        PageTitle.Text = page switch { "widgets" => "Notch widgets", "behavior" => "Gestures & behavior", "animations" => "Animations", "about" => "About NocUI Experience", _ => "Appearance & hardware bounds" };
-        PageDescription.Text = page switch { "widgets" => "Choose what appears in your notch.", "behavior" => "Control how the notch responds.", "animations" => "Make transitions feel right for you.", "about" => "Your desktop, at a glance.", _ => "Personalize your notch. Changes apply immediately." };
+        PageTitle.Text = page switch { "widgets" => "Widgets", "behavior" => "Gestures & behavior", "animations" => "Animations", "about" => "About", _ => "Appearance" };
+        PageDescription.Text = page switch { "widgets" => "Choose what appears in your notch.", "behavior" => "Choose how the notch opens and closes.", "animations" => "Adjust motion for a comfortable experience.", "about" => "Information about NocUI Experience.", _ => "Make the notch feel at home on your desktop." };
     }
     private void OnHoverChanged(object sender, RoutedEventArgs args)
     {
