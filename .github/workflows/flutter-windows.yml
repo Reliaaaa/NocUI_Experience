@@ -1,0 +1,46 @@
+name: Flutter Windows validation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  flutter-windows:
+    runs-on: windows-2022
+    defaults:
+      run:
+        working-directory: flutter_app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Show Flutter toolchain
+        run: flutter --version
+      - name: Restore dependencies
+        run: flutter pub get
+      - name: Analyze Dart
+        run: flutter analyze
+      - name: Run Flutter tests
+        run: flutter test
+      - name: Build Windows release
+        run: flutter build windows --release
+      - name: Check release bundle
+        shell: pwsh
+        run: |
+          $bundle = 'build/windows/x64/runner/Release'
+          if (!(Test-Path $bundle)) { throw 'Flutter Windows release bundle was not produced.' }
+          if (@(Get-ChildItem $bundle -Filter '*.exe' -File).Count -ne 1) { throw 'Expected exactly one application executable in the release bundle.' }
+          if (!(Test-Path "$bundle/flutter_windows.dll")) { throw 'Flutter runtime is missing from the release bundle.' }
+          if (!(Test-Path "$bundle/data/flutter_assets")) { throw 'Flutter assets are missing from the release bundle.' }
+          'Flutter build and tests completed; Windows runtime, installer, and acceptance testing remain required.' >> $env:GITHUB_STEP_SUMMARY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nocui-flutter-windows-x64-preview
+          path: flutter_app/build/windows/x64/runner/Release/
+          if-no-files-found: error
