@@ -608,6 +608,7 @@ void IslandWindow::ApplyPlacement() {
 void IslandWindow::SetInteractiveRects(std::vector<LogicalRect> rects) {
   interactive_rects_ = std::move(rects);
   RefreshMouseCache();
+  UpdateWindowRegion();
   if (!interactive_rects_.empty()) {
     const LogicalRect& first = interactive_rects_.front();
     DB_LOG_DEBUG(kTag, "Island rect (logical) " +
@@ -616,6 +617,43 @@ void IslandWindow::SetInteractiveRects(std::vector<LogicalRect> rects) {
                            std::to_string(static_cast<int>(first.right)) + "," +
                            std::to_string(static_cast<int>(first.bottom)));
   }
+}
+
+void IslandWindow::UpdateWindowRegion() {
+  if (window_ == nullptr || (interactive_rects_.empty() && !region_applied_)) {
+    // Do not clip the initial Flutter frame before it can report geometry.
+    return;
+  }
+  HRGN combined = ::CreateRectRgn(0, 0, 0, 0);
+  if (combined == nullptr) {
+    DB_LOG_WARN(kTag, "Could not create the island window region.");
+    return;
+  }
+  const double factor = scale();
+  for (const LogicalRect& rect : interactive_rects_) {
+    HRGN part = ::CreateRectRgn(
+        RoundToInt(rect.left * factor), RoundToInt(rect.top * factor),
+        RoundToInt(rect.right * factor), RoundToInt(rect.bottom * factor));
+    if (part == nullptr) {
+      ::DeleteObject(combined);
+      DB_LOG_WARN(kTag, "Could not create an island region component.");
+      return;
+    }
+    const int result = ::CombineRgn(combined, combined, part, RGN_OR);
+    ::DeleteObject(part);
+    if (result == ERROR) {
+      ::DeleteObject(combined);
+      DB_LOG_WARN(kTag, "Could not combine island regions.");
+      return;
+    }
+  }
+  // On success Windows owns the region; on failure it remains ours.
+  if (::SetWindowRgn(window_, combined, TRUE) == 0) {
+    ::DeleteObject(combined);
+    DB_LOG_WARN(kTag, "Could not apply the island window region.");
+    return;
+  }
+  region_applied_ = true;
 }
 
 void IslandWindow::SetVisible(bool visible) {
@@ -825,6 +863,8 @@ LRESULT IslandWindow::HandleMessage(HWND window, UINT message, WPARAM wparam,
       // The suggested rectangle is for ordinary windows; the stage owns its
       // own placement, so recompute instead of accepting it.
       ApplyPlacement();
+      RefreshMouseCache();
+      if (region_applied_) UpdateWindowRegion();
       Emit("dpiChanged",
            EncodableMap{{EncodableValue("scale"), EncodableValue(scale())},
                         {EncodableValue("dpi"),

@@ -72,6 +72,33 @@ void main() {
       expect(AppSettings.fromJson(<String, Object?>{}).accent, AccentPreset.teal);
       expect(AppSettings.fromJson(<String, Object?>{'accent': 'graphite'}).accent, AccentPreset.graphite);
     });
+
+    test('existing settings keep the notch visible without discarding hide preferences', () {
+      final AppSettings restored = AppSettings.fromJson(<String, Object?>{
+        'autoHide': true,
+        'suppressInFullscreen': true,
+        'hideWhenCovered': true,
+      });
+
+      expect(restored.alwaysVisible, isTrue);
+      expect(restored.autoHide, isTrue);
+      expect(restored.suppressInFullscreen, isTrue);
+      expect(restored.hideWhenCovered, isTrue);
+    });
+
+    test('visibility preference can be disabled and survives serialization', () {
+      final AppSettings changed = AppSettings.defaults.copyWith(
+        alwaysVisible: false,
+        autoHide: true,
+      );
+      final AppSettings restored = AppSettings.fromJson(
+        jsonDecode(jsonEncode(changed.toJson())) as Map<String, Object?>,
+      );
+
+      expect(restored.alwaysVisible, isFalse);
+      expect(restored.autoHide, isTrue);
+      expect(AppSettings.fromJson(<String, Object?>{'alwaysVisible': 'invalid'}).alwaysVisible, isTrue);
+    });
   });
 
   group('SettingsStore', () {
@@ -98,12 +125,14 @@ void main() {
       const AppSettings settings = AppSettings(
         accent: AccentPreset.purple,
         islandScale: 1.25,
+        alwaysVisible: false,
       );
 
       expect(await store.save(settings), isTrue);
       final AppSettings loaded = await store.load();
       expect(loaded.accent, AccentPreset.purple);
       expect(loaded.islandScale, closeTo(1.25, 1e-9));
+      expect(loaded.alwaysVisible, isFalse);
     });
 
     test('survives a corrupt file', () async {

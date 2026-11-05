@@ -309,7 +309,9 @@ class IslandCoordinator {
   /// handler behind it does nothing but compare a point to a rectangle.
   Future<void> applyAutoHide() async {
     final AppSettings current = services.settings.settings;
-    final bool wanted = current.autoHide && !services.island.isPaused;
+    final bool wanted = current.autoHide &&
+        !current.alwaysVisible &&
+        !services.island.isPaused;
 
     if (wanted != _proximityWatch) {
       _proximityWatch = wanted;
@@ -343,6 +345,7 @@ class IslandCoordinator {
     _autoHide?.cancel();
     final AppSettings current = services.settings.settings;
     if (!current.autoHide ||
+        current.alwaysVisible ||
         _cursorNear ||
         _hiddenForAutoHide ||
         services.island.isPaused ||
@@ -725,10 +728,12 @@ class IslandCoordinator {
   void _onSystemChanged() {
     final AppSettings current = services.settings.settings;
     final PresentationState state = services.system.presentation;
-    final bool presentation =
-        current.suppressInFullscreen && state.shouldSuppress;
-    final bool covered =
-        current.hideWhenCovered && services.system.foregroundCovers;
+    final bool presentation = !current.alwaysVisible &&
+        current.suppressInFullscreen &&
+        state.shouldSuppress;
+    final bool covered = !current.alwaysVisible &&
+        current.hideWhenCovered &&
+        services.system.foregroundCovers;
     final bool shouldStepAside = presentation || covered;
 
     if (shouldStepAside && !_suppressedForPresentation) {

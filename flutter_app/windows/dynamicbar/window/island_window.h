@@ -199,6 +199,7 @@ class IslandWindow {
   std::atomic<bool> buttons_down_{false};
   std::atomic<bool> hook_installed_{false};
   bool transparent_applied_ = false;
+  bool region_applied_ = false;
 
   // Guards the cached rectangles. Taken shared by the hook thread and
   // exclusively by the UI thread, which writes only when the stage moves.
@@ -229,6 +230,9 @@ class IslandWindow {
   // thread whenever the stage moves, the DPI changes, or either rectangle set
   // is replaced.
   void RefreshMouseCache();
+  // Bound the native stage to the published interactive area. Unlike
+  // HTTRANSPARENT on its own this also applies across process boundaries.
+  void UpdateWindowRegion();
   EventCallback event_callback_;
   std::vector<MessageHook> message_hooks_;
 };

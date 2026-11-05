@@ -32,6 +32,7 @@ class AppSettings {
     this.volumeHudEnabled = true,
     this.launchAtStartup = false,
     this.startupDelaySeconds = 0,
+    this.alwaysVisible = true,
     this.suppressInFullscreen = true,
     this.hideWhenCovered = true,
     this.autoCollapseSeconds = 8,
@@ -92,6 +93,9 @@ class AppSettings {
   /// Seconds to wait before showing the island when Windows started it. Gives
   /// the desktop time to settle before an overlay appears over it.
   final int startupDelaySeconds;
+
+  /// Keep the notch visible instead of applying automatic hiding policies.
+  final bool alwaysVisible;
 
   /// Hide the island while a game, a presentation or Do Not Disturb is on.
   final bool suppressInFullscreen;
@@ -188,6 +192,7 @@ class AppSettings {
     bool? volumeHudEnabled,
     bool? launchAtStartup,
     int? startupDelaySeconds,
+    bool? alwaysVisible,
     bool? suppressInFullscreen,
     bool? hideWhenCovered,
     int? autoCollapseSeconds,
@@ -234,6 +239,7 @@ class AppSettings {
       volumeHudEnabled: volumeHudEnabled ?? this.volumeHudEnabled,
       launchAtStartup: launchAtStartup ?? this.launchAtStartup,
       startupDelaySeconds: startupDelaySeconds ?? this.startupDelaySeconds,
+      alwaysVisible: alwaysVisible ?? this.alwaysVisible,
       suppressInFullscreen: suppressInFullscreen ?? this.suppressInFullscreen,
       hideWhenCovered: hideWhenCovered ?? this.hideWhenCovered,
       autoCollapseSeconds: autoCollapseSeconds ?? this.autoCollapseSeconds,
@@ -282,6 +288,7 @@ class AppSettings {
     'volumeHudEnabled': volumeHudEnabled,
     'launchAtStartup': launchAtStartup,
     'startupDelaySeconds': startupDelaySeconds,
+    'alwaysVisible': alwaysVisible,
     'suppressInFullscreen': suppressInFullscreen,
     'hideWhenCovered': hideWhenCovered,
     'autoCollapseSeconds': autoCollapseSeconds,
@@ -371,6 +378,7 @@ class AppSettings {
         0,
         120,
       ).round(),
+      alwaysVisible: _bool(json['alwaysVisible'], defaults.alwaysVisible),
       suppressInFullscreen: _bool(
         json['suppressInFullscreen'],
         defaults.suppressInFullscreen,

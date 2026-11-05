@@ -88,6 +88,17 @@ class GeneralSettings extends _Section {
           title: 'Behaviour',
           children: <Widget>[
             SettingsRow(
+              label: 'Keep notch visible',
+              description: 'Keep the notch above other windows instead of automatically hiding it.',
+              control: DbSwitch(
+                value: settings.alwaysVisible,
+                onChanged: (bool value) => update(
+                  (AppSettings s) => s.copyWith(alwaysVisible: value),
+                ),
+              ),
+            ),
+            if (!settings.alwaysVisible)
+            SettingsRow(
               label: 'Step aside for full screen',
               description:
                   'Hide during games, presentations and Do Not Disturb.',
@@ -98,6 +109,7 @@ class GeneralSettings extends _Section {
                 ),
               ),
             ),
+            if (!settings.alwaysVisible)
             SettingsRow(
               label: 'Hide behind maximised apps',
               description:
@@ -137,6 +149,7 @@ class GeneralSettings extends _Section {
                 ),
               ),
             ),
+            if (!settings.alwaysVisible)
             SettingsRow(
               label: 'Hide until needed',
               description:
@@ -149,7 +162,7 @@ class GeneralSettings extends _Section {
                     update((AppSettings s) => s.copyWith(autoHide: value)),
               ),
             ),
-            if (settings.autoHide)
+            if (!settings.alwaysVisible && settings.autoHide)
               SettingsRow(
                 label: 'Withdraw after',
                 description:
