@@ -22,6 +22,7 @@
                     <TextBlock x:Name="DateText" Foreground="White" Opacity="0.75" />
                     <TextBlock x:Name="BatteryText" Foreground="White" Opacity="0.75" />
                     <TextBlock x:Name="MediaText" Foreground="White" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="MediaArtistText" Foreground="White" Opacity="0.75" TextTrimming="CharacterEllipsis" Visibility="Collapsed" />
                     <StackPanel x:Name="MediaControls" Orientation="Horizontal" Spacing="8">
                         <Button x:Name="PreviousButton" AutomationProperties.Name="Previous track" Click="OnPreviousClicked"><FontIcon Glyph="&#xE892;" /></Button>
                         <Button x:Name="PlayPauseButton" AutomationProperties.Name="Play or pause" Click="OnPlayPauseClicked"><FontIcon x:Name="PlayPauseIcon" Glyph="&#xE768;" /></Button>

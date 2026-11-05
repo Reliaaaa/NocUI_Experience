@@ -83,6 +83,7 @@ public sealed partial class OverlayWindow : Window
         DateText.Foreground = foreground;
         BatteryText.Foreground = foreground;
         MediaText.Foreground = foreground;
+        MediaArtistText.Foreground = foreground;
         Pill.CornerRadius = new CornerRadius(settings.CornerRadius);
         SummaryText.Text = settings.MediaEnabled && _coordinator.Media.Availability == MediaAvailability.Active
             ? _coordinator.Media.Title : "NocUI Experience";
@@ -103,11 +104,14 @@ public sealed partial class OverlayWindow : Window
         MediaControls.Visibility = settings.MediaEnabled ? Visibility.Visible : Visibility.Collapsed;
         MediaText.Text = _coordinator.Media.Error ?? (_coordinator.Media.Availability switch
         {
-            MediaAvailability.Active => $"{_coordinator.Media.Title} — {_coordinator.Media.Artist}",
+            MediaAvailability.Active => string.IsNullOrWhiteSpace(_coordinator.Media.Title) ? "Unknown title" : _coordinator.Media.Title,
             MediaAvailability.Loading => "Loading media…",
             MediaAvailability.Error => "Media unavailable. Disable and re-enable the module to retry.",
             _ => "No active media session"
         });
+        MediaArtistText.Text = _coordinator.Media.Artist;
+        MediaArtistText.Visibility = settings.MediaEnabled && _coordinator.Media.Availability == MediaAvailability.Active
+            && !string.IsNullOrWhiteSpace(_coordinator.Media.Artist) ? Visibility.Visible : Visibility.Collapsed;
         PreviousButton.IsEnabled = _coordinator.Media.CanPrevious && !_coordinator.Media.IsBusy;
         PlayPauseIcon.Glyph = _coordinator.Media.IsPlaying ? "\uE769" : "\uE768";
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(PlayPauseButton, _coordinator.Media.IsPlaying ? "Pause" : "Play");
@@ -216,7 +220,7 @@ public sealed partial class OverlayWindow : Window
             From = startHeight, To = expanded ? ExpandedHeight : _coordinator.Settings.Height,
             Duration = new Duration(TimeSpan.FromMilliseconds(_coordinator.Settings.AnimationDurationMs)),
             EnableDependentAnimation = true,
-            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
         };
         var widthAnimation = new DoubleAnimation
         {
@@ -224,7 +228,7 @@ public sealed partial class OverlayWindow : Window
             To = Math.Min(expanded ? Math.Max(_coordinator.Settings.Width, 430) : _coordinator.Settings.Width, _host.PrimaryWidthDip),
             Duration = new Duration(TimeSpan.FromMilliseconds(_coordinator.Settings.AnimationDurationMs)),
             EnableDependentAnimation = true,
-            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
         };
         Storyboard.SetTarget(animation, Pill);
         Storyboard.SetTargetProperty(animation, "Height");
