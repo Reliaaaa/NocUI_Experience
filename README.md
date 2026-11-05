@@ -12,7 +12,7 @@ Antarmuka minimalis, animasi responsif, dan widget yang dapat disesuaikan—dala
 ![Flutter](https://img.shields.io/badge/Flutter-Windows-02569B?logo=flutter&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT%20planned-lightgrey)
 
-**Status: dalam pengembangan · belum dinyatakan siap rilis**
+**Status: Full Release · Version 1.0.0**
 
 </div>
 
