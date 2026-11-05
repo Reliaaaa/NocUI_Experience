@@ -174,8 +174,8 @@ class DbSwitch extends StatelessWidget {
   }
 }
 
-/// A horizontal slider with a numeric readout.
-class DbSlider extends StatelessWidget {
+/// A horizontal slider with an editable value in the displayed unit.
+class DbSlider extends StatefulWidget {
   const DbSlider({
     required this.value,
     required this.min,
@@ -183,6 +183,9 @@ class DbSlider extends StatelessWidget {
     required this.onChanged,
     this.label,
     this.width = 168,
+    this.displayFactor = 1,
+    this.unit = '',
+    this.semanticLabel = 'Setting',
     super.key,
   });
 
@@ -192,13 +195,70 @@ class DbSlider extends StatelessWidget {
   final ValueChanged<double> onChanged;
   final String? label;
   final double width;
+  final double displayFactor;
+  final String unit;
+  final String semanticLabel;
+
+  @override
+  State<DbSlider> createState() => _DbSliderState();
+}
+
+class _DbSliderState extends State<DbSlider> {
+  late final TextEditingController _controller;
+  final FocusNode _focus = FocusNode();
+
+  String _format(double value) {
+    final String formatted = (value * widget.displayFactor).toStringAsFixed(2);
+    return formatted.replaceFirst(RegExp(r'\.?0+$'), '');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: _format(widget.value));
+    _focus.addListener(_onFocusChanged);
+  }
+
+  @override
+  void didUpdateWidget(DbSlider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_focus.hasFocus && (oldWidget.value != widget.value ||
+        oldWidget.displayFactor != widget.displayFactor)) {
+      _controller.text = _format(widget.value);
+    }
+  }
+
+  void _onFocusChanged() {
+    if (!_focus.hasFocus) _commit();
+    if (mounted) setState(() {});
+  }
+
+  void _commit() {
+    final double? input = double.tryParse(_controller.text.trim().replaceAll(',', '.'));
+    if (input == null || !input.isFinite) {
+      _controller.text = _format(widget.value);
+      return;
+    }
+    final double next = (input / widget.displayFactor).clamp(widget.min, widget.max).toDouble();
+    _controller.text = _format(next);
+    widget.onChanged(next);
+  }
+
+  @override
+  void dispose() {
+    _focus.removeListener(_onFocusChanged);
+    _focus.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
 
   double get _fraction =>
-      ((value - min) / (max - min)).clamp(0.0, 1.0).toDouble();
+      ((widget.value - widget.min) / (widget.max - widget.min)).clamp(0.0, 1.0).toDouble();
 
   void _updateFromLocal(double dx, double trackWidth) {
+    if (_focus.hasFocus) _focus.unfocus();
     final double fraction = (dx / trackWidth).clamp(0.0, 1.0).toDouble();
-    onChanged(min + fraction * (max - min));
+    widget.onChanged(widget.min + fraction * (widget.max - widget.min));
   }
 
   @override
@@ -207,26 +267,49 @@ class DbSlider extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        if (label != null) ...<Widget>[
-          SizedBox(
-            width: 44,
-            child: Text(
-              label!,
-              textAlign: TextAlign.right,
-              style: DbType.numeric.copyWith(color: palette.textSecondary),
+        Semantics(
+          label: '${widget.semanticLabel}, enter value${widget.unit.isEmpty ? '' : ' in ${widget.unit}'}, '
+              'range ${_format(widget.min)} to ${_format(widget.max)}',
+          textField: true,
+          child: Container(
+            width: 68,
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            decoration: BoxDecoration(
+              color: palette.surfaceSunken,
+              borderRadius: BorderRadius.circular(DbRadius.control),
+              border: Border.all(color: _focus.hasFocus ? palette.accent : palette.stroke),
+            ),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: EditableText(
+                    controller: _controller,
+                    focusNode: _focus,
+                    style: DbType.numeric.copyWith(color: palette.textPrimary),
+                    cursorColor: palette.accent,
+                    backgroundCursorColor: palette.textTertiary,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                    textInputAction: TextInputAction.done,
+                    maxLines: 1,
+                    onSubmitted: (_) => _focus.unfocus(),
+                  ),
+                ),
+                if (widget.unit.isNotEmpty)
+                  Text(widget.unit, style: DbType.caption.copyWith(color: palette.textSecondary)),
+              ],
             ),
           ),
-          const SizedBox(width: DbSpace.md),
-        ],
+        ),
+        const SizedBox(width: DbSpace.md),
         SizedBox(
-          width: width,
+          width: widget.width,
           height: 22,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTapDown: (TapDownDetails details) =>
-                _updateFromLocal(details.localPosition.dx, width),
+                _updateFromLocal(details.localPosition.dx, widget.width),
             onHorizontalDragUpdate: (DragUpdateDetails details) =>
-                _updateFromLocal(details.localPosition.dx, width),
+                _updateFromLocal(details.localPosition.dx, widget.width),
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
               child: Stack(
