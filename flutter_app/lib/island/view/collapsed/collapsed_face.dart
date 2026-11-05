@@ -49,9 +49,12 @@ class CollapsedFace extends StatelessWidget {
               else
                 _LiveDot(color: palette.accent),
               const SizedBox(width: DbSpace.md),
-              Text(
-                ClockFormat.time(now, use24Hour: use24Hour),
-                style: DbType.clock.copyWith(color: palette.textPrimary),
+              Transform.translate(
+                offset: const Offset(0, 4),
+                child: Text(
+                  ClockFormat.time(now, use24Hour: use24Hour),
+                  style: DbType.clock.copyWith(color: palette.textPrimary),
+                ),
               ),
               const SizedBox(width: DbSpace.md),
               if (trailing != null)
