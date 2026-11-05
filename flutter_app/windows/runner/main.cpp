@@ -9,8 +9,8 @@
 // same screen real estate and the same notification icon.
 namespace {
 constexpr const wchar_t kSingleInstanceMutex[] =
-    L"Local\\DynamicBar.SingleInstance";
-constexpr const wchar_t kActivationMessage[] = L"DynamicBar.ActivateExisting";
+    L"Local\\NocUIExperience.Flutter.SingleInstance";
+constexpr const wchar_t kActivationMessage[] = L"NocUIExperience.Flutter.ActivateExisting";
 }  // namespace
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,

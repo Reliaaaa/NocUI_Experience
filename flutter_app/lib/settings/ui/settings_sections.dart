@@ -58,7 +58,7 @@ class GeneralSettings extends _Section {
               description: startupStatus.isStale
                   ? 'The registered entry points elsewhere and will be '
                         'rewritten.'
-                  : 'Adds Notch X to the Windows startup list.',
+                  : 'Adds NocUI Experience to the Windows startup list.',
               control: DbSwitch(
                 value: settings.launchAtStartup,
                 onChanged: (bool value) => update(
@@ -213,7 +213,7 @@ class GeneralSettings extends _Section {
           ],
         ),
         Text(
-          'Notch X has no window of its own. Closing the island leaves it '
+          'NocUI Experience has no window of its own. Closing the island leaves it '
           'running in the notification area.',
           style: DbType.caption.copyWith(color: palette.textTertiary),
         ),
@@ -607,7 +607,7 @@ class PrivacySettings extends _Section {
         SettingsSection(
           title: 'Clipboard',
           description:
-              'Off by default. When on, Notch X is told that something was '
+              'Off by default. When on, NocUI Experience is told that something was '
               'copied, and how large it was.',
           children: <Widget>[
             SettingsRow(
@@ -652,7 +652,7 @@ class PrivacySettings extends _Section {
                   ),
                   const SizedBox(height: DbSpace.sm),
                   Text(
-                    'Notch X makes no network requests. There is no '
+                    'NocUI Experience makes no network requests unless weather is enabled. There is no '
                     'telemetry, no crash reporting and no account. Settings '
                     'and logs are written to your user profile and read by '
                     'nothing else.',

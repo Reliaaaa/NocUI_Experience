@@ -12,7 +12,7 @@ constexpr const char kTag[] = "Startup";
 constexpr const char kMethodChannelName[] = "dynamicbar/startup";
 constexpr const wchar_t kRunKey[] =
     L"Software\\Microsoft\\Windows\\CurrentVersion\\Run";
-constexpr const wchar_t kValueName[] = L"DynamicBar";
+constexpr const wchar_t kValueName[] = L"NocUIExperience.Flutter";
 
 /// Marks a launch as automatic so the application can honour a start delay and
 /// a "start paused" preference without guessing.

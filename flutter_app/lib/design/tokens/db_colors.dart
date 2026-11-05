@@ -5,7 +5,7 @@ import 'dart:ui';
 /// The default is deliberately the most restrained of the set: on a surface
 /// this small, a saturated accent reads as noise. Colour is used to mark one
 /// thing at a time, never to decorate.
-enum AccentPreset { graphite, blue, purple, emerald, amber, crimson }
+enum AccentPreset { graphite, blue, purple, emerald, amber, crimson, teal }
 
 extension AccentPresetX on AccentPreset {
   String get label {
@@ -22,6 +22,8 @@ extension AccentPresetX on AccentPreset {
         return 'Amber';
       case AccentPreset.crimson:
         return 'Crimson';
+      case AccentPreset.teal:
+        return 'Teal';
     }
   }
 
@@ -39,6 +41,8 @@ extension AccentPresetX on AccentPreset {
         return const Color(0xFFF3B33D);
       case AccentPreset.crimson:
         return const Color(0xFFFF5C63);
+      case AccentPreset.teal:
+        return const Color(0xFF62DDCE);
     }
   }
 
@@ -104,24 +108,24 @@ class IslandPalette {
   final Color negative;
   final Color shadow;
 
-  static const Color _darkBase = Color(0xFF0B0C0F);
-  static const Color _lightBase = Color(0xFFF6F7F9);
+  static const Color _darkBase = Color(0xFF0B1820);
+  static const Color _lightBase = Color(0xFFF1F8F7);
 
-  /// Deep charcoal glass. Never pure black: pure black loses the edge light
+  /// Deep slate glass. Never pure black: pure black loses the edge light
   /// that separates the island from a dark wallpaper.
   factory IslandPalette.dark({required Color accent, required double opacity}) {
     return IslandPalette(
       isDark: true,
       surface: _darkBase.withValues(alpha: opacity),
-      surfaceRaised: const Color(0xFF17191F).withValues(alpha: 0.92),
-      surfaceSunken: const Color(0xFF000000).withValues(alpha: 0.34),
+      surfaceRaised: const Color(0xFF172D36).withValues(alpha: 0.96),
+      surfaceSunken: const Color(0xFF030D12).withValues(alpha: 0.48),
       stroke: const Color(0xFFFFFFFF).withValues(alpha: 0.07),
       strokeStrong: const Color(0xFFFFFFFF).withValues(alpha: 0.14),
       innerHighlight: const Color(0xFFFFFFFF).withValues(alpha: 0.10),
       separator: const Color(0xFFFFFFFF).withValues(alpha: 0.06),
-      textPrimary: const Color(0xFFF4F5F7),
-      textSecondary: const Color(0xFF9CA3AF),
-      textTertiary: const Color(0xFF6B7280),
+      textPrimary: const Color(0xFFF1F8F7),
+      textSecondary: const Color(0xFFB5C9CA),
+      textTertiary: const Color(0xFF9AB3B5),
       accent: accent,
       positive: const Color(0xFF35D07F),
       warning: const Color(0xFFF3B33D),
@@ -138,14 +142,14 @@ class IslandPalette {
       isDark: false,
       surface: _lightBase.withValues(alpha: opacity),
       surfaceRaised: const Color(0xFFFFFFFF).withValues(alpha: 0.94),
-      surfaceSunken: const Color(0xFF0B0C0F).withValues(alpha: 0.07),
-      stroke: const Color(0xFF0B0C0F).withValues(alpha: 0.09),
-      strokeStrong: const Color(0xFF0B0C0F).withValues(alpha: 0.16),
+      surfaceSunken: const Color(0xFF0B2529).withValues(alpha: 0.07),
+      stroke: const Color(0xFF0B2529).withValues(alpha: 0.12),
+      strokeStrong: const Color(0xFF0B2529).withValues(alpha: 0.20),
       innerHighlight: const Color(0xFFFFFFFF).withValues(alpha: 0.85),
-      separator: const Color(0xFF0B0C0F).withValues(alpha: 0.07),
-      textPrimary: const Color(0xFF11141A),
-      textSecondary: const Color(0xFF5A6270),
-      textTertiary: const Color(0xFF8A929E),
+      separator: const Color(0xFF0B2529).withValues(alpha: 0.10),
+      textPrimary: const Color(0xFF10272A),
+      textSecondary: const Color(0xFF465F60),
+      textTertiary: const Color(0xFF536D6D),
       accent: accent,
       positive: const Color(0xFF1FA362),
       warning: const Color(0xFFB77A10),

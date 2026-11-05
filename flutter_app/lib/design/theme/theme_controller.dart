@@ -40,7 +40,7 @@ class ThemeController extends ChangeNotifier {
   ThemeController();
 
   AppearanceMode _appearance = AppearanceMode.system;
-  AccentPreset _accent = AccentPreset.graphite;
+  AccentPreset _accent = AccentPreset.teal;
   double _surfaceOpacity = 0.94;
   double _cornerScale = 1.0;
   double _islandScale = 1.0;
@@ -71,7 +71,10 @@ class ThemeController extends ChangeNotifier {
   IslandThemeData get data => _cache ??= _build();
 
   IslandThemeData _build() {
-    final Color accentColor = _accent.color;
+    // Use a darker teal on light surfaces so accent labels stay legible.
+    final Color accentColor = !isDark && _accent == AccentPreset.teal
+        ? const Color(0xFF006E68)
+        : _accent.color;
     final IslandPalette palette = isDark
         ? IslandPalette.dark(accent: accentColor, opacity: _surfaceOpacity)
         : IslandPalette.light(accent: accentColor, opacity: _surfaceOpacity);

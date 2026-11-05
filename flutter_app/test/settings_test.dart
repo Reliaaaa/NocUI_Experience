@@ -67,6 +67,11 @@ void main() {
       expect(restored.surfaceOpacity, 1.0);
       expect(restored.motionIntensity, 0.0);
     });
+
+    test('missing accent uses the current default without changing a saved accent', () {
+      expect(AppSettings.fromJson(<String, Object?>{}).accent, AccentPreset.teal);
+      expect(AppSettings.fromJson(<String, Object?>{'accent': 'graphite'}).accent, AccentPreset.graphite);
+    });
   });
 
   group('SettingsStore', () {
@@ -108,6 +113,46 @@ void main() {
 
       final AppSettings loaded = await store.load();
       expect(loaded.accent, AppSettings.defaults.accent);
+      expect(await store.save(AppSettings.defaults), isFalse);
+      expect(await store.file.readAsString(), '{ not json');
+    });
+
+    test('protects unsupported and oversized settings from overwrite', () async {
+      final SettingsStore store = SettingsStore(directory: temporary);
+      await store.file.writeAsString('{"schemaVersion":999}');
+      await store.load();
+      expect(await store.save(AppSettings.defaults), isFalse);
+      expect(await store.file.readAsString(), '{"schemaVersion":999}');
+      await store.file.writeAsString('x' * 65537);
+      await store.load();
+      expect(await store.save(AppSettings.defaults), isFalse);
+      expect(await store.file.length(), 65537);
+    });
+
+    test('imports equivalent legacy values without modifying the original', () async {
+      final legacy = File('${temporary.path}${Platform.pathSeparator}legacy.json');
+      const original = '{"SchemaVersion":1,"Settings":{"MediaEnabled":false,"AnimationDurationMs":0}}';
+      await legacy.writeAsString(original);
+      final directory = Directory('${temporary.path}${Platform.pathSeparator}new');
+      final store = SettingsStore(directory: directory, legacyFile: legacy);
+      final loaded = await store.load();
+      expect(loaded.mediaEnabled, isFalse);
+      expect(loaded.motionIntensity, 0);
+      expect(await store.save(loaded), isTrue);
+      expect(await legacy.readAsString(), original);
+      expect((await store.load()).mediaEnabled, isFalse);
+    });
+
+    test('protects unknown legacy schema and does not create a new store', () async {
+      final legacy = File('${temporary.path}${Platform.pathSeparator}legacy.json');
+      await legacy.writeAsString('{"SchemaVersion":2,"Settings":{}}');
+      final store = SettingsStore(
+        directory: Directory('${temporary.path}${Platform.pathSeparator}new'),
+        legacyFile: legacy,
+      );
+      await store.load();
+      expect(await store.save(AppSettings.defaults), isFalse);
+      expect(await store.file.exists(), isFalse);
     });
   });
 }

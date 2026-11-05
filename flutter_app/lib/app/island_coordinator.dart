@@ -111,7 +111,7 @@ class IslandCoordinator {
     await applyStartup();
     await applyHotkeys();
 
-    await services.tray.install(tooltip: 'Notch X');
+    await services.tray.install(tooltip: 'NocUI Experience');
     await _publishTrayMenu(force: true);
 
     await _revealAtLaunch();
@@ -577,7 +577,7 @@ class IslandCoordinator {
     }
     if (reason == 'shellRestarted') {
       // Explorer takes the notification icon with it when it goes.
-      await services.tray.install(tooltip: 'Notch X');
+      await services.tray.install(tooltip: 'NocUI Experience');
       await _publishTrayMenu(force: true);
     }
   }
@@ -776,12 +776,12 @@ class IslandCoordinator {
     await services.tray.setMenu(<TrayMenuEntry>[
       const TrayMenuEntry.item(
         id: _menuOpen,
-        label: 'Open Notch X',
+        label: 'Open NocUI Experience',
         isDefault: true,
       ),
       TrayMenuEntry.checkbox(
         id: _menuPause,
-        label: 'Pause Notch X',
+        label: 'Pause NocUI Experience',
         checked: services.island.isPaused,
       ),
       const TrayMenuEntry.separator(),
@@ -793,7 +793,7 @@ class IslandCoordinator {
         checked: current.launchAtStartup,
       ),
       const TrayMenuEntry.separator(),
-      const TrayMenuEntry.item(id: _menuQuit, label: 'Quit Notch X'),
+      const TrayMenuEntry.item(id: _menuQuit, label: 'Quit NocUI Experience'),
     ]);
   }
 

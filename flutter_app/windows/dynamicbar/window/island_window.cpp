@@ -412,7 +412,7 @@ bool IslandWindow::Create(const flutter::DartProject& project) {
 
   taskbar_created_message_ = ::RegisterWindowMessageW(L"TaskbarCreated");
   activation_message_ =
-      ::RegisterWindowMessageW(L"DynamicBar.ActivateExisting");
+      ::RegisterWindowMessageW(L"NocUIExperience.Flutter.ActivateExisting");
 
   // Placement needs a monitor, and the monitor needs a window handle for DPI
   // queries, so start at a provisional position and correct it immediately

@@ -119,7 +119,7 @@ class ShelfController extends ChangeNotifier {
         Platform.environment['USERPROFILE'] ??
         Directory.systemTemp.path;
     return Directory(
-      '$local${Platform.pathSeparator}DynamicBar${Platform.pathSeparator}shelf',
+      '$local${Platform.pathSeparator}NocUIExperience${Platform.pathSeparator}shelf',
     );
   }
 

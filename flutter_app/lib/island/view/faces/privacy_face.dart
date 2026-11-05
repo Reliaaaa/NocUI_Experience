@@ -129,7 +129,7 @@ class PrivacyExpanded extends StatelessWidget {
                 ),
               const Spacer(),
               Text(
-                'Reported by Windows. Notch X cannot see what is captured.',
+                'Reported by Windows. NocUI Experience cannot see what is captured.',
                 style: DbType.caption.copyWith(color: palette.textTertiary),
               ),
             ]),

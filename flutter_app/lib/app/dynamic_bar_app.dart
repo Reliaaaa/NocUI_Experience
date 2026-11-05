@@ -62,7 +62,7 @@ class _DynamicBarAppState extends State<DynamicBarApp>
       child: WidgetsApp(
         color: const Color(0x00000000),
         debugShowCheckedModeBanner: false,
-        title: 'Notch X',
+        title: 'NocUI Experience',
         builder: (BuildContext context, Widget? _) {
           return AnimatedBuilder(
             animation: services.theme,

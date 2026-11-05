@@ -695,7 +695,7 @@ class _Actions extends StatelessWidget {
       children: <Widget>[
         Expanded(
           child: Text(
-            'Notch X',
+            'NocUI Experience',
             style: DbType.label.copyWith(color: palette.textTertiary),
           ),
         ),
@@ -713,14 +713,14 @@ class _Actions extends StatelessWidget {
         const SizedBox(width: DbSpace.sm),
         IslandButton(
           icon: DbIcons.pause,
-          tooltip: 'Pause Notch X',
+          tooltip: 'Pause NocUI Experience',
           onPressed: () => controller.setPaused(true),
         ),
         const SizedBox(width: DbSpace.sm),
         IslandButton(
           icon: DbIcons.power,
           tone: IslandButtonTone.danger,
-          tooltip: 'Quit Notch X',
+          tooltip: 'Quit NocUI Experience',
           onPressed: () => services.window.quit(),
         ),
       ],

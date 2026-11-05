@@ -80,7 +80,7 @@ void InitLogging() {
   if (root.empty()) {
     return;
   }
-  std::wstring directory = root + L"\\DynamicBar";
+  std::wstring directory = root + L"\\NocUIExperience";
   ::CreateDirectoryW(directory.c_str(), nullptr);
   directory += L"\\logs";
   ::CreateDirectoryW(directory.c_str(), nullptr);

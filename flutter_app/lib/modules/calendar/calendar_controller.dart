@@ -50,7 +50,7 @@ class CalendarController extends ChangeNotifier {
         Platform.environment['APPDATA'] ??
         Platform.environment['USERPROFILE'] ??
         Directory.systemTemp.path;
-    return Directory('$appData${Platform.pathSeparator}DynamicBar');
+    return Directory('$appData${Platform.pathSeparator}NocUIExperience');
   }
 
   File get file => File('${directory.path}${Platform.pathSeparator}$_fileName');

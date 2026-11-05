@@ -35,12 +35,27 @@ jobs:
         run: |
           $bundle = 'build/windows/x64/runner/Release'
           if (!(Test-Path $bundle)) { throw 'Flutter Windows release bundle was not produced.' }
-          if (@(Get-ChildItem $bundle -Filter '*.exe' -File).Count -ne 1) { throw 'Expected exactly one application executable in the release bundle.' }
+          if (!(Test-Path "$bundle/NocUIExperience.exe")) { throw 'NocUIExperience.exe was not produced.' }
           if (!(Test-Path "$bundle/flutter_windows.dll")) { throw 'Flutter runtime is missing from the release bundle.' }
           if (!(Test-Path "$bundle/data/flutter_assets")) { throw 'Flutter assets are missing from the release bundle.' }
-          'Flutter build and tests completed; Windows runtime, installer, and acceptance testing remain required.' >> $env:GITHUB_STEP_SUMMARY
+          'Flutter build and tests completed; Windows runtime, installation, and acceptance testing remain required.' >> $env:GITHUB_STEP_SUMMARY
       - uses: actions/upload-artifact@v4
         with:
           name: nocui-flutter-windows-x64-preview
           path: flutter_app/build/windows/x64/runner/Release/
+          if-no-files-found: error
+      - name: Build Flutter preview installer
+        working-directory: .
+        shell: pwsh
+        run: |
+          $compiler = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
+          if (!(Test-Path $compiler)) { throw 'Inno Setup 6 is not installed on this runner.' }
+          & $compiler installer/NocUIFlutterPreview.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (!(Test-Path 'artifacts/flutter-installer/NocUI-Experience-Flutter-Preview-Setup-x64.exe')) { throw 'Flutter preview installer was not produced.' }
+          'The unsigned Flutter preview installer was compiled; installation and runtime have not been tested.' >> $env:GITHUB_STEP_SUMMARY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nocui-flutter-preview-installer-x64
+          path: artifacts/flutter-installer/NocUI-Experience-Flutter-Preview-Setup-x64.exe
           if-no-files-found: error

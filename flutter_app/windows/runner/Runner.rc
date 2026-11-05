@@ -92,9 +92,9 @@ BEGIN
             VALUE "CompanyName", "rahoz osman" "\0"
             VALUE "FileDescription", "NocUI Experience (Flutter preview)" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "Notch X" "\0"
+            VALUE "InternalName", "NocUIExperience" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 rahoz osman. All rights reserved." "\0"
-            VALUE "OriginalFilename", "DynamicBar.exe" "\0"
+            VALUE "OriginalFilename", "NocUIExperience.exe" "\0"
             VALUE "ProductName", "NocUI Experience" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END

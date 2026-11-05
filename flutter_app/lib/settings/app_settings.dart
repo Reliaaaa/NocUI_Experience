@@ -11,7 +11,7 @@ import '../modules/shortcuts/shortcut_catalog.dart';
 class AppSettings {
   const AppSettings({
     this.appearance = AppearanceMode.system,
-    this.accent = AccentPreset.graphite,
+    this.accent = AccentPreset.teal,
     this.surfaceOpacity = 0.94,
     this.cornerScale = 1.0,
     this.islandScale = 1.0,
@@ -50,7 +50,7 @@ class AppSettings {
     this.weatherLongitude,
     this.disabledPages = const <String>[],
     this.introSeen = false,
-    this.hotkeyToggle = 'Ctrl + Alt + Space',
+    this.hotkeyToggle = '',
     this.hotkeyExpand = '',
     this.hotkeyHide = '',
   });
@@ -308,7 +308,9 @@ class AppSettings {
   static AppSettings fromJson(Map<String, Object?> json) {
     return AppSettings(
       appearance: AppearanceModeX.fromName(json['appearance'] as String?),
-      accent: AccentPresetX.fromName(json['accent'] as String?),
+      accent: json['accent'] == null
+          ? defaults.accent
+          : AccentPresetX.fromName(json['accent'] as String?),
       surfaceOpacity: _double(
         json['surfaceOpacity'],
         defaults.surfaceOpacity,
