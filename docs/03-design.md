@@ -1,5 +1,7 @@
 # Desain Windows Dynamic Notch
 
+> Dokumen historis untuk implementasi WinUI. Folder `ui-reference` yang disebut di bawah telah dihapus; implementasi utama sekarang menggunakan Flutter.
+
 ## Dasar dan batas desain
 
 Dokumen ini menerjemahkan `01-features.md` dan `02-architecture.md` menjadi kontrak UI MVP. Tujuh pasangan `screen.png`/`code.html` serta dua `DESIGN.md` di `ui-reference/stitch_windows_dynamic_notch_utility` sudah ditelaah. Screenshot menentukan arah visual; HTML menjelaskan komponen/properti mockup, bukan implementasi native atau bukti performa. Persyaratan fitur dan arsitektur mengungguli mockup bila berbeda.

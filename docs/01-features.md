@@ -1,5 +1,7 @@
 # Fitur Windows Dynamic Notch
 
+> Dokumen historis untuk implementasi WinUI. Folder `ui-reference` yang disebut di bawah telah dihapus; implementasi utama sekarang menggunakan Flutter.
+
 ## Ruang lingkup dan aturan rilis
 
 Produk adalah aplikasi desktop native Windows dengan C# 12, .NET 8, WinUI 3 (Windows App SDK), dan Win32 untuk pengelolaan jendela. Rilis awal hanya mencakup satu notch di tengah tepi atas **layar utama**. Dashboard mengikuti arah visual Fluent pada `ui-reference`, sedangkan kebutuhan fungsional dirangkum di matriks berikut. Tautan PRD asli di `README.md` menunjuk ke `attachments/` yang tidak tersedia dalam checkout ini; jangan menafsirkan mockup sebagai kebutuhan tambahan. Satu fitur di bawah ini dirancang sebagai pekerjaan satu orang selama sekitar 1–3 hari; rentang itu adalah perkiraan, bukan janji jadwal.
