@@ -116,21 +116,46 @@
                     </Border>
                 </StackPanel>
                 <StackPanel x:Name="BehaviorPage" Visibility="Collapsed" Spacing="12">
-                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
-                        <StackPanel Spacing="12">
-                            <TextBlock Text="Opening the notch" Style="{StaticResource SubtitleTextBlockStyle}" />
-                            <TextBlock Text="Hover briefly to open the notch; it closes shortly after you leave. Clicking the header toggles it immediately." TextWrapping="Wrap" Opacity="0.7" />
-                            <ToggleSwitch x:Name="HoverToggle" Header="Open on hover" Toggled="OnHoverChanged" AutomationProperties.Name="Open notch on hover" />
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="16" Padding="20">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Open on hover" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" />
+                            <TextBlock Text="Expand after the pointer rests over the notch." TextWrapping="Wrap" Opacity="0.7" />
+                            <ToggleSwitch x:Name="HoverToggle" Toggled="OnHoverChanged" AutomationProperties.Name="Open notch on hover" AutomationProperties.HelpText="Opens the notch after a brief hover and closes it after the pointer leaves." />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="16" Padding="20">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Hover timing" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <TextBlock Text="The notch opens after a brief hover and closes shortly after you leave." TextWrapping="Wrap" Opacity="0.7" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="16" Padding="20">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Click the notch" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <TextBlock Text="Click the header to open or close immediately." TextWrapping="Wrap" Opacity="0.7" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="16" Padding="20">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Keyboard" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <TextBlock Text="Open from Settings, use Tab to navigate, and press Escape to close." TextWrapping="Wrap" Opacity="0.7" />
+                            <Button Content="Open notch with keyboard" HorizontalAlignment="Left" Click="OnOpenNotch" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
                 <StackPanel x:Name="AnimationsPage" Visibility="Collapsed" Spacing="12">
-                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="16" Padding="20">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Transition speed" Style="{StaticResource SubtitleTextBlockStyle}" />
-                            <TextBlock Text="Choose how long the notch takes to open and close. Set to zero to disable motion." TextWrapping="Wrap" Opacity="0.7" />
+                            <TextBlock Text="Transition duration" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <TextBlock Text="One duration applies to opening and closing." TextWrapping="Wrap" Opacity="0.7" />
                             <TextBlock x:Name="DurationLabel" Text="Duration" />
                             <Slider x:Name="DurationSlider" Minimum="0" Maximum="600" StepFrequency="20" ValueChanged="OnDurationChanged" AutomationProperties.Name="Animation duration in milliseconds" AutomationProperties.LabeledBy="{Binding ElementName=DurationLabel}" AutomationProperties.HelpText="Transition duration in milliseconds. Zero disables motion." />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="16" Padding="20">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Reduce motion" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <TextBlock Text="Set duration to zero for an immediate transition. The maximum is 600 ms." TextWrapping="Wrap" Opacity="0.7" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
