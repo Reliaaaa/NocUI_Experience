@@ -112,11 +112,11 @@ public sealed partial class OverlayWindow : Window
         MediaArtistText.Text = _coordinator.Media.Artist;
         MediaArtistText.Visibility = settings.MediaEnabled && _coordinator.Media.Availability == MediaAvailability.Active
             && !string.IsNullOrWhiteSpace(_coordinator.Media.Artist) ? Visibility.Visible : Visibility.Collapsed;
-        PreviousButton.IsEnabled = _coordinator.Media.CanPrevious && !_coordinator.Media.IsBusy;
+        PreviousButton.IsEnabled = _coordinator.IsExpanded && _coordinator.Media.CanPrevious && !_coordinator.Media.IsBusy;
         PlayPauseIcon.Glyph = _coordinator.Media.IsPlaying ? "\uE769" : "\uE768";
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(PlayPauseButton, _coordinator.Media.IsPlaying ? "Pause" : "Play");
-        PlayPauseButton.IsEnabled = _coordinator.Media.CanTogglePlayPause && !_coordinator.Media.IsBusy;
-        NextButton.IsEnabled = _coordinator.Media.CanNext && !_coordinator.Media.IsBusy;
+        PlayPauseButton.IsEnabled = _coordinator.IsExpanded && _coordinator.Media.CanTogglePlayPause && !_coordinator.Media.IsBusy;
+        NextButton.IsEnabled = _coordinator.IsExpanded && _coordinator.Media.CanNext && !_coordinator.Media.IsBusy;
         if (_transition is null && !_changingState)
         {
             Pill.Width = Math.Min(_coordinator.IsExpanded ? Math.Max(settings.Width, 430) : settings.Width, _host.PrimaryWidthDip);
@@ -199,18 +199,26 @@ public sealed partial class OverlayWindow : Window
         // Actual size reflects the current animated layout; Width/Height may still hold base values.
         var startWidth = Pill.ActualWidth > 0 ? Pill.ActualWidth : Pill.Width;
         var startHeight = Pill.ActualHeight > 0 ? Pill.ActualHeight : Pill.Height;
+        var startContentOpacity = ExpandedContent.Visibility == Visibility.Visible ? ExpandedContent.Opacity : 0;
         Pill.Width = startWidth;
         Pill.Height = startHeight;
+        ExpandedContent.Opacity = startContentOpacity;
         _transition?.Stop();
         _transition = null;
         _changingState = true;
         _coordinator.SetExpanded(expanded);
         _changingState = false;
-        ExpandedContent.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
+        // Keep the content visible while closing so it fades with the shrinking surface.
+        // The media buttons are disabled by UpdateVisuals when collapsed; also
+        // exclude the fading content from pointer interaction immediately.
+        ExpandedContent.Visibility = Visibility.Visible;
+        ExpandedContent.IsHitTestVisible = expanded;
         if (_coordinator.Settings.AnimationDurationMs == 0)
         {
             Pill.Width = Math.Min(expanded ? Math.Max(_coordinator.Settings.Width, 430) : _coordinator.Settings.Width, _host.PrimaryWidthDip);
             Pill.Height = expanded ? ExpandedHeight : _coordinator.Settings.Height;
+            ExpandedContent.Opacity = expanded ? 1 : 0;
+            ExpandedContent.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
             _geometryTimer.Stop();
             ApplyGeometry();
             return;
@@ -230,23 +238,37 @@ public sealed partial class OverlayWindow : Window
             EnableDependentAnimation = true,
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
         };
+        var contentAnimation = new DoubleAnimation
+        {
+            From = startContentOpacity,
+            To = expanded ? 1 : 0,
+            Duration = new Duration(TimeSpan.FromMilliseconds(_coordinator.Settings.AnimationDurationMs)),
+            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+        };
         Storyboard.SetTarget(animation, Pill);
         Storyboard.SetTargetProperty(animation, "Height");
         Storyboard.SetTarget(widthAnimation, Pill);
         Storyboard.SetTargetProperty(widthAnimation, "Width");
+        Storyboard.SetTarget(contentAnimation, ExpandedContent);
+        Storyboard.SetTargetProperty(contentAnimation, "Opacity");
         var storyboard = new Storyboard();
         _transition = storyboard;
         storyboard.Children.Add(animation);
         storyboard.Children.Add(widthAnimation);
+        storyboard.Children.Add(contentAnimation);
         storyboard.Completed += (_, _) =>
         {
             if (_closed || !ReferenceEquals(_transition, storyboard)) return;
             Pill.Width = widthAnimation.To!.Value;
             Pill.Height = animation.To!.Value;
+            ExpandedContent.Opacity = contentAnimation.To!.Value;
             storyboard.Stop();
             _transition = null;
+            ExpandedContent.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
             _geometryTimer.Stop();
-            ApplyGeometry();
+            // Settings can change while the transition is running; apply the current
+            // dimensions instead of leaving the snapshot taken when it started.
+            UpdateVisuals();
         };
         _geometryTimer.Start();
         storyboard.Begin();
@@ -274,6 +296,9 @@ public sealed partial class OverlayWindow : Window
             _transition = null;
             transition?.Stop();
             _geometryTimer.Stop();
+            ExpandedContent.Opacity = _coordinator.IsExpanded ? 1 : 0;
+            ExpandedContent.Visibility = _coordinator.IsExpanded ? Visibility.Visible : Visibility.Collapsed;
+            ExpandedContent.IsHitTestVisible = _coordinator.IsExpanded;
             UpdateVisuals();
         });
     }
