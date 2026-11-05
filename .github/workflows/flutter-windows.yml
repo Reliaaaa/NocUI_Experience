@@ -60,8 +60,8 @@ jobs:
           path: artifacts/flutter-installer/NocUI-Experience-Setup-x64.exe
           if-no-files-found: error
 
-  publish-v1:
-    if: github.event_name == 'push' && github.ref == 'refs/tags/v1.0.0'
+  publish-v1-1:
+    if: github.event_name == 'push' && github.ref == 'refs/tags/v1.1.0'
     needs: flutter-windows
     runs-on: ubuntu-latest
     permissions:
@@ -75,4 +75,4 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create v1.0.0 release-assets/NocUI-Experience-Setup-x64.exe --title "NocUI Experience 1.0.0" --notes-file docs/release-1.0.0.md --verify-tag
+        run: gh release create v1.1.0 release-assets/NocUI-Experience-Setup-x64.exe --title "NocUI Experience 1.1.0" --notes-file docs/release-1.1.0.md --verify-tag
