@@ -147,7 +147,7 @@
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="16" Padding="20">
                         <StackPanel Spacing="12">
                             <TextBlock Text="Transition duration" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                            <TextBlock Text="One duration applies to opening and closing." TextWrapping="Wrap" Opacity="0.7" />
+                            <TextBlock Text="One duration applies to opening and closing. Content follows the shape as it opens and fades sooner when it closes." TextWrapping="Wrap" Opacity="0.7" />
                             <TextBlock x:Name="DurationLabel" Text="Duration" />
                             <Slider x:Name="DurationSlider" Minimum="0" Maximum="600" StepFrequency="20" ValueChanged="OnDurationChanged" AutomationProperties.Name="Animation duration in milliseconds" AutomationProperties.LabeledBy="{Binding ElementName=DurationLabel}" AutomationProperties.HelpText="Transition duration in milliseconds. Zero disables motion." />
                         </StackPanel>

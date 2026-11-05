@@ -19,8 +19,11 @@
                 </Grid>
                 </Button>
                 <StackPanel x:Name="ExpandedContent" Visibility="Collapsed" Spacing="4">
-                    <TextBlock x:Name="DateText" Foreground="White" Opacity="0.75" />
-                    <TextBlock x:Name="BatteryText" Foreground="White" Opacity="0.75" />
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <TextBlock x:Name="DateText" Foreground="White" Opacity="0.75" TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="BatteryText" Grid.Column="1" Foreground="White" Opacity="0.75" TextTrimming="CharacterEllipsis" />
+                    </Grid>
                     <TextBlock x:Name="MediaText" Foreground="White" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                     <TextBlock x:Name="MediaArtistText" Foreground="White" Opacity="0.75" TextTrimming="CharacterEllipsis" Visibility="Collapsed" />
                     <StackPanel x:Name="MediaControls" Orientation="Horizontal" Spacing="8">

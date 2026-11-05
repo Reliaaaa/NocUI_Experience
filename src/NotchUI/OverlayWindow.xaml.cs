@@ -242,7 +242,10 @@ public sealed partial class OverlayWindow : Window
         {
             From = startContentOpacity,
             To = expanded ? 1 : 0,
-            Duration = new Duration(TimeSpan.FromMilliseconds(_coordinator.Settings.AnimationDurationMs)),
+            // Let the surface lead the content on entry; clear the content
+            // sooner on exit. Both phases stay within the configured duration.
+            BeginTime = TimeSpan.FromMilliseconds(expanded ? _coordinator.Settings.AnimationDurationMs * 0.2 : 0),
+            Duration = new Duration(TimeSpan.FromMilliseconds(_coordinator.Settings.AnimationDurationMs * (expanded ? 0.8 : 0.65))),
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
         };
         Storyboard.SetTarget(animation, Pill);
