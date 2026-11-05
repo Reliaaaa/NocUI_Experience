@@ -1,20 +1,22 @@
 # NotchUI
 
-NotchUI adalah prototipe aplikasi desktop Windows yang menempatkan notch interaktif di tengah tepi atas layar utama. Target produk adalah C# 12, .NET 8, WinUI 3, dan Windows App SDK; kebutuhan awal ada di [PRD](attachments/e03c4d15-6ae7-4021-9794-4ddf76fe9aac/product_requirements_document.txt), sedangkan cakupan MVP ada di [fitur](docs/01-features.md).
+NotchUI adalah prototipe aplikasi desktop Windows yang menempatkan notch interaktif di tengah tepi atas layar utama. Source menggunakan C# 12, .NET 8, WinUI 3, Windows App SDK, dan interop Win32. Cakupan MVP ada di [fitur](docs/01-features.md).
 
 ## Status saat ini
 
-Repository ini memuat model pengaturan, codec dan penyimpanan `ApplicationData.LocalSettings`, layanan jam/baterai/media, adapter Win32 untuk overlay dan tray, serta proyek self-check codec. **Aplikasi belum dapat dijalankan atau dikemas:** proyek aplikasi WinUI, bootstrap, XAML dashboard/overlay, view model, dan manifest MSIX belum tersedia. Status verifikasi terperinci ada di [laporan QA](docs/06-qa-report.md).
+Repository sudah memuat proyek aplikasi WinUI, dashboard dan overlay XAML, service, manifest MSIX, proyek self-check pengaturan, serta konfigurasi build Windows. Pengguna pernah melaporkan aplikasi berjalan di Windows; laporan itu belum membuktikan build, instalasi, dan seluruh kriteria penerimaan untuk perubahan source saat ini. Lihat [laporan QA](docs/06-qa-report.md).
 
-## Pemeriksaan yang tersedia
+## Mulai memeriksa dan membangun
 
-Dengan .NET 8 SDK, jalankan:
+Pada mesin dengan .NET 8 SDK, jalankan pemeriksaan codec dan penyimpanan pengaturan:
 
 ```sh
 dotnet run --project tests/NotchUI.Settings.SelfCheck/NotchUI.Settings.SelfCheck.csproj --configuration Release
 ```
 
-Ini hanya memeriksa codec pengaturan dan tidak menguji WinUI, interop Win32, atau perilaku overlay. Lingkungan kerja ini belum memiliki `dotnet`, sehingga hasil pemeriksaan belum diklaim. Workflow Windows di `.github/workflows/windows-build.yml` menjalankan self-check; tahap paket akan aktif setelah `src/NotchUI/NotchUI.csproj` dan `src/NotchUI/Package.appxmanifest` ditambahkan.
+Self-check tidak menjalankan UI WinUI, integrasi WinRT, atau interop Win32. Build dan pengujian aplikasi memerlukan Windows x64 versi 10 build 19041 atau lebih baru, .NET 8 SDK dan toolchain WinUI/MSIX. Workflow [Windows build and package](.github/workflows/windows-build.yml) menjalankan self-check, membuat MSIX **unsigned**, lalu menerbitkan aplikasi portable dan merakit installer Inno Setup. Artefak CI belum siap didistribusikan sebagai rilis: signature, instalasi, dan perilaku Windows perlu diverifikasi. Perintah, prasyarat dan prosedur rilis ada di [panduan DevOps](docs/08-devops.md).
+
+Lingkungan pemeriksaan repository ini tidak menyediakan `dotnet` atau Windows; belum ada klaim bahwa build dan self-check terbaru berhasil dijalankan di sini.
 
 ## Dokumentasi
 

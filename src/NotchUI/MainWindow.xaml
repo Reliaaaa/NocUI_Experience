@@ -37,9 +37,11 @@
                                         <GradientStop Color="#FFB5D3DC" Offset="1" />
                                     </LinearGradientBrush>
                                 </Border.Background>
-                                <Border x:Name="PreviewPill" Height="34" Width="320" MaxWidth="520" CornerRadius="16" VerticalAlignment="Top" HorizontalAlignment="Center">
-                                    <TextBlock x:Name="PreviewText" Text="NocUI Experience  •  Live preview" Foreground="White" TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
+                                <Viewbox Stretch="Uniform" StretchDirection="DownOnly" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+                                    <Border x:Name="PreviewPill" Height="34" Width="320" MaxWidth="520" CornerRadius="16">
+                                        <TextBlock x:Name="PreviewText" Text="NocUI Experience  •  Live preview" Foreground="White" TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                </Viewbox>
                             </Border>
                         </StackPanel>
                     </Border>
@@ -50,11 +52,11 @@
                                 <TextBlock Text="Dimensions" Style="{StaticResource SubtitleTextBlockStyle}" />
                             </StackPanel>
                             <TextBlock x:Name="WidthLabel" Text="Notch width" />
-                            <Slider x:Name="WidthSlider" Minimum="200" Maximum="520" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Notch width" />
+                            <Slider x:Name="WidthSlider" Minimum="200" Maximum="520" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Notch width" AutomationProperties.LabeledBy="{Binding ElementName=WidthLabel}" AutomationProperties.HelpText="Width in device-independent pixels (DIP)." />
                             <TextBlock x:Name="HeightLabel" Text="Resting height" />
-                            <Slider x:Name="HeightSlider" Minimum="28" Maximum="64" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Notch height" />
+                            <Slider x:Name="HeightSlider" Minimum="28" Maximum="64" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Notch height" AutomationProperties.LabeledBy="{Binding ElementName=HeightLabel}" AutomationProperties.HelpText="Resting height in device-independent pixels (DIP)." />
                             <TextBlock x:Name="RadiusLabel" Text="Corner radius" />
-                            <Slider x:Name="RadiusSlider" Minimum="0" Maximum="32" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Corner radius" />
+                            <Slider x:Name="RadiusSlider" Minimum="0" Maximum="32" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Corner radius" AutomationProperties.LabeledBy="{Binding ElementName=RadiusLabel}" AutomationProperties.HelpText="Radius in device-independent pixels (DIP), limited to half the smaller notch dimension." />
                         </StackPanel>
                     </Border>
                     <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="20">
@@ -64,9 +66,9 @@
                                 <TextBlock Text="Color &amp; opacity" Style="{StaticResource SubtitleTextBlockStyle}" />
                             </StackPanel>
                             <TextBlock x:Name="OpacityLabel" Text="Background opacity" />
-                            <Slider x:Name="OpacitySlider" Minimum="20" Maximum="100" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Background opacity percent" />
+                            <Slider x:Name="OpacitySlider" Minimum="20" Maximum="100" StepFrequency="1" ValueChanged="OnSliderChanged" AutomationProperties.Name="Background opacity percent" AutomationProperties.LabeledBy="{Binding ElementName=OpacityLabel}" AutomationProperties.HelpText="Background opacity as a percentage." />
                             <Expander Header="Choose a background color" HorizontalAlignment="Stretch">
-                                <ColorPicker x:Name="BackgroundPicker" IsAlphaEnabled="False" IsAlphaSliderVisible="False" ColorChanged="OnColorChanged" />
+                                <ColorPicker x:Name="BackgroundPicker" IsAlphaEnabled="False" IsAlphaSliderVisible="False" ColorChanged="OnColorChanged" AutomationProperties.Name="Notch background color" />
                             </Expander>
                         </StackPanel>
                     </Border>
@@ -78,9 +80,9 @@
                         <StackPanel Spacing="14">
                             <TextBlock Text="Choose your widgets" Style="{StaticResource SubtitleTextBlockStyle}" />
                             <TextBlock Text="Enable the information shown inside the notch." TextWrapping="Wrap" Opacity="0.7" />
-                            <ToggleSwitch x:Name="ClockToggle" Header="Clock and date" Toggled="OnModulesChanged" />
-                            <ToggleSwitch x:Name="BatteryToggle" Header="Battery and charging" Toggled="OnModulesChanged" />
-                            <ToggleSwitch x:Name="MediaToggle" Header="Media controls" Toggled="OnModulesChanged" />
+                            <ToggleSwitch x:Name="ClockToggle" Header="Clock and date" Toggled="OnModulesChanged" AutomationProperties.Name="Clock and date widget" />
+                            <ToggleSwitch x:Name="BatteryToggle" Header="Battery and charging" Toggled="OnModulesChanged" AutomationProperties.Name="Battery and charging widget" />
+                            <ToggleSwitch x:Name="MediaToggle" Header="Media controls" Toggled="OnModulesChanged" AutomationProperties.Name="Media controls widget" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -99,7 +101,7 @@
                         <StackPanel Spacing="12">
                             <TextBlock Text="Opening the notch" Style="{StaticResource SubtitleTextBlockStyle}" />
                             <TextBlock Text="Hover briefly to open the notch; it closes shortly after you leave. Clicking the header toggles it immediately." TextWrapping="Wrap" Opacity="0.7" />
-                            <ToggleSwitch x:Name="HoverToggle" Header="Open on hover" Toggled="OnHoverChanged" />
+                            <ToggleSwitch x:Name="HoverToggle" Header="Open on hover" Toggled="OnHoverChanged" AutomationProperties.Name="Open notch on hover" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -109,7 +111,7 @@
                             <TextBlock Text="Transition speed" Style="{StaticResource SubtitleTextBlockStyle}" />
                             <TextBlock Text="Choose how long the notch takes to open and close. Set to zero to disable motion." TextWrapping="Wrap" Opacity="0.7" />
                             <TextBlock x:Name="DurationLabel" Text="Duration" />
-                            <Slider x:Name="DurationSlider" Minimum="0" Maximum="600" StepFrequency="20" ValueChanged="OnDurationChanged" AutomationProperties.Name="Animation duration in milliseconds" />
+                            <Slider x:Name="DurationSlider" Minimum="0" Maximum="600" StepFrequency="20" ValueChanged="OnDurationChanged" AutomationProperties.Name="Animation duration in milliseconds" AutomationProperties.LabeledBy="{Binding ElementName=DurationLabel}" AutomationProperties.HelpText="Transition duration in milliseconds. Zero disables motion." />
                         </StackPanel>
                     </Border>
                 </StackPanel>

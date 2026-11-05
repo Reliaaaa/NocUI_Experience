@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Text.Json;
 using NotchUI.Models;
 
@@ -9,6 +10,25 @@ public static class SettingsCodec
 {
     public const int CurrentVersion = 1;
     public const int MaximumPayloadLength = 4096;
+
+    public static bool CanInspectStoredValue(object? value) =>
+        value is string payload && payload.Length <= MaximumPayloadLength;
+
+    // Read one extra character to detect oversize without loading the entire file.
+    // Readers may return fewer characters than requested before reaching EOF.
+    public static bool TryReadBounded(TextReader reader, out string payload)
+    {
+        var buffer = new char[MaximumPayloadLength + 1];
+        var count = 0;
+        while (count < buffer.Length)
+        {
+            var read = reader.Read(buffer, count, buffer.Length - count);
+            if (read == 0) break;
+            count += read;
+        }
+        payload = new string(buffer, 0, count);
+        return count <= MaximumPayloadLength;
+    }
 
     public static string Encode(NotchSettings settings) =>
         JsonSerializer.Serialize(new SettingsEnvelope(settings.Normalize()));

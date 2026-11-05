@@ -34,6 +34,7 @@ public sealed partial class MainWindow : Window
         var settings = _viewModel.Settings;
         WidthSlider.Value = settings.Width;
         HeightSlider.Value = settings.Height;
+        RadiusSlider.Maximum = Math.Min(NotchSettings.MaximumRadius, Math.Min(settings.Width, settings.Height) / 2);
         RadiusSlider.Value = settings.CornerRadius;
         OpacitySlider.Value = settings.Opacity * 100;
         WidthLabel.Text = $"Notch width · {settings.Width:0} DIP";

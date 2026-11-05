@@ -4,17 +4,19 @@
 
 Dokumen ini menerjemahkan `01-features.md` dan `02-architecture.md` menjadi kontrak UI MVP. Tujuh pasangan `screen.png`/`code.html` serta dua `DESIGN.md` di `ui-reference/stitch_windows_dynamic_notch_utility` sudah ditelaah. Screenshot menentukan arah visual; HTML menjelaskan komponen/properti mockup, bukan implementasi native atau bukti performa. Persyaratan fitur dan arsitektur mengungguli mockup bila berbeda.
 
-MVP: satu dashboard pengaturan, satu overlay pada layar utama, jam, baterai, media, dan tray. Tidak ada katalog plugin, akun, pencarian global, multi-display, monitor chooser, profil, tombol Apply, diagnostik, cuaca, fokus, autorun, atau halaman About terpisah. Preferensi berlaku langsung. F17 reposisi display/DPI dan F18 preferensi reduced motion tetap P1; kontrol keduanya belum ditampilkan pada MVP.
+Implementasi saat ini: satu dashboard pengaturan dengan navigasi Appearance, Notch Widgets, Gestures & Behavior, Animations, dan About; satu overlay pada layar utama; jam, baterai, media, dan tray. Tidak ada katalog plugin, akun, pencarian global, multi-display, monitor chooser, profil, tombol Apply, diagnostik, cuaca, fokus, atau autorun. Preferensi berlaku langsung. F17 reposisi display/DPI dan F18 sinkronisasi reduced motion sistem tetap P1. Halaman Animations sudah menyediakan durasi transisi 0–600 ms; nilai nol menonaktifkan animasi secara manual dan bukan sinkronisasi preferensi sistem.
 
 ## Peta navigasi dan jendela
 
 ```text
 Peluncuran aplikasi (satu instance)
 ├── OverlayWindow → Compact ⇄ Opening/Closing ⇄ Expanded
-├── MainWindow → SettingsPage (satu halaman)
-│   ├── Ukuran dan bentuk
-│   ├── Warna notch
-│   └── Modul: Jam / Baterai / Media
+├── MainWindow → NavigationView
+│   ├── General & Appearance → preview, dimensi, warna, opacity, defaults, buka notch
+│   ├── Notch Widgets → Jam / Baterai / Media
+│   ├── Gestures & Behavior → Open on hover
+│   ├── Animations → durasi transisi
+│   └── About → identitas aplikasi dan informasi tray
 └── Ikon tray → menu konteks
     ├── Settings → buat atau aktifkan MainWindow yang sama
     └── Exit → tutup kedua jendela, hapus tray, akhiri proses
@@ -26,11 +28,13 @@ Menu tray memiliki label `Settings` dan `Exit` sesuai arsitektur. Bahasa label h
 
 ## Layout dashboard MVP
 
-Ukuran awal usulan 880 × 720 DIP, dapat diubah; layout minimal 480 DIP lebar sebelum konten perlu penataan tambahan. Gunakan title bar/caption buttons native dan judul “NotchUI — Pengaturan”. Tidak perlu sidebar kosong atau breadcrumb untuk satu halaman. Pertahankan komposisi kartu Stitch: heading “Pengaturan notch”, deskripsi “Perubahan langsung diterapkan pada notch di layar utama”, lalu tiga kartu dalam ScrollViewer vertikal. Margin 24 DIP (12 saat lebar <640), jarak kartu 16, padding kartu 16. Pada lebar kecil semua label, nilai, dan kontrol disusun vertikal; jangan membuat scroll horizontal.
+MainWindow meminta ukuran awal 1100 × 760 melalui `AppWindow.Resize`; ukuran ini merupakan ukuran jendela native, bukan kontrak DIP. Judulnya “NocUI Experience Settings”, dengan title bar/caption buttons native. NavigationView menyediakan lima halaman di atas, dengan konten dalam ScrollViewer vertikal. Konten memiliki lebar maksimum 940 DIP, padding 32/28/32/48 DIP, jarak utama 20 DIP, dan padding kartu umumnya 20 DIP. Label dan kontrol disusun vertikal; perilaku jendela sempit, text scaling, dan akses navigasi tetap perlu diverifikasi pada Windows.
 
-Kartu “Ukuran dan bentuk”: slider Lebar, Tinggi, Radius sudut dengan nilai numerik DIP yang selalu terlihat. Nilai bukan ukuran piksel fisik monitor. Kartu “Warna notch”: swatch, nilai warna heksadesimal, serta ColorPicker native dalam flyout. Kartu “Modul”: satu baris untuk tiap modul, label, status saat ini, dan ToggleSwitch berlabel Aktif/Nonaktif. Semua perubahan langsung terlihat di overlay tanpa Apply/reload; helper penyimpanan hanya muncul jika gagal.
+Kartu Dimensions memiliki slider lebar, tinggi, dan radius sudut dengan nilai numerik DIP yang selalu terlihat. Nilai bukan ukuran piksel fisik monitor. Kartu Color & opacity menyediakan slider opacity 20–100% dan ColorPicker native di dalam Expander. Halaman Notch Widgets memiliki tiga ToggleSwitch independen untuk jam, baterai, dan media. Appearance juga menyediakan Restore defaults dan Open notch with keyboard. Semua perubahan langsung terlihat di overlay tanpa Apply/reload; InfoBar menampilkan kegagalan preferensi.
 
-Preview simulasi desktop besar dari Stitch tidak diperlukan; overlay asli menjadi umpan balik langsung. Jika memakai ilustrasi kecil noninteraktif, tandai sebagai ilustrasi dan jangan berisi metadata lagu atau metrik palsu.
+Kartu Live preview menampilkan ilustrasi notch di atas latar gradien tanpa metadata lagu atau metrik palsu. Overlay asli tetap menjadi umpan balik langsung pada layar utama.
+
+Implementasi dashboard saat ini mempertahankan live preview serta navigasi widget, perilaku, animasi, dan About yang sudah tersedia. Preview memakai `Viewbox` dengan `Stretch="Uniform"` dan `StretchDirection="DownOnly"`: notch diperkecil secara proporsional ketika jendela sempit, tanpa memperbesar ukuran DIP yang dipilih atau mengubah preferensi. Maksimum slider radius mengikuti `min(32, width/2, height/2)` dan diperbarui sebelum nilainya saat pengaturan dimuat. Slider memiliki nama aksesibilitas, hubungan ke label nilai aktual, serta bantuan satuan; ColorPicker dan semua ToggleSwitch memiliki nama eksplisit.
 
 ## Geometri dan susunan overlay
 
@@ -59,7 +63,7 @@ Expanded memuat baris waktu/baterai, lalu judul/artis media maksimal masing-masi
 | F11 Tray/lifetime | Ikon tray dan menu Settings/Exit | Dashboard Visible/Closed tidak memengaruhi overlay; Settings membuka satu dashboard; Exit menghentikan semuanya. Tidak ada sakelar “minimize to tray” karena perilakunya tetap. |
 | F12 Dashboard | Heading, kartu, label, nilai, status | Semua kontrol bisa dijangkau keyboard; nilai aktual tampil saat dibuka kembali. ScrollViewer menampung konten pada window kecil/text scaling besar. |
 | F13 Ukuran/radius | Tiga Slider, label dan nilai DIP | Rest/Hover/Dragging/KeyboardFocus; perubahan langsung, nilai dibatasi, radius tervalidasi, hit test sinkron. Nilai yang dijepit tampil sebagai nilai efektif. |
-| F14 Warna | Swatch + Button/flyout ColorPicker | Closed/Open/Changing; RGB/hex valid mengubah fill segera. Alpha dipertahankan opak untuk menjaga kontras yang dapat dihitung. Luar notch tetap transparan. Foreground notch menyesuaikan gelap/terang berdasarkan luminansi fill. |
+| F14 Warna | ColorPicker dalam Expander dan slider opacity | Collapsed/Expanded/Changing; RGB/hex valid mengubah fill segera. Alpha pada ColorPicker dinonaktifkan; opacity dikendalikan terpisah pada rentang 20–100%. Luar notch tetap transparan. Foreground notch menyesuaikan gelap/terang berdasarkan luminansi warna fill; kontras saat opacity rendah perlu pengujian terhadap desktop di belakangnya. |
 | F15 Sakelar modul | Tiga ToggleSwitch independen | On/Off terpisah dari Ready/Unavailable. Baterai tanpa perangkat tetap dapat On; status menjelaskan ketersediaan. Menonaktifkan media menghapus tombol/metadata, tanpa memengaruhi playback sumber. |
 | F16 Preferensi | Umpan balik simpan nonmodal | Perubahan langsung di memori; simpan tertunda singkat setelah drag. Default aman saat data rusak/hilang. Jika gagal menyimpan: InfoBar “Pengaturan berlaku untuk sesi ini, tetapi belum tersimpan.” Retry hanya mengulangi penyimpanan lokal; tidak membatalkan perubahan. |
 
@@ -85,13 +89,13 @@ Utamakan `fluent_desktop_mica_dark/DESIGN.md` dan screenshot HUD `_2`. `fluent_d
 
 ## Aksesibilitas dan ergonomi desktop
 
-- Tab/Shift+Tab mengikuti urutan visual: slider lebar → tinggi → radius → warna → toggle jam → baterai → media. Arrow keys mengubah slider 1 DIP; Home/End mencapai batas. Space mengubah toggle, Enter/Space mengaktifkan button. Flyout ColorPicker dapat ditutup Esc dan mengembalikan fokus ke pemicu.
+- Tab/Shift+Tab mengikuti urutan visual pada halaman aktif; Appearance memuat slider lebar → tinggi → radius → opacity → Expander/ColorPicker → Restore defaults → Open notch with keyboard. NavigationView menyediakan akses ke halaman widget, perilaku, animasi, dan About. Arrow keys mengubah slider dimensi 1 DIP; Home/End mencapai batas. Space mengubah toggle, Enter/Space mengaktifkan button. ColorPicker berada di Expander, bukan flyout.
 - Beri AutomationProperties.Name, label/value yang terbaca, help text satuan DIP, serta status media/baterai. Nama Play/Pause berubah sesuai aksi. Disabled control tetap memiliki label dan penjelasan kemampuan yang tidak tersedia. Jangan memakai tooltip sebagai satu-satunya label.
 - Overlay tidak mengambil fokus saat hover. Bila diaktifkan secara eksplisit melalui keyboard/shell, trigger harus focusable dengan Enter/Space membuka; Tab mencapai tombol media, Esc menutup dan mengembalikan fokus ke trigger. Pointer keluar tidak menutup panel selama fokus keyboard masih di dalamnya. Ini aturan mempertahankan akses keyboard untuk F05, bukan fitur pin/global shortcut baru. Jalur pengaktifan overlay via keyboard harus dibuktikan dengan shell native pada Windows; jangan menyembunyikan seluruh aksesibilitas overlay demi menghilangkan taskbar button.
 - Text scaling hingga 200% dan DPI 100/150/200% tidak memotong label atau target kontrol. Dashboard reflow/scroll; expanded tumbuh dan compact mengurangi konten sekunder. Ini pengujian rendering startup pada tiap skala; reposisi dinamis setelah perubahan monitor tetap F17.
 - Teks normal menargetkan kontras minimal 4,5:1, teks besar dan batas kontrol esensial 3:1. Warna notch yang dipilih pengguna harus memilih foreground hitam/putih dengan kontras memadai. High contrast menggunakan SystemColor/theme resource, bukan forced palette; informasi status tidak hanya dibedakan warna.
 - Jangan mengumumkan jam setiap menit melalui live region. Umumkan kegagalan interaksi media secara polite; perubahan lagu tidak memindahkan fokus. Placeholder/dekorasi tidak menjadi tab stop.
-- P0 memakai motion singkat tanpa kedipan atau gerak terus-menerus. Pengaturan reduced motion dan sinkronisasi kebijakan animasi memerlukan F18; jangan menampilkan switch palsu sebelum didukung.
+- Animasi default 180 ms tanpa kedipan atau gerak terus-menerus. Halaman Animations menyediakan slider durasi 0–600 ms dengan langkah 20 ms; nol menonaktifkan motion. Sinkronisasi kebijakan animasi/reduced motion Windows masih memerlukan F18 dan belum memiliki kontrol khusus.
 
 ## Pemetaan tujuh layar Stitch ke WinUI 3
 
@@ -99,13 +103,13 @@ Semua nama folder relatif terhadap `ui-reference/stitch_windows_dynamic_notch_ut
 
 | Layar referensi | Dipakai pada MVP / kontrol native | Tidak dibawa ke MVP |
 | --- | --- | --- |
-| `settings_general_appearance` | Kartu dimensi → Border/Grid + 3 Slider; warna → ColorPicker flyout; hierarki heading dan nilai. Tampilan diubah menjadi dark tokens. | Simulator resolusi/DPI, offset atas, material chooser, opacity/glow, monitor chooser, fullscreen rules, metrik performa, Apply Profile. |
+| `settings_general_appearance` | Kartu dimensi → Border/Grid + 3 Slider; warna → ColorPicker dalam Expander; slider opacity; live preview; hierarki heading dan nilai. Tampilan mengikuti theme resource WinUI. | Simulator resolusi/DPI, offset atas, material chooser, glow, monitor chooser, fullscreen rules, metrik performa, Apply Profile. |
 | `notch_hud_top_bar_overlay_1` | Anatomi pill atas dan panel media expanded → Border/Grid/TextBlock/Button pada OverlayWindow; dashboard/overlay benar-benar dua HWND. | Desktop/terminal palsu, album art wajib, seek/volume/shuffle/repeat, fokus/night light/VRR, state simulator, equalizer, spring physics, reload engine. |
 | `notch_hud_top_bar_overlay_2` | Sumber utama dark surface, stroke, kontras dan metadata media; digabung dengan anatomi `_1`. | Seluruh kontrol lanjutan yang sama; screenshot bukan halaman tambahan atau mode runtime tersendiri. |
-| `notch_widgets_catalog` | Pola toggle per modul dan status → 3 baris ToggleSwitch pada SettingsPage; jam ditambahkan sesuai PRD. | Widget store, install/import, reorder/drag slots, auto-priority, cuaca, telemetry, fokus, clipboard, SDK pihak ketiga. |
-| `gestures_behavior` | Arah penjelasan hover/klik dan batas hit test → state coordinator + pointer events; keterangan singkat perilaku pada dashboard bila perlu. | Halaman gesture, hit-zone slider, pin, touchpad swipe, wheel volume, exclusions, multi-display barrier, global shortcuts. |
-| `animations_physics` | Gerak ringan sebagai Storyboard; token timing awal 180–220 ms. P1 F18 dapat menambah satu preferensi reduced motion pada halaman yang sama. | Inspector/grafik fisika, mass/stiffness/damping, preset spring, FPS selector, SVG morph, tilt, render backend switches, GPU numbers. |
-| `about_notchui` | Identitas aplikasi pada title bar dan gagasan close-ke-tray → perilaku tetap AppLifetimeService. | Halaman About, versi/SDK/sertifikasi klaim mockup, update checker, autorun, notification mirroring, diagnostic export, runtime metrics, tautan komunitas tanpa tujuan nyata. |
+| `notch_widgets_catalog` | Pola toggle per modul → 3 baris ToggleSwitch pada halaman Notch Widgets; jam ditambahkan sesuai PRD. | Widget store, install/import, reorder/drag slots, auto-priority, cuaca, telemetry, fokus, clipboard, SDK pihak ketiga. |
+| `gestures_behavior` | Halaman Gestures & Behavior menjelaskan hover/klik dan menyediakan Open on hover; batas hit test → state coordinator + pointer events. | Hit-zone slider, pin, touchpad swipe, wheel volume, exclusions, multi-display barrier, global shortcuts. |
+| `animations_physics` | Halaman Animations menyediakan durasi 0–600 ms, default 180 ms; nol menonaktifkan motion. Sinkronisasi reduced motion sistem tetap F18. | Inspector/grafik fisika, mass/stiffness/damping, preset spring, FPS selector, SVG morph, tilt, render backend switches, GPU numbers. |
+| `about_notchui` | Halaman About memuat logo, identitas, deskripsi singkat, dan penjelasan close-ke-tray. | Versi/SDK/sertifikasi klaim mockup, update checker, autorun, notification mirroring, diagnostic export, runtime metrics, tautan komunitas tanpa tujuan nyata. |
 
 HTML memakai Tailwind, web fonts, Material Symbols, absolute positioning, dan angka runtime statis. Semuanya dipetakan ke XAML serta API native; tidak memuat HTML/WebView/CDN atau menyalin teks “v2.4”, “Microsoft Store Signed”, “0.42 ms”, “120 Hz”, atau nama GPU sebagai fakta produk.
 
