@@ -19,4 +19,56 @@ Check(new NotchSettings { Opacity = -1 }.Normalize().Opacity == 0.2 && new Notch
 Check(new NotchSettings { AnimationDurationMs = 1000 }.Normalize().AnimationDurationMs == 600 && new NotchSettings { AnimationDurationMs = double.NaN }.Normalize().AnimationDurationMs == 180, "Animation duration normalization failed.");
 var behavior = new NotchSettings { OpenOnHover = false, AnimationDurationMs = 0 };
 Check(SettingsCodec.TryDecode(SettingsCodec.Encode(behavior), out var restoredBehavior) && restoredBehavior == behavior, "Behavior settings roundtrip failed.");
-Console.WriteLine("PASS: roundtrip, invalid JSON/type/version/size, missing fields, normalization and monitor bounds.");
+var encoded = SettingsCodec.Encode(expected);
+foreach (var opaque in new object?[] { null, 42, new byte[] { 1, 2 }, new string(' ', 4097) })
+    Check(!SettingsCodec.CanInspectStoredValue(opaque), "Opaque LocalSettings value must be protected from overwrite.");
+Check(SettingsCodec.CanInspectStoredValue(encoded.PadRight(4096)) && SettingsCodec.CanInspectStoredValue("{"),
+    "Inspectable values must retain valid-load or corrupt-snapshot recovery behavior.");
+using (var shortReader = new ShortReader(encoded))
+    Check(SettingsCodec.TryReadBounded(shortReader, out var read) && read == encoded, "Short reads truncated settings.");
+using (var oversizedReader = new ShortReader(new string(' ', 10000)))
+    Check(!SettingsCodec.TryReadBounded(oversizedReader, out var read) && read.Length == 4097 && oversizedReader.CharactersRead == 4097, "Oversize read was not bounded.");
+using (var boundaryReader = new ShortReader(encoded.PadRight(4096)))
+    Check(SettingsCodec.TryReadBounded(boundaryReader, out var read) && SettingsCodec.TryDecode(read, out _), "Exact size limit rejected.");
+
+var directory = Path.Combine(Path.GetTempPath(), "NotchUI.Settings.SelfCheck-" + Guid.NewGuid().ToString("N"));
+Directory.CreateDirectory(directory);
+var path = Path.Combine(directory, "settings.json");
+try
+{
+    var service = new SettingsService(path);
+    Check(service.Load() == new NotchSettings() && service.Save(expected), "Missing file must allow save.");
+    foreach (var encoding in new System.Text.Encoding[] { new System.Text.UTF8Encoding(true), System.Text.Encoding.Unicode, System.Text.Encoding.BigEndianUnicode })
+    {
+        File.WriteAllText(path, encoded, encoding);
+        Check(service.Load() == expected, "BOM settings failed to load.");
+    }
+    foreach (var protectedPayload in new[] { new string('x', 4097), "{\"SchemaVersion\":2,\"Settings\":{}}" })
+    {
+        File.WriteAllText(path, protectedPayload);
+        Check(service.Load() == new NotchSettings() && !service.Save(expected) && File.ReadAllText(path) == protectedPayload,
+            "Oversize or future settings were overwritten.");
+    }
+    File.Delete(path);
+    Directory.CreateDirectory(path); // Opening a directory as a file fails on supported platforms.
+    Check(service.Load() == new NotchSettings() && !service.Save(expected) && Directory.Exists(path), "Unreadable settings were overwritten.");
+    Directory.Delete(path);
+    File.WriteAllText(path, encoded);
+    Check(service.Load() == expected && service.Save(expected), "Successful reload must release preservation guard.");
+}
+finally
+{
+    Directory.Delete(directory, true);
+}
+Console.WriteLine("PASS: codec, bounded short reads, size boundary, BOM and portable storage preservation.");
+
+sealed class ShortReader(string text) : StringReader(text)
+{
+    public int CharactersRead { get; private set; }
+    public override int Read(char[] buffer, int index, int count)
+    {
+        var read = base.Read(buffer, index, Math.Min(count, 3));
+        CharactersRead += read;
+        return read;
+    }
+}
