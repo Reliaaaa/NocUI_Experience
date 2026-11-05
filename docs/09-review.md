@@ -1,4 +1,34 @@
-# Keputusan terakhir — source LOLOS, penerimaan Windows belum selesai
+# Keputusan terbaru — review perubahan 2026-11-05
+
+**Tech Lead: LOLOS terbatas untuk handoff perubahan source; penerimaan MVP tetap KEMBALI.** Review ini mencakup diff Escape/keyboard overlay, teardown/display, preview dan label aksesibilitas, bounded storage unpackaged, guard packaged, serta dokumen 01–07. Tidak ditemukan blocker source baru pada perubahan tersebut. Ini bukan persetujuan rilis, bukti kompilasi, atau hasil runtime Windows. Keputusan ini menggantikan seluruh pernyataan “terbaru/terakhir” dalam riwayat di bawah.
+
+## Perubahan yang diterima secara statis
+
+- Escape didaftarkan pada `Pill` dengan `handledEventsToo=true`; penutupan memindahkan fokus dari turunan `ExpandedContent` ke header sebelum menyembunyikannya dan membatalkan penutupan jika fokus gagal dipindahkan. Jalur `OpenForKeyboard` mengaktifkan overlay dan memfokuskan header. Escape hanya berlaku ketika event keyboard mencapai overlay, bukan global shortcut saat aplikasi lain aktif.
+- Handler input/timer/geometri, callback display yang diantrekan, dan completion animasi memeriksa `_closed`. Teardown idempoten melepas handler, menghentikan timer/storyboard, lalu melepaskan host. Display change menghentikan transisi sebelum menghitung ulang ukuran. Efektivitas terhadap lifetime HWND tetap memerlukan Windows.
+- Preview memakai `Viewbox` Uniform/DownOnly; batas radius slider dihitung sebelum nilai diisi, dengan guard `_loading` agar pembaruan UI tidak menyimpan perubahan reentrant. Label dan bantuan satuan tersedia. Rendering, Narrator, DPI dan text scaling belum diuji.
+- Reader unpackaged mengakumulasi short read hingga EOF atau 4097 karakter hasil decode; payload >4096 ditolak tanpa pembacaan seluruh file. Load memblokir Save saat oversize/future schema/gagal baca, dan mengizinkan Save setelah load valid atau file hilang. Guard packaged `CanInspectStoredValue` mempertahankan value non-string/null/oversize; backup/default tetap tersedia untuk JSON rusak yang dapat diperiksa.
+- Self-check menautkan service `UNPACKAGED` dan menambah kasus short read, batas 4096/4097, BOM, missing file, future schema, unreadable path, reload, serta klasifikasi value packaged. Kasus terakhir menguji helper klasifikasi; bukan eksekusi cabang WinRT `LocalSettings`.
+
+## Bukti verifikasi putaran ini
+
+Tanggal 2026-11-05 di lingkungan Linux setelah reset: `git diff --check` lulus. Parse XML menggunakan `xml.etree.ElementTree` lulus untuk App.xaml, MainWindow.xaml, OverlayWindow.xaml, NotchUI.csproj, Package.appxmanifest dan self-check csproj. Parse ini tidak memvalidasi API WinUI, XAML compiler atau schema paket Windows. `dotnet run --project tests/NotchUI.Settings.SelfCheck` dicoba dan gagal memulai dengan `dotnet: command not found`; **tidak ada self-check yang dieksekusi**. Tidak ada build, packaging, installer atau runtime Windows yang dijalankan dalam review ini. Laporan smoke run pengguna yang disebut docs01/02 belum memvalidasi diff terbaru.
+
+## Pengembalian yang spesifik
+
+| Pemilik | Keputusan / tindakan |
+| --- | --- |
+| Implementer UI dan storage | **LOLOS pada source yang ditinjau**, lanjutkan validasi Windows. Uji Escape dengan fokus header/media, hover tanpa aktivasi, fokus saat collapse, display change dan Exit saat animasi/callback pending; uji preview sempit dan radius setelah tinggi berubah. |
+| Database / QA | **KEMBALI untuk bukti**: jalankan self-check .NET 8; uji LocalSettings non-string/oversize/future/error, recovery LastGood, Load valid sesudah guard, debounce/flush dan gagal tulis pada kedua mode. Kontrak service tetap mengandalkan Load sebelum Save; coordinator sudah memenuhi urutan tersebut. |
+| QA / Security | **LOLOS untuk koreksi laporan**: pemeriksaan ulang menerima pembaruan docs06 QA-004/QA-008 dan docs07 tentang guard packaged, debounce coordinator 400 ms, display handler serta kontrol durasi. Kontradiksi snapshot awal ditutup secara dokumentasi; bukti runtime tetap KEMBALI. |
+| Designer | **LOLOS untuk koreksi dokumentasi yang diminta**: pemeriksaan ulang docs03 menerima penyelarasan pembukaan, peta navigasi, layout, keyboard dan tabel referensi dengan lima halaman yang tersedia, termasuk About. Kontrol durasi 0–600 ms dibedakan dari sinkronisasi reduced motion sistem yang belum tersedia. Kontradiksi navigasi/kontrol animasi ditutup; rendering dan acceptance aksesibilitas Windows tetap belum terverifikasi. |
+| DevOps / Security / Tech Lead | **KEMBALI untuk penerimaan MVP**: sertakan build Windows, artefak paket/installer, hasil instalasi, dependensi dan manifest final serta matriks acceptance F01–F16. Tidak ada bukti yang menutup gate SPOT-03. |
+
+Temuan dokumentasi yang dikembalikan pada putaran ini sudah ditutup melalui pemeriksaan ulang pembaruan QA, Security dan Designer; bukan bukti runtime. Persetujuan dokumentasi ini terbatas pada koreksi yang disebutkan, bukan sertifikasi seluruh kontrak desain. Review tidak mengubah kode produksi, melakukan commit, atau push. Riwayat berikut dipertahankan untuk jejak keputusan; klaim inventaris dan status historis tidak berlaku sebagai status saat ini.
+
+---
+
+# Riwayat — source LOLOS, penerimaan Windows belum selesai
 
 Tanggal: 2026-11-04. **Source LOLOS untuk diteruskan ke build dan uji Windows.** Ini keputusan spot review atas perbaikan terakhir, bukan sertifikasi seluruh aplikasi, build sukses, atau persetujuan rilis MVP. Bagian ini menggantikan status SPOT-01/02 pada riwayat di bawah.
 

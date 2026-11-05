@@ -1,8 +1,9 @@
 using System;
 using NotchUI.Models;
-using Windows.Storage;
 #if UNPACKAGED
 using System.IO;
+#else
+using Windows.Storage;
 #endif
 
 namespace NotchUI.Services;
@@ -13,7 +14,12 @@ public sealed class SettingsService : ISettingsService
     private const string CurrentKey = "NotchUI.Settings";
     private const string RecoveryKey = "NotchUI.Settings.LastGood";
     private readonly object _gate = new();
-    private bool _unsupportedVersion;
+    private bool _preserveStoredSettings;
+#if UNPACKAGED
+    private readonly string? _settingsPath;
+    public SettingsService() { }
+    internal SettingsService(string settingsPath) => _settingsPath = settingsPath;
+#endif
     public string? LastError { get; private set; }
 
     public NotchSettings Load()
@@ -21,41 +27,71 @@ public sealed class SettingsService : ISettingsService
         lock (_gate)
         {
             LastError = null;
-            _unsupportedVersion = false;
+            _preserveStoredSettings = true;
             try
             {
 #if UNPACKAGED
                 var path = SettingsPath;
-                if (!File.Exists(path)) return new NotchSettings();
-                var payload = File.ReadAllText(path);
-                if (SettingsCodec.TryDecode(payload, out var settings)) return settings;
+                using var reader = File.OpenText(path); // StreamReader consumes UTF BOMs.
+                if (!SettingsCodec.TryReadBounded(reader, out var payload))
+                {
+                    LastError = "Pengaturan terlalu besar. Data tersimpan tidak akan ditimpa.";
+                    return new NotchSettings();
+                }
+                if (SettingsCodec.TryDecode(payload, out var settings))
+                {
+                    _preserveStoredSettings = false;
+                    return settings;
+                }
                 if (IsFutureVersion(payload))
                 {
-                    _unsupportedVersion = true;
                     LastError = "Versi pengaturan lebih baru. Pengaturan sesi ini tidak akan menimpa data tersebut.";
                     return new NotchSettings();
                 }
+                _preserveStoredSettings = false;
                 LastError = "Pengaturan rusak; nilai default digunakan.";
                 return new NotchSettings();
 #else
                 var values = ApplicationData.Current.LocalSettings.Values;
-                if (!values.ContainsKey(CurrentKey)) return new NotchSettings();
-                var payload = values[CurrentKey] as string;
-                if (SettingsCodec.TryDecode(payload, out var settings)) return settings;
+                if (!values.TryGetValue(CurrentKey, out var stored))
+                {
+                    _preserveStoredSettings = false;
+                    return new NotchSettings();
+                }
+                if (!SettingsCodec.CanInspectStoredValue(stored))
+                {
+                    LastError = "Format atau ukuran pengaturan tidak dapat dibaca. Data tersimpan tidak akan ditimpa.";
+                    return new NotchSettings();
+                }
+                var payload = (string)stored;
+                if (SettingsCodec.TryDecode(payload, out var settings))
+                {
+                    _preserveStoredSettings = false;
+                    return settings;
+                }
                 // Preserve settings written by a newer app rather than overwriting on downgrade.
                 if (IsFutureVersion(payload))
                 {
-                    _unsupportedVersion = true;
+                    _preserveStoredSettings = true;
                     LastError = "Versi pengaturan lebih baru. Pengaturan sesi ini tidak akan menimpa data tersebut.";
                     return new NotchSettings();
                 }
                 LastError = "Pengaturan rusak; cadangan atau nilai default digunakan.";
+                _preserveStoredSettings = false;
                 return SettingsCodec.TryDecode(values.TryGetValue(RecoveryKey, out var recovery) ? recovery as string : null, out var recovered)
                     ? recovered : new NotchSettings();
 #endif
             }
+#if UNPACKAGED
+            catch (Exception exception) when (exception is FileNotFoundException or DirectoryNotFoundException)
+            {
+                _preserveStoredSettings = false;
+                return new NotchSettings();
+            }
+#endif
             catch (Exception exception) when (exception is not OutOfMemoryException)
             {
+                _preserveStoredSettings = true;
                 LastError = "Pengaturan lokal tidak dapat dibaca.";
                 return new NotchSettings();
             }
@@ -66,7 +102,7 @@ public sealed class SettingsService : ISettingsService
     {
         lock (_gate)
         {
-            if (_unsupportedVersion) return false;
+            if (_preserveStoredSettings) return false;
             try
             {
                 var payload = SettingsCodec.Encode(settings);
@@ -94,7 +130,7 @@ public sealed class SettingsService : ISettingsService
     }
 
 #if UNPACKAGED
-    private static string SettingsPath => Path.Combine(
+    private string SettingsPath => _settingsPath ?? Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NotchUI", "settings.json");
 #endif
 

@@ -44,16 +44,24 @@ public sealed partial class OverlayWindow : Window
         _leaveTimer.Tick += OnLeaveTimer;
         Activated += OnWindowActivated;
         Closed += OnClosed;
+        Pill.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler(OnOverlayKeyDown), true);
         UpdateVisuals();
     }
 
-    public void ApplyGeometry() => _host.SetGeometry(
+    public void ApplyGeometry()
+    {
+        if (_closed) return;
+        _host.SetGeometry(
         _transition is not null && Pill.ActualWidth > 0 ? Pill.ActualWidth : Pill.Width,
         _transition is not null && Pill.ActualHeight > 0 ? Pill.ActualHeight : Pill.Height,
         _coordinator.Settings.CornerRadius);
+    }
     private void OnCoordinatorChanged(object? sender, EventArgs args) => UpdateVisuals();
     private void UpdateVisuals()
     {
+        if (_closed) return;
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(HeaderButton,
+            _coordinator.IsExpanded ? "Close notch" : "Open notch");
         var settings = _coordinator.Settings;
         var color = settings.BackgroundColor;
         Pill.Background = new SolidColorBrush(Color.FromArgb(255, Convert.ToByte(color.Substring(1, 2), 16),
@@ -114,23 +122,25 @@ public sealed partial class OverlayWindow : Window
     }
     private void OnPointerEntered(object sender, PointerRoutedEventArgs args)
     {
+        if (_closed) return;
         _pointerInside = true;
         _leaveTimer.Stop();
         if (_coordinator.Settings.OpenOnHover && !_coordinator.IsExpanded) _hoverTimer.Start();
     }
     private void OnPointerExited(object sender, PointerRoutedEventArgs args)
     {
+        if (_closed) return;
         _pointerInside = false;
         _hoverTimer.Stop();
         if (_coordinator.Settings.OpenOnHover && _coordinator.IsExpanded) _leaveTimer.Start();
     }
     private void OnHoverTimer(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
     {
-        if (_pointerInside && _coordinator.Settings.OpenOnHover) SetExpanded(true);
+        if (!_closed && _pointerInside && _coordinator.Settings.OpenOnHover) SetExpanded(true);
     }
     private void OnLeaveTimer(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
     {
-        if (!_pointerInside && _coordinator.Settings.OpenOnHover && !HasKeyboardFocus()) SetExpanded(false);
+        if (!_closed && !_pointerInside && _coordinator.Settings.OpenOnHover && !HasKeyboardFocus()) SetExpanded(false);
     }
     private bool HasKeyboardFocus()
     {
@@ -145,18 +155,21 @@ public sealed partial class OverlayWindow : Window
     }
     private void OnWindowActivated(object sender, WindowActivatedEventArgs args)
     {
+        if (_closed) return;
         _windowActive = args.WindowActivationState != WindowActivationState.Deactivated;
         if (!_windowActive && !_pointerInside && _coordinator.Settings.OpenOnHover && _coordinator.IsExpanded)
             _leaveTimer.Start();
     }
     private void OnHeaderClicked(object sender, RoutedEventArgs args)
     {
+        if (_closed) return;
         _hoverTimer.Stop();
         _leaveTimer.Stop();
         SetExpanded(!_coordinator.IsExpanded);
     }
     public void OpenForKeyboard()
     {
+        if (_closed) return;
         _hoverTimer.Stop();
         _leaveTimer.Stop();
         SetExpanded(true);
@@ -165,7 +178,20 @@ public sealed partial class OverlayWindow : Window
     }
     private void SetExpanded(bool expanded)
     {
-        if (_coordinator.IsExpanded == expanded) return;
+        if (_closed || _coordinator.IsExpanded == expanded) return;
+        if (!expanded && Pill.XamlRoot is not null)
+        {
+            var focused = FocusManager.GetFocusedElement(Pill.XamlRoot) as DependencyObject;
+            while (focused is not null)
+            {
+                if (focused == ExpandedContent)
+                {
+                    if (!HeaderButton.Focus(FocusState.Keyboard)) return;
+                    break;
+                }
+                focused = VisualTreeHelper.GetParent(focused);
+            }
+        }
         // Actual size reflects the current animated layout; Width/Height may still hold base values.
         var startWidth = Pill.ActualWidth > 0 ? Pill.ActualWidth : Pill.Width;
         var startHeight = Pill.ActualHeight > 0 ? Pill.ActualHeight : Pill.Height;
@@ -210,7 +236,7 @@ public sealed partial class OverlayWindow : Window
         storyboard.Children.Add(widthAnimation);
         storyboard.Completed += (_, _) =>
         {
-            if (!ReferenceEquals(_transition, storyboard)) return;
+            if (_closed || !ReferenceEquals(_transition, storyboard)) return;
             Pill.Width = widthAnimation.To!.Value;
             Pill.Height = animation.To!.Value;
             storyboard.Stop();
@@ -222,14 +248,48 @@ public sealed partial class OverlayWindow : Window
         storyboard.Begin();
     }
     private void OnGeometryTick(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args) => ApplyGeometry();
-    private void OnSystemStateChanged(object? sender, EventArgs args) => _coordinator.RefreshSystemState();
-    private void OnDisplayChanged(object? sender, EventArgs args) => DispatcherQueue.TryEnqueue(() => { if (!_closed) UpdateVisuals(); });
-    private async void OnPreviousClicked(object sender, RoutedEventArgs args) => await _coordinator.PreviousAsync();
-    private async void OnPlayPauseClicked(object sender, RoutedEventArgs args) => await _coordinator.TogglePlayPauseAsync();
-    private async void OnNextClicked(object sender, RoutedEventArgs args) => await _coordinator.NextAsync();
+    private void OnOverlayKeyDown(object sender, KeyRoutedEventArgs args)
+    {
+        if (_closed || args.Key != Windows.System.VirtualKey.Escape || !_coordinator.IsExpanded) return;
+        _hoverTimer.Stop();
+        _leaveTimer.Stop();
+        SetExpanded(false);
+        args.Handled = true;
+    }
+    private void OnSystemStateChanged(object? sender, EventArgs args)
+    {
+        if (!_closed) _coordinator.RefreshSystemState();
+    }
+    private void OnDisplayChanged(object? sender, EventArgs args)
+    {
+        if (_closed) return;
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (_closed) return;
+            var transition = _transition;
+            _transition = null;
+            transition?.Stop();
+            _geometryTimer.Stop();
+            UpdateVisuals();
+        });
+    }
+    private async void OnPreviousClicked(object sender, RoutedEventArgs args)
+    {
+        if (!_closed) await _coordinator.PreviousAsync();
+    }
+    private async void OnPlayPauseClicked(object sender, RoutedEventArgs args)
+    {
+        if (!_closed) await _coordinator.TogglePlayPauseAsync();
+    }
+    private async void OnNextClicked(object sender, RoutedEventArgs args)
+    {
+        if (!_closed) await _coordinator.NextAsync();
+    }
     private void OnClosed(object sender, WindowEventArgs args)
     {
+        if (_closed) return;
         _closed = true;
+        Pill.RemoveHandler(UIElement.KeyDownEvent, new KeyEventHandler(OnOverlayKeyDown));
         Activated -= OnWindowActivated;
         var transition = _transition;
         _transition = null;
