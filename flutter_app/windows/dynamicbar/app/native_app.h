@@ -23,6 +23,7 @@
 #include "dynamicbar/tray/tray_channel.h"
 #include "dynamicbar/window/island_window.h"
 #include "dynamicbar/window/window_channel.h"
+#include "dynamicbar/window/settings_window.h"
 
 namespace dynamicbar {
 
@@ -43,6 +44,7 @@ class NativeApp {
 
   std::unique_ptr<IslandWindow> window_;
   std::unique_ptr<WindowChannel> window_channel_;
+  std::unique_ptr<SettingsWindow> settings_window_;
   std::unique_ptr<DisplayChannel> display_channel_;
   std::unique_ptr<ShellChannel> shell_channel_;
   std::unique_ptr<ShelfChannel> shelf_channel_;

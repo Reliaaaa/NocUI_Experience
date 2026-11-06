@@ -78,6 +78,16 @@ void main() {
       expect(harness.island.mode, IslandMode.idle);
     });
 
+    test('separate settings requests do not replace the notch face', () {
+      final requests = <String?>[];
+      harness.router.onSettingsRequested = requests.add;
+      harness.router.openSettings(section: 'features');
+      harness.router.openSettings();
+      expect(requests, <String?>['features', null]);
+      expect(harness.router.mode, IslandMode.idle);
+      expect(harness.router.isSettingsOpen, isFalse);
+    });
+
     test('a running timer becomes the ambient mode', () {
       harness.timers.addCountdown(const Duration(minutes: 5));
       expect(harness.router.mode, IslandMode.timer);

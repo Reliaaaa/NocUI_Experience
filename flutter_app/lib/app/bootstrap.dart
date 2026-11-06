@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../core/events/event_bus.dart';
@@ -35,6 +36,7 @@ import '../native/startup_bridge.dart';
 import '../native/system_bridge.dart';
 import '../native/tray_bridge.dart';
 import '../native/window_bridge.dart';
+import '../native/native_channel.dart';
 import '../settings/settings_controller.dart';
 import '../settings/settings_store.dart';
 import 'app_services.dart';
@@ -125,7 +127,12 @@ String _describe(FlutterErrorDetails details) {
   return summary;
 }
 
-Future<AppServices> _buildServices() async {
+Future<AppServices> buildSettingsServices() async {
+  NativeChannel.settingsProxy = true;
+  return _buildServices(settingsWindow: true);
+}
+
+Future<AppServices> _buildServices({bool settingsWindow = false}) async {
   final EventBus bus = EventBus();
   final ClockService clock = ClockService();
   final ThemeController theme = ThemeController();
@@ -134,7 +141,7 @@ Future<AppServices> _buildServices() async {
   final WindowBridge window = WindowBridge();
 
   // From here on, every Dart log line also lands in the native log file.
-  AppLog.sink = (LogRecord record) {
+  if (!settingsWindow) AppLog.sink = (LogRecord record) {
     window.writeLog(
       level: record.level.name,
       tag: record.tag,
@@ -156,12 +163,19 @@ Future<AppServices> _buildServices() async {
   final HotkeyBridge hotkeys = HotkeyBridge();
   final StartupBridge startup = StartupBridge();
 
-  final SettingsController settings = SettingsController(
-    store: SettingsStore(),
-    theme: theme,
-  );
+  final SettingsController settings = settingsWindow
+      ? SettingsController.remote(
+          theme: theme,
+          update: (patch) async {
+            const channel = MethodChannel('nocui/settings_window');
+            final result = await channel.invokeMapMethod<String, Object?>('update', patch);
+            if (result == null) throw StateError('Settings owner returned no state.');
+            return result;
+          },
+        )
+      : SettingsController(store: SettingsStore(), theme: theme);
 
-  await settings.load();
+  if (!settingsWindow) await settings.load();
 
   // Seed the system brightness before the first frame so the island never
   // flashes the wrong appearance on launch.
@@ -206,8 +220,10 @@ Future<AppServices> _buildServices() async {
   final ShelfController shelf = ShelfController(bridge: shelfBridge);
   // Both read a small file from disk; doing it now means the first time either
   // page is opened it already has its contents.
-  await calendar.load();
-  await shelf.load();
+  if (!settingsWindow) {
+    await calendar.load();
+    await shelf.load();
+  }
 
   final ActivityCenter activities = ActivityCenter(
     media: media,
