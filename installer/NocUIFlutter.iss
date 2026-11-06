@@ -25,6 +25,7 @@ UninstallDisplayIcon={app}\{#MyAppExeName}
 CloseApplications=yes
 
 [Files]
+Source: "..\flutter_app\assets\fonts\OFL.txt"; DestDir: "{app}\licenses"; DestName: "Inter-OFL.txt"; Flags: ignoreversion
 Source: "..\flutter_app\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
