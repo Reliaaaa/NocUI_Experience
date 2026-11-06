@@ -18,16 +18,16 @@ class DbShadow {
     final Color shadow = palette.shadow;
     return <BoxShadow>[
       BoxShadow(
-        color: shadow.withValues(alpha: (palette.isDark ? 0.46 : 0.16) * t),
-        blurRadius: 34 * t,
-        spreadRadius: -6,
-        offset: Offset(0, 14 * t),
+        color: shadow.withValues(alpha: (palette.isDark ? 0.40 : 0.14) * t),
+        blurRadius: 36 * t,
+        spreadRadius: -4,
+        offset: Offset(0, 12 * t),
       ),
       BoxShadow(
-        color: shadow.withValues(alpha: (palette.isDark ? 0.30 : 0.10) * t),
-        blurRadius: 10 * t,
-        spreadRadius: -2,
-        offset: Offset(0, 3 * t),
+        color: shadow.withValues(alpha: (palette.isDark ? 0.28 : 0.08) * t),
+        blurRadius: 12 * t,
+        spreadRadius: -1,
+        offset: Offset(0, 4 * t),
       ),
     ];
   }

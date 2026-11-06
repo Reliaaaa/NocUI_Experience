@@ -108,28 +108,28 @@ class IslandPalette {
   final Color negative;
   final Color shadow;
 
-  static const Color _darkBase = Color(0xFF0B1820);
-  static const Color _lightBase = Color(0xFFF1F8F7);
+  static const Color _darkBase = Color(0xFF000000);
+  static const Color _lightBase = Color(0xFFF2F2F7);
 
-  /// Deep slate glass. Never pure black: pure black loses the edge light
-  /// that separates the island from a dark wallpaper.
+  /// Authentic macOS notch black. True pitch black (#000000) seamless with
+  /// bezel and display cutout, with subtle edge highlight for separation.
   factory IslandPalette.dark({required Color accent, required double opacity}) {
     return IslandPalette(
       isDark: true,
       surface: _darkBase.withValues(alpha: opacity),
-      surfaceRaised: const Color(0xFF172D36).withValues(alpha: 0.96),
-      surfaceSunken: const Color(0xFF030D12).withValues(alpha: 0.48),
-      stroke: const Color(0xFFFFFFFF).withValues(alpha: 0.07),
-      strokeStrong: const Color(0xFFFFFFFF).withValues(alpha: 0.14),
-      innerHighlight: const Color(0xFFFFFFFF).withValues(alpha: 0.10),
-      separator: const Color(0xFFFFFFFF).withValues(alpha: 0.06),
-      textPrimary: const Color(0xFFF1F8F7),
-      textSecondary: const Color(0xFFB5C9CA),
-      textTertiary: const Color(0xFF9AB3B5),
+      surfaceRaised: const Color(0xFF1C1C1E).withValues(alpha: 0.94),
+      surfaceSunken: const Color(0xFF121214).withValues(alpha: 0.65),
+      stroke: const Color(0xFFFFFFFF).withValues(alpha: 0.08),
+      strokeStrong: const Color(0xFFFFFFFF).withValues(alpha: 0.16),
+      innerHighlight: const Color(0xFFFFFFFF).withValues(alpha: 0.12),
+      separator: const Color(0xFFFFFFFF).withValues(alpha: 0.08),
+      textPrimary: const Color(0xFFFFFFFF),
+      textSecondary: const Color(0xB8FFFFFF),
+      textTertiary: const Color(0x7AFFFFFF),
       accent: accent,
-      positive: const Color(0xFF35D07F),
-      warning: const Color(0xFFF3B33D),
-      negative: const Color(0xFFFF5C63),
+      positive: const Color(0xFF34C759),
+      warning: const Color(0xFFFF9F0A),
+      negative: const Color(0xFFFF453A),
       shadow: const Color(0xFF000000),
     );
   }

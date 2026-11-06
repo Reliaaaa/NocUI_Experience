@@ -25,11 +25,11 @@ class DbType {
   static const TextStyle clock = TextStyle(
     fontFamily: _display,
     fontFamilyFallback: _fallback,
-    fontSize: 13,
+    fontSize: 13.5,
     height: 1.0,
     fontWeight: FontWeight.w600,
     fontVariations: <FontVariation>[FontVariation('wght', 600)],
-    letterSpacing: 0.2,
+    letterSpacing: -0.1,
     fontFeatures: _tabular,
   );
 

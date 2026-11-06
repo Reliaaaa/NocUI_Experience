@@ -26,7 +26,7 @@ class CollapsedFace extends StatelessWidget {
     final bool use24Hour = services.settings.settings.use24HourClock;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: DbSpace.md),
+      padding: const EdgeInsets.symmetric(horizontal: DbSpace.lg),
       child: AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[
           services.clock,
@@ -49,11 +49,11 @@ class CollapsedFace extends StatelessWidget {
               else
                 _LiveDot(color: palette.accent),
               const SizedBox(width: DbSpace.md),
-              Transform.translate(
-                offset: const Offset(0, 4),
-                child: Text(
-                  ClockFormat.time(now, use24Hour: use24Hour),
-                  style: DbType.clock.copyWith(color: palette.textPrimary),
+              Text(
+                ClockFormat.time(now, use24Hour: use24Hour),
+                style: DbType.clock.copyWith(
+                  color: palette.textPrimary,
+                  letterSpacing: -0.1,
                 ),
               ),
               const SizedBox(width: DbSpace.md),
@@ -66,8 +66,10 @@ class CollapsedFace extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.clip,
                     softWrap: false,
-                    style:
-                        DbType.caption.copyWith(color: palette.textSecondary),
+                    style: DbType.caption.copyWith(
+                      color: palette.textSecondary,
+                      letterSpacing: 0.1,
+                    ),
                   ),
                 ),
             ],
@@ -201,7 +203,8 @@ class _EarRing extends CustomPainter {
       oldDelegate.value != value || oldDelegate.color != color;
 }
 
-/// The mark that says the island is running, shown when nothing else is.
+/// The mark that says the island is running, designed after the macOS camera /
+/// sensor lens aperture with an active indicator core.
 class _LiveDot extends StatelessWidget {
   const _LiveDot({required this.color});
 
@@ -210,11 +213,32 @@ class _LiveDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 5,
-      height: 5,
+      width: 7,
+      height: 7,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.85),
         shape: BoxShape.circle,
+        color: const Color(0xFF141416),
+        border: Border.all(
+          color: color.withValues(alpha: 0.55),
+          width: 1.0,
+        ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: color.withValues(alpha: 0.35),
+            blurRadius: 4,
+            spreadRadius: 0.5,
+          ),
+        ],
+      ),
+      child: Center(
+        child: Container(
+          width: 2.5,
+          height: 2.5,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
       ),
     );
   }

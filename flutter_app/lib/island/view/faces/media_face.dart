@@ -38,8 +38,8 @@ class MediaCollapsed extends StatelessWidget {
               _Artwork(
                 bytes: media.artwork,
                 artworkId: media.artworkId,
-                size: 18,
-                radius: 5,
+                size: 20,
+                radius: 6,
               ),
               const SizedBox(width: DbSpace.md),
               Expanded(
