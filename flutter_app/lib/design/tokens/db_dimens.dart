@@ -21,9 +21,9 @@ class DbRadius {
   /// The island hugs the top edge of the screen, so its top corners stay
   /// square: it should read as a shape cut into the bezel, not a floating card.
   static const double islandTop = 0;
-  static const double islandCollapsedBottom = 16;
-  static const double islandPeekBottom = 19;
-  static const double islandExpandedBottom = 30;
+  static const double islandCollapsedBottom = 17;
+  static const double islandPeekBottom = 20;
+  static const double islandExpandedBottom = 28;
 
   static const double card = 14;
   static const double control = 11;
@@ -34,14 +34,14 @@ class DbRadius {
 class DbSize {
   const DbSize._();
 
-  /// Collapsed pill. Small enough to disappear into the bezel, wide enough to
-  /// hold two status glyphs and a clock.
-  static const double collapsedWidth = 160;
-  static const double collapsedHeight = 30;
+  /// Collapsed notch pill. Proportioned to match the sleek Apple notch aesthetic
+  /// on desktop screens (~6:1 aspect ratio), with breathing room for status indicators.
+  static const double collapsedWidth = 204;
+  static const double collapsedHeight = 34;
 
   /// Hover peek: the same shape, breathing.
-  static const double peekWidth = 236;
-  static const double peekHeight = 38;
+  static const double peekWidth = 248;
+  static const double peekHeight = 40;
 
   /// Expanded panel defaults; individual modules refine these.
   static const double expandedWidth = 424;

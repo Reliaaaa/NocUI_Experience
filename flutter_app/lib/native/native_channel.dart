@@ -12,12 +12,19 @@ import 'models/native_models.dart';
 /// instead of an unhandled exception on the UI thread. The island has to
 /// survive a Windows capability being unavailable, not crash with it.
 abstract class NativeChannel {
+  /// Settings runs in a second engine: forward calls to the owning engine
+  /// rather than starting another copy of the native services.
+  static bool settingsProxy = false;
+  static const MethodChannel _settingsWindow = MethodChannel('nocui/settings_window');
+
   NativeChannel(String methodChannelName, {String? eventChannelName})
-    : _method = MethodChannel(methodChannelName),
+    : _methodName = methodChannelName,
+      _method = MethodChannel(methodChannelName),
       _event = eventChannelName == null ? null : EventChannel(eventChannelName),
       log = Logger(methodChannelName.split('/').last);
 
   final MethodChannel _method;
+  final String _methodName;
   final EventChannel? _event;
   final Logger log;
 
@@ -28,6 +35,7 @@ abstract class NativeChannel {
   /// Returns an empty stream when this channel has no event channel, so callers
   /// never need a null check.
   Stream<NativeEvent> get events {
+    if (settingsProxy) return const Stream<NativeEvent>.empty();
     final channel = _event;
     if (channel == null) {
       return const Stream<NativeEvent>.empty();
@@ -44,6 +52,13 @@ abstract class NativeChannel {
 
   Future<T?> invoke<T>(String method, [Map<String, Object?>? arguments]) async {
     try {
+      if (settingsProxy) {
+        return await _settingsWindow.invokeMethod<T>('call', <String, Object?>{
+          'channel': _methodName,
+          'method': method,
+          'arguments': arguments,
+        });
+      }
       return await _method.invokeMethod<T>(method, arguments);
     } on MissingPluginException {
       log.warn('Native method "$method" is not available on this platform.');

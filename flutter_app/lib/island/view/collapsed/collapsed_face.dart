@@ -25,54 +25,65 @@ class CollapsedFace extends StatelessWidget {
     final IslandPalette palette = IslandTheme.of(context).palette;
     final bool use24Hour = services.settings.settings.use24HourClock;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: DbSpace.md),
-      child: AnimatedBuilder(
-        animation: Listenable.merge(<Listenable>[
-          services.clock,
-          services.activities,
-        ]),
-        builder: (BuildContext context, _) {
-          final List<LiveActivity> visible = services.activities.visible;
-          final LiveActivity? leading =
-              visible.isNotEmpty ? visible.first : null;
-          final LiveActivity? trailing =
-              visible.length > 1 ? visible[1] : null;
-          final DateTime now = services.clock.now;
+    return SizedBox.expand(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DbSpace.lg),
+          child: AnimatedBuilder(
+            animation: Listenable.merge(<Listenable>[
+              services.clock,
+              services.activities,
+            ]),
+            builder: (BuildContext context, _) {
+              final List<LiveActivity> visible = services.activities.visible;
+              final LiveActivity? leading =
+                  visible.isNotEmpty ? visible.first : null;
+              final LiveActivity? trailing =
+                  visible.length > 1 ? visible[1] : null;
+              final DateTime now = services.clock.now;
 
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              if (leading != null)
-                _ActivityEar(activity: leading, alignEnd: false)
-              else
-                _LiveDot(color: palette.accent),
-              const SizedBox(width: DbSpace.md),
-              Transform.translate(
-                offset: const Offset(0, 4),
-                child: Text(
-                  ClockFormat.time(now, use24Hour: use24Hour),
-                  style: DbType.clock.copyWith(color: palette.textPrimary),
+              return Transform.translate(
+                // Optical balance: moves the baseline down so text is perfectly
+                // centered between the monitor's top edge and the pill's bottom curve.
+                offset: const Offset(0, 1.5),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    if (leading != null)
+                      _ActivityEar(activity: leading, alignEnd: false)
+                    else
+                      _LiveDot(color: palette.accent),
+                    const SizedBox(width: DbSpace.md),
+                    Text(
+                      ClockFormat.time(now, use24Hour: use24Hour),
+                      style: DbType.clock.copyWith(
+                        color: palette.textPrimary,
+                        letterSpacing: -0.1,
+                      ),
+                    ),
+                    const SizedBox(width: DbSpace.md),
+                    if (trailing != null)
+                      _ActivityEar(activity: trailing, alignEnd: true)
+                    else
+                      Flexible(
+                        child: Text(
+                          ClockFormat.shortDate(now),
+                          maxLines: 1,
+                          overflow: TextOverflow.clip,
+                          softWrap: false,
+                          style: DbType.caption.copyWith(
+                            color: palette.textSecondary,
+                            letterSpacing: 0.1,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: DbSpace.md),
-              if (trailing != null)
-                _ActivityEar(activity: trailing, alignEnd: true)
-              else
-                Flexible(
-                  child: Text(
-                    ClockFormat.shortDate(now),
-                    maxLines: 1,
-                    overflow: TextOverflow.clip,
-                    softWrap: false,
-                    style:
-                        DbType.caption.copyWith(color: palette.textSecondary),
-                  ),
-                ),
-            ],
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -201,7 +212,8 @@ class _EarRing extends CustomPainter {
       oldDelegate.value != value || oldDelegate.color != color;
 }
 
-/// The mark that says the island is running, shown when nothing else is.
+/// The mark that says the island is running, designed after the macOS camera /
+/// sensor lens aperture with an active indicator core.
 class _LiveDot extends StatelessWidget {
   const _LiveDot({required this.color});
 
@@ -210,11 +222,32 @@ class _LiveDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 5,
-      height: 5,
+      width: 7,
+      height: 7,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.85),
         shape: BoxShape.circle,
+        color: const Color(0xFF141416),
+        border: Border.all(
+          color: color.withValues(alpha: 0.55),
+          width: 1.0,
+        ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: color.withValues(alpha: 0.35),
+            blurRadius: 4,
+            spreadRadius: 0.5,
+          ),
+        ],
+      ),
+      child: Center(
+        child: Container(
+          width: 2.5,
+          height: 2.5,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
       ),
     );
   }

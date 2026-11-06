@@ -77,15 +77,12 @@ extension SettingsTabX on SettingsTab {
   }
 }
 
-/// The settings surface.
-///
-/// This is the island opened all the way, not a separate window: one engine,
-/// one process, one place the design system lives. The stage grows to make room
-/// for it and shrinks again on the way out.
+/// The settings surface, hosted in the separate settings window.
 class SettingsPanel extends StatefulWidget {
-  const SettingsPanel({required this.onClose, super.key});
+  const SettingsPanel({required this.onClose, this.initialSection, super.key});
 
   final VoidCallback onClose;
+  final String? initialSection;
 
   @override
   State<SettingsPanel> createState() => _SettingsPanelState();
@@ -119,7 +116,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
     // panel asking for a place, the home shelf asking which four apps. Honour
     // it once, on the way in, and leave the user in charge after that.
     final SettingsTab? requested = SettingsTabX.fromId(
-      AppScope.read(context).router.settingsSection,
+      widget.initialSection ?? AppScope.read(context).router.settingsSection,
     );
     if (requested != null) {
       _tab = requested;
@@ -189,6 +186,13 @@ class _SettingsPanelState extends State<SettingsPanel> {
                         ),
                       ],
                     ),
+                    if (services.settings.remoteError != null) ...<Widget>[
+                      const SizedBox(height: DbSpace.md),
+                      Text(
+                        services.settings.remoteError!,
+                        style: DbType.caption.copyWith(color: palette.negative),
+                      ),
+                    ],
                     const SizedBox(height: DbSpace.xl),
                     Expanded(
                       child: _ScrollingSection(
@@ -272,7 +276,7 @@ class _NavigationRail extends StatelessWidget {
     final IslandPalette palette = theme.palette;
 
     return SizedBox(
-      width: 186,
+      width: 216,
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: DbSpace.md,
@@ -296,12 +300,21 @@ class _NavigationRail extends StatelessWidget {
               ),
             ),
             const SizedBox(height: DbSpace.xl),
-            for (final SettingsTab tab in SettingsTab.values)
-              _RailItem(
-                tab: tab,
-                selected: tab == selected,
-                onTap: () => onSelected(tab),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    for (final SettingsTab tab in SettingsTab.values)
+                      _RailItem(
+                        tab: tab,
+                        selected: tab == selected,
+                        onTap: () => onSelected(tab),
+                      ),
+                  ],
+                ),
               ),
+            ),
           ],
         ),
       ),
@@ -326,6 +339,7 @@ class _RailItem extends StatefulWidget {
 
 class _RailItemState extends State<_RailItem> {
   bool _hovered = false;
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
@@ -335,11 +349,19 @@ class _RailItemState extends State<_RailItem> {
         ? palette.textPrimary
         : palette.textSecondary;
 
-    return Semantics(
-      selected: widget.selected,
-      button: true,
-      label: widget.tab.label,
-      child: MouseRegion(
+    return FocusableActionDetector(
+      onShowFocusHighlight: (value) => setState(() => _focused = value),
+      actions: <Type, Action<Intent>>{
+        ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
+          widget.onTap();
+          return null;
+        }),
+      },
+      child: Semantics(
+        selected: widget.selected,
+        button: true,
+        label: widget.tab.label,
+        child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
@@ -356,11 +378,14 @@ class _RailItemState extends State<_RailItem> {
             ),
             decoration: BoxDecoration(
               color: widget.selected
-                  ? palette.surfaceRaised
+                  ? palette.accent.withValues(alpha: 0.24)
                   : (_hovered
                         ? palette.textPrimary.withValues(alpha: 0.05)
                         : const Color(0x00000000)),
               borderRadius: BorderRadius.circular(DbRadius.control),
+              border: Border.all(
+                color: _focused ? palette.accent : const Color(0x00000000),
+              ),
             ),
             child: Row(
               children: <Widget>[
@@ -373,6 +398,7 @@ class _RailItemState extends State<_RailItem> {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

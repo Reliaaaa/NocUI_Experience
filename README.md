@@ -6,13 +6,13 @@
 
 Antarmuka minimalis, animasi responsif, dan widget yang dapat disesuaikan—dalam satu ruang ringkas di bagian atas layar.
 
-![Version](https://img.shields.io/badge/version-1.1.0-blue)
+![Version](https://img.shields.io/badge/version-1.1.1-blue)
 [![Windows build](https://github.com/Reliaaaa/NocUI_Experience/actions/workflows/flutter-windows.yml/badge.svg?branch=feature)](https://github.com/Reliaaaa/NocUI_Experience/actions/workflows/flutter-windows.yml)
 ![Platform](https://img.shields.io/badge/platform-Windows%20x64-0078D4)
 ![Flutter](https://img.shields.io/badge/Flutter-Windows-02569B?logo=flutter&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT%20planned-lightgrey)
 
-**Status: Full Release · Version 1.1.0**
+**Status: Full Release · Version 1.1.1**
 
 </div>
 

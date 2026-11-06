@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'dart:ui';
+import 'package:flutter/services.dart';
 
 import '../core/events/app_event.dart';
 import '../core/logging/app_logger.dart';
 import '../island/state/island_metrics.dart';
 import '../island/state/island_page.dart';
 import '../island/state/island_state.dart';
+import '../modules/notifications/island_notification.dart';
 import '../native/hotkey_bridge.dart';
 import '../native/models/native_models.dart';
 import '../native/startup_bridge.dart';
@@ -79,6 +80,9 @@ class IslandCoordinator {
   bool _suppressedForPresentation = false;
   bool _started = false;
   Timer? _startupDelay;
+  static const MethodChannel _settingsWindow = MethodChannel('nocui/settings_window');
+  bool _settingsWindowReady = false;
+  String? _settingsSection;
 
   bool get isAutoStart => launchArguments.contains('--autostart');
   StartupStatus get startupStatus => _startupStatus;
@@ -97,6 +101,9 @@ class IslandCoordinator {
     services.settings.addListener(_onSettingsChanged);
     services.system.addListener(_onSystemChanged);
     services.router.addListener(_onRouterChanged);
+    services.router.onSettingsRequested = _requestSettingsWindow;
+    services.hotkeyConflicts.addListener(_pushSettingsWindowState);
+    _settingsWindow.setMethodCallHandler(_handleSettingsWindowCall);
 
     services.activities.addListener(_onActivitiesChanged);
     // A dropped image should be visible where it landed. Anything else - a
@@ -133,6 +140,9 @@ class IslandCoordinator {
     services.settings.removeListener(_onSettingsChanged);
     services.system.removeListener(_onSystemChanged);
     services.router.removeListener(_onRouterChanged);
+    services.router.onSettingsRequested = null;
+    services.hotkeyConflicts.removeListener(_pushSettingsWindowState);
+    _settingsWindow.setMethodCallHandler(null);
     await _windowEvents?.cancel();
     await _trayEvents?.cancel();
     await _hotkeyEvents?.cancel();
@@ -643,6 +653,22 @@ class IslandCoordinator {
 
   Future<void> _quit() async {
     _log.info('Quit requested from the tray.');
+    try {
+      // Let an open settings window commit its focused field and pending
+      // updates while the owner channel is still available.
+      await _settingsWindow.invokeMethod<void>('flush').timeout(const Duration(seconds: 10));
+    } on MissingPluginException {
+      // The older in-island fallback has no second engine to flush.
+    } on Object catch (error) {
+      _log.error('Could not flush the settings window; quit cancelled.', error);
+      services.notifications.post(IslandNotification(
+        id: 'settings.quit_failed',
+        title: 'Could not save settings',
+        body: 'Close Settings and try quitting again.',
+        kind: NotificationKind.warning,
+      ));
+      return;
+    }
     await stop();
     await services.settings.flush();
     await services.window.quit();
@@ -650,18 +676,100 @@ class IslandCoordinator {
 
   // --- Reacting to our own state -------------------------------------------
 
-  /// Opens the settings panel, growing the stage before the island reaches
-  /// for the extra room. Doing it the other way round shows a clipped panel
-  /// for a frame.
+  /// Opens the separate settings window without moving the notch.
   Future<void> openSettings() async {
-    if (services.island.isPaused) {
-      services.island.setPaused(false);
-    }
-    services.island.reveal(trigger: IslandTrigger.user);
     services.router.openSettings();
-    await applyPlacement();
-    services.island.expand(trigger: IslandTrigger.user);
-    await requestFocus();
+  }
+
+  void _requestSettingsWindow(String? section) {
+    _settingsSection = section;
+    unawaited(_openSettingsWindow(section));
+  }
+
+  Future<void> _openSettingsWindow(String? section) async {
+    try {
+      await _settingsWindow.invokeMethod<void>('open', <String, Object?>{'section': section});
+    } on PlatformException catch (error) {
+      _log.error('Unable to open the settings window.', error);
+      await _openSettingsInIsland(section);
+    } on MissingPluginException catch (error) {
+      _log.error('The settings window is unavailable.', error);
+      await _openSettingsInIsland(section);
+    }
+  }
+
+  /// Preserve access to settings if the separate native window cannot start.
+  Future<void> _openSettingsInIsland(String? section) async {
+    services.router.onSettingsRequested = null;
+    try {
+      if (services.island.isPaused) services.island.setPaused(false);
+      services.island.reveal(trigger: IslandTrigger.user);
+      services.router.openSettings(section: section);
+      await applyPlacement();
+      services.island.expand(trigger: IslandTrigger.user);
+      await requestFocus();
+    } finally {
+      services.router.onSettingsRequested = _requestSettingsWindow;
+    }
+  }
+
+  void _pushSettingsWindowState() {
+    if (!_settingsWindowReady) return;
+    unawaited(_settingsWindow.invokeMethod<void>('state', <String, Object?>{
+      'settings': services.settings.settings.toJson(),
+      'hotkeyConflicts': services.hotkeyConflicts.value.toList(),
+      'section': _settingsSection,
+    }).catchError((Object error) {
+      _log.warn('Could not update the settings window.', error);
+    }));
+  }
+
+  Future<Object?> _handleSettingsWindowCall(MethodCall call) async {
+    switch (call.method) {
+      case 'ready':
+        _settingsWindowReady = true;
+        _pushSettingsWindowState();
+        return null;
+      case 'closed':
+        _settingsWindowReady = false;
+        return null;
+      case 'failed':
+        _settingsWindowReady = false;
+        _log.warn('Settings window did not become ready; using the island fallback.');
+        await _openSettingsInIsland(_settingsSection);
+        return null;
+      case 'update':
+        final Object? raw = call.arguments;
+        if (raw is! Map) throw PlatformException(code: 'invalid_settings');
+        final Map<String, Object?> current = services.settings.settings.toJson();
+        for (final entry in raw.entries) {
+          if (entry.key is! String || !current.containsKey(entry.key) || entry.key == 'schemaVersion') {
+            throw PlatformException(code: 'invalid_settings');
+          }
+          current[entry.key as String] = entry.value;
+        }
+        services.settings.update(AppSettings.fromJson(current));
+        return services.settings.settings.toJson();
+      case 'call':
+        final Object? raw = call.arguments;
+        if (raw is! Map || raw['channel'] is! String || raw['method'] is! String) {
+          throw PlatformException(code: 'invalid_call');
+        }
+        const allowed = <String, Set<String>>{
+          'dynamicbar/display': {'list'},
+          'dynamicbar/startup': {'status'},
+          'dynamicbar/downloads': {'folder'},
+          'dynamicbar/window': {'logPath', 'systemPrefersDarkMode'},
+        };
+        final String channel = raw['channel'] as String;
+        final String method = raw['method'] as String;
+        if (!(allowed[channel]?.contains(method) ?? false)) {
+          throw PlatformException(code: 'unsupported_call');
+        }
+        return MethodChannel(channel).invokeMethod<Object?>(method, raw['arguments']);
+      default:
+        throw MissingPluginException();
+    }
   }
 
   bool _stageIsPanel = false;
@@ -803,6 +911,7 @@ class IslandCoordinator {
   }
 
   void _onSettingsChanged() {
+    _pushSettingsWindowState();
     applyPages();
     _restartAutoCollapse();
     _onSystemChanged();

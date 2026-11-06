@@ -199,15 +199,38 @@ class GlassContainer extends StatelessWidget {
         background = palette.surfaceSunken;
     }
 
-    final Widget content = DecoratedBox(
-      decoration: BoxDecoration(
+    final BoxDecoration decoration;
+    if (palette.isDark && level == SurfaceLevel.raised) {
+      decoration = BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            Color.alphaBlend(const Color(0x14FFFFFF), background),
+            background,
+            Color.alphaBlend(const Color(0x05FFFFFF), background),
+          ],
+          stops: const <double>[0.0, 0.45, 1.0],
+        ),
+        border: Border.all(
+          color: borderColor ?? palette.stroke,
+          width: DbSize.hairline,
+        ),
+      );
+    } else {
+      decoration = BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
           color: borderColor ?? palette.stroke,
           width: DbSize.hairline,
         ),
-      ),
+      );
+    }
+
+    final Widget content = DecoratedBox(
+      decoration: decoration,
       child: Padding(padding: padding, child: child),
     );
 
