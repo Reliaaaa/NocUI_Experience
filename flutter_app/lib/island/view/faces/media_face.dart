@@ -27,39 +27,47 @@ class MediaCollapsed extends StatelessWidget {
     final MediaController media = AppScope.read(context).media;
     final IslandPalette palette = IslandTheme.of(context).palette;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: DbSpace.lg),
-      child: AnimatedBuilder(
-        animation: media,
-        builder: (BuildContext context, _) {
-          final MediaSession session = media.session;
-          return Row(
-            children: <Widget>[
-              _Artwork(
-                bytes: media.artwork,
-                artworkId: media.artworkId,
-                size: 20,
-                radius: 6,
-              ),
-              const SizedBox(width: DbSpace.md),
-              Expanded(
-                child: Text(
-                  session.shortLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: false,
-                  style: DbType.label.copyWith(color: palette.textPrimary),
+    return SizedBox.expand(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DbSpace.lg),
+          child: AnimatedBuilder(
+            animation: media,
+            builder: (BuildContext context, _) {
+              final MediaSession session = media.session;
+              return Transform.translate(
+                offset: const Offset(0, 1.5),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    _Artwork(
+                      bytes: media.artwork,
+                      artworkId: media.artworkId,
+                      size: 20,
+                      radius: 6,
+                    ),
+                    const SizedBox(width: DbSpace.md),
+                    Expanded(
+                      child: Text(
+                        session.shortLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                        style: DbType.label.copyWith(color: palette.textPrimary),
+                      ),
+                    ),
+                    const SizedBox(width: DbSpace.md),
+                    SoundBars(
+                      active: session.isPlaying,
+                      color: palette.accent,
+                      height: 12,
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: DbSpace.md),
-              SoundBars(
-                active: session.isPlaying,
-                color: palette.accent,
-                height: 11,
-              ),
-            ],
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }

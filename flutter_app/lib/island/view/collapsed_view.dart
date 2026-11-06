@@ -29,7 +29,7 @@ class CollapsedView extends StatelessWidget {
       duration: theme.motion.scale(DbDuration.quick),
       switchInCurve: DbCurve.standard,
       switchOutCurve: DbCurve.exit,
-      layoutBuilder: _stackFromTop,
+      layoutBuilder: _stackCentered,
       transitionBuilder: _slideFade,
       child: KeyedSubtree(
         key: ValueKey<IslandMode>(_faceKeyFor(controller.mode)),
@@ -85,11 +85,10 @@ Widget _slideFade(Widget child, Animation<double> animation) {
   );
 }
 
-/// Faces are pinned to the top of the island so a taller arriving face does not
-/// push the outgoing one around while both are on screen.
-Widget _stackFromTop(Widget? currentChild, List<Widget> previousChildren) {
+/// Collapsed faces are centered vertically inside the resting notch pill.
+Widget _stackCentered(Widget? currentChild, List<Widget> previousChildren) {
   return Stack(
-    alignment: Alignment.topCenter,
+    alignment: Alignment.center,
     children: <Widget>[...previousChildren, ?currentChild],
   );
 }

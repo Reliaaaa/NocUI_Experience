@@ -25,45 +25,53 @@ class PrivacyCollapsed extends StatelessWidget {
     final SystemController system = AppScope.read(context).system;
     final IslandPalette palette = IslandTheme.of(context).palette;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: DbSpace.lg),
-      child: AnimatedBuilder(
-        animation: system,
-        builder: (BuildContext context, _) {
-          final PrivacyStatus privacy = system.privacy;
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              _Dot(color: palette.negative),
-              const SizedBox(width: DbSpace.md),
-              if (privacy.microphoneInUse) ...<Widget>[
-                Icon(
-                  DbIcons.microphone,
-                  size: DbSize.iconSm,
-                  color: palette.textPrimary,
+    return SizedBox.expand(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DbSpace.lg),
+          child: AnimatedBuilder(
+            animation: system,
+            builder: (BuildContext context, _) {
+              final PrivacyStatus privacy = system.privacy;
+              return Transform.translate(
+                offset: const Offset(0, 1.5),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    _Dot(color: palette.negative),
+                    const SizedBox(width: DbSpace.md),
+                    if (privacy.microphoneInUse) ...<Widget>[
+                      Icon(
+                        DbIcons.microphone,
+                        size: DbSize.iconSm,
+                        color: palette.textPrimary,
+                      ),
+                      const SizedBox(width: DbSpace.sm),
+                    ],
+                    if (privacy.cameraInUse) ...<Widget>[
+                      Icon(
+                        DbIcons.camera,
+                        size: DbSize.iconSm,
+                        color: palette.textPrimary,
+                      ),
+                      const SizedBox(width: DbSpace.sm),
+                    ],
+                    Flexible(
+                      child: Text(
+                        _label(privacy),
+                        maxLines: 1,
+                        overflow: TextOverflow.clip,
+                        softWrap: false,
+                        style: DbType.label.copyWith(color: palette.textPrimary),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: DbSpace.sm),
-              ],
-              if (privacy.cameraInUse) ...<Widget>[
-                Icon(
-                  DbIcons.camera,
-                  size: DbSize.iconSm,
-                  color: palette.textPrimary,
-                ),
-                const SizedBox(width: DbSpace.sm),
-              ],
-              Flexible(
-                child: Text(
-                  _label(privacy),
-                  maxLines: 1,
-                  overflow: TextOverflow.clip,
-                  softWrap: false,
-                  style: DbType.label.copyWith(color: palette.textPrimary),
-                ),
-              ),
-            ],
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }

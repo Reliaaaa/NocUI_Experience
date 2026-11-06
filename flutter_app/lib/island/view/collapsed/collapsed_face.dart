@@ -25,56 +25,65 @@ class CollapsedFace extends StatelessWidget {
     final IslandPalette palette = IslandTheme.of(context).palette;
     final bool use24Hour = services.settings.settings.use24HourClock;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: DbSpace.lg),
-      child: AnimatedBuilder(
-        animation: Listenable.merge(<Listenable>[
-          services.clock,
-          services.activities,
-        ]),
-        builder: (BuildContext context, _) {
-          final List<LiveActivity> visible = services.activities.visible;
-          final LiveActivity? leading =
-              visible.isNotEmpty ? visible.first : null;
-          final LiveActivity? trailing =
-              visible.length > 1 ? visible[1] : null;
-          final DateTime now = services.clock.now;
+    return SizedBox.expand(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DbSpace.lg),
+          child: AnimatedBuilder(
+            animation: Listenable.merge(<Listenable>[
+              services.clock,
+              services.activities,
+            ]),
+            builder: (BuildContext context, _) {
+              final List<LiveActivity> visible = services.activities.visible;
+              final LiveActivity? leading =
+                  visible.isNotEmpty ? visible.first : null;
+              final LiveActivity? trailing =
+                  visible.length > 1 ? visible[1] : null;
+              final DateTime now = services.clock.now;
 
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              if (leading != null)
-                _ActivityEar(activity: leading, alignEnd: false)
-              else
-                _LiveDot(color: palette.accent),
-              const SizedBox(width: DbSpace.md),
-              Text(
-                ClockFormat.time(now, use24Hour: use24Hour),
-                style: DbType.clock.copyWith(
-                  color: palette.textPrimary,
-                  letterSpacing: -0.1,
-                ),
-              ),
-              const SizedBox(width: DbSpace.md),
-              if (trailing != null)
-                _ActivityEar(activity: trailing, alignEnd: true)
-              else
-                Flexible(
-                  child: Text(
-                    ClockFormat.shortDate(now),
-                    maxLines: 1,
-                    overflow: TextOverflow.clip,
-                    softWrap: false,
-                    style: DbType.caption.copyWith(
-                      color: palette.textSecondary,
-                      letterSpacing: 0.1,
+              return Transform.translate(
+                // Optical balance: moves the baseline down so text is perfectly
+                // centered between the monitor's top edge and the pill's bottom curve.
+                offset: const Offset(0, 1.5),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    if (leading != null)
+                      _ActivityEar(activity: leading, alignEnd: false)
+                    else
+                      _LiveDot(color: palette.accent),
+                    const SizedBox(width: DbSpace.md),
+                    Text(
+                      ClockFormat.time(now, use24Hour: use24Hour),
+                      style: DbType.clock.copyWith(
+                        color: palette.textPrimary,
+                        letterSpacing: -0.1,
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: DbSpace.md),
+                    if (trailing != null)
+                      _ActivityEar(activity: trailing, alignEnd: true)
+                    else
+                      Flexible(
+                        child: Text(
+                          ClockFormat.shortDate(now),
+                          maxLines: 1,
+                          overflow: TextOverflow.clip,
+                          softWrap: false,
+                          style: DbType.caption.copyWith(
+                            color: palette.textSecondary,
+                            letterSpacing: 0.1,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-            ],
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }
