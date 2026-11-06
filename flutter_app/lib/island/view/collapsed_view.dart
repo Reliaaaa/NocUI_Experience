@@ -93,6 +93,14 @@ Widget _stackCentered(Widget? currentChild, List<Widget> previousChildren) {
   );
 }
 
+/// Keeps expanded faces pinned to the top during transitions.
+Widget _stackFromTop(Widget? currentChild, List<Widget> previousChildren) {
+  return Stack(
+    alignment: Alignment.topCenter,
+    children: <Widget>[...previousChildren, ?currentChild],
+  );
+}
+
 /// Chooses the expanded face for the current mode.
 ///
 /// Everything that is not a transient message opens into the pager, so the user
