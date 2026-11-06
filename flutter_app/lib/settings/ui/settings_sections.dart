@@ -64,6 +64,8 @@ class GeneralSettings extends _Section {
               description: 'Wait for the desktop to settle before appearing.',
               control: DbSlider(
                 value: settings.startupDelaySeconds.toDouble(),
+                semanticLabel: 'Start delay',
+                unit: 's',
                 min: 0,
                 max: 60,
                 label: '${settings.startupDelaySeconds}s',
@@ -138,6 +140,8 @@ class GeneralSettings extends _Section {
                   : 'Closes after a pause, unless the pointer is on it.',
               control: DbSlider(
                 value: settings.autoCollapseSeconds.toDouble(),
+                semanticLabel: 'Close by itself',
+                unit: 's',
                 min: 0,
                 max: 30,
                 label: settings.autoCollapseSeconds == 0
@@ -171,6 +175,8 @@ class GeneralSettings extends _Section {
                     'is always quick, whatever this says.',
                 control: DbSlider(
                   value: settings.autoHideSeconds.toDouble(),
+                  semanticLabel: 'Withdraw after',
+                  unit: 's',
                   min: 1,
                   max: 20,
                   label: '${settings.autoHideSeconds}s',
@@ -206,6 +212,9 @@ class GeneralSettings extends _Section {
                   : 'How much the island animates.',
               control: DbSlider(
                 value: settings.motionIntensity,
+                semanticLabel: 'Motion',
+                displayFactor: 100,
+                unit: '%',
                 min: 0,
                 max: 1.4,
                 label: settings.motionIntensity <= 0.01
@@ -273,6 +282,9 @@ class AppearanceSettings extends _Section {
               description: 'How much of the desktop shows through.',
               control: DbSlider(
                 value: settings.surfaceOpacity,
+                semanticLabel: 'Translucency',
+                displayFactor: 100,
+                unit: '%',
                 min: 0.55,
                 max: 1.0,
                 label: '${(settings.surfaceOpacity * 100).round()}%',
@@ -285,6 +297,9 @@ class AppearanceSettings extends _Section {
               label: 'Corner radius',
               control: DbSlider(
                 value: settings.cornerScale,
+                semanticLabel: 'Corner radius',
+                displayFactor: 100,
+                unit: '%',
                 min: 0.4,
                 max: 1.6,
                 label: '${(settings.cornerScale * 100).round()}%',
@@ -296,6 +311,9 @@ class AppearanceSettings extends _Section {
               label: 'Island size',
               control: DbSlider(
                 value: settings.islandScale,
+                semanticLabel: 'Island size',
+                displayFactor: 100,
+                unit: '%',
                 min: 0.85,
                 max: 1.35,
                 label: '${(settings.islandScale * 100).round()}%',
@@ -365,6 +383,7 @@ class DisplaySettings extends _Section {
               label: 'Horizontal offset',
               control: DbSlider(
                 value: settings.offsetX,
+                semanticLabel: 'Horizontal offset',
                 min: -400,
                 max: 400,
                 label: '${settings.offsetX.round()}',
@@ -377,6 +396,7 @@ class DisplaySettings extends _Section {
               description: 'Distance from the top edge of the screen.',
               control: DbSlider(
                 value: settings.offsetY,
+                semanticLabel: 'Vertical offset',
                 min: 0,
                 max: 200,
                 label: '${settings.offsetY.round()}',

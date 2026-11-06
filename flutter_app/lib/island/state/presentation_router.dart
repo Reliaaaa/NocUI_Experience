@@ -69,6 +69,9 @@ class PresentationRouter extends ChangeNotifier {
   IslandMode get mode => _mode;
   bool get isSettingsOpen => _settingsOpen;
 
+  /// When supplied, settings requests are handled by a separate window.
+  void Function(String? section)? onSettingsRequested;
+
   /// Which part of settings to land on, when whoever opened it had somewhere
   /// specific in mind. A plain string rather than the panel's own enum: this
   /// layer decides *that* settings is showing, never how it is laid out.
@@ -77,6 +80,11 @@ class PresentationRouter extends ChangeNotifier {
   /// Settings takes the island over completely: it is the one thing here the
   /// user opened on purpose, so nothing may push it aside.
   void openSettings({String? section}) {
+    final handler = onSettingsRequested;
+    if (handler != null) {
+      handler(section);
+      return;
+    }
     _settingsSection = section;
     if (_settingsOpen) {
       // Already showing, and the panel reads the section on the way in, so

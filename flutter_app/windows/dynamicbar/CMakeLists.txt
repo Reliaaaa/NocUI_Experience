@@ -18,6 +18,7 @@ add_library(${DYNAMICBAR_NATIVE} STATIC
   "window/window_effects.cpp"
   "window/island_window.cpp"
   "window/window_channel.cpp"
+  "window/settings_window.cpp"
   "display/display_channel.cpp"
   "shell/shell_channel.cpp"
   "shelf/shelf_channel.cpp"

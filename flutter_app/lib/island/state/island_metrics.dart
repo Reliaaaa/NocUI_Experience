@@ -48,7 +48,10 @@ class IslandMetrics {
 
   /// How much the island grows under the cursor. Enough to acknowledge the
   /// pointer, not enough to be mistaken for opening.
-  static const Size _peekGrowth = Size(28, 6);
+  static const Size _peekGrowth = Size(
+    DbSize.peekWidth - DbSize.collapsedWidth,
+    DbSize.peekHeight - DbSize.collapsedHeight,
+  );
 
   /// The settings surface. Far larger than any island face, which is why it
   /// gets a stage of its own rather than stretching the island's.
@@ -74,9 +77,9 @@ class IslandMetrics {
     final int extra = activities.clamp(0, 2);
     switch (mode) {
       case IslandMode.notification:
-        return const Size(300, 40);
+        return const Size(320, 42);
       case IslandMode.privacy:
-        return const Size(168, 32);
+        return Size(180, DbSize.collapsedHeight);
       case IslandMode.idle:
       case IslandMode.media:
       case IslandMode.download:

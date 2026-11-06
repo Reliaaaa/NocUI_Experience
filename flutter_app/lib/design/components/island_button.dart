@@ -153,7 +153,9 @@ class _IslandButtonState extends State<IslandButton>
           color: background,
           borderRadius: BorderRadius.circular(DbRadius.control),
           border: Border.all(
-            color: _focused ? accent : palette.stroke,
+            color: _focused
+                ? accent
+                : (_hovered ? palette.strokeStrong : palette.stroke),
             width: _focused ? 1.4 : DbSize.hairline,
           ),
         ),

@@ -2,22 +2,19 @@ import 'package:flutter/widgets.dart';
 
 /// Typography.
 ///
-/// Windows 11 ships Segoe UI Variable; using it (rather than bundling a font)
-/// keeps the binary small and makes the island look native next to the rest of
-/// the shell. The Display optical size is used for the large numerals, Text for
-/// running copy, with graceful fallbacks for older systems.
+/// Inter is bundled so the notch and settings use the same typeface on every
+/// installation. Windows fonts remain as fallbacks for missing glyphs.
 class DbType {
   const DbType._();
 
   static const List<String> _fallback = <String>[
     'Segoe UI Variable Text',
     'Segoe UI',
-    'Inter',
     'Roboto',
   ];
 
-  static const String _display = 'Segoe UI Variable Display';
-  static const String _text = 'Segoe UI Variable Text';
+  static const String _display = 'Inter';
+  static const String _text = 'Inter';
 
   /// Digits that do not jitter as they change. Essential for clocks, timers,
   /// transfer rates and progress readouts.
@@ -28,10 +25,11 @@ class DbType {
   static const TextStyle clock = TextStyle(
     fontFamily: _display,
     fontFamilyFallback: _fallback,
-    fontSize: 13,
+    fontSize: 13.5,
     height: 1.0,
     fontWeight: FontWeight.w600,
-    letterSpacing: 0.2,
+    fontVariations: <FontVariation>[FontVariation('wght', 600)],
+    letterSpacing: -0.1,
     fontFeatures: _tabular,
   );
 
@@ -41,6 +39,7 @@ class DbType {
     fontSize: 22,
     height: 1.15,
     fontWeight: FontWeight.w600,
+    fontVariations: <FontVariation>[FontVariation('wght', 600)],
     letterSpacing: -0.4,
   );
 
@@ -50,6 +49,7 @@ class DbType {
     fontSize: 14.5,
     height: 1.25,
     fontWeight: FontWeight.w600,
+    fontVariations: <FontVariation>[FontVariation('wght', 600)],
     letterSpacing: -0.1,
   );
 
@@ -59,6 +59,7 @@ class DbType {
     fontSize: 12.5,
     height: 1.35,
     fontWeight: FontWeight.w500,
+    fontVariations: <FontVariation>[FontVariation('wght', 500)],
   );
 
   static const TextStyle label = TextStyle(
@@ -67,6 +68,7 @@ class DbType {
     fontSize: 11.5,
     height: 1.2,
     fontWeight: FontWeight.w600,
+    fontVariations: <FontVariation>[FontVariation('wght', 600)],
     letterSpacing: 0.1,
   );
 
@@ -76,6 +78,7 @@ class DbType {
     fontSize: 10.5,
     height: 1.2,
     fontWeight: FontWeight.w500,
+    fontVariations: <FontVariation>[FontVariation('wght', 500)],
     letterSpacing: 0.2,
   );
 
@@ -86,6 +89,7 @@ class DbType {
     fontSize: 10,
     height: 1.2,
     fontWeight: FontWeight.w700,
+    fontVariations: <FontVariation>[FontVariation('wght', 700)],
     letterSpacing: 0.9,
   );
 
@@ -100,6 +104,7 @@ class DbType {
     fontSize: 42,
     height: 1.0,
     fontWeight: FontWeight.w300,
+    fontVariations: <FontVariation>[FontVariation('wght', 300)],
     letterSpacing: -1.6,
     fontFeatures: _tabular,
   );
@@ -112,6 +117,7 @@ class DbType {
     fontSize: 11,
     height: 1.2,
     fontWeight: FontWeight.w600,
+    fontVariations: <FontVariation>[FontVariation('wght', 600)],
     letterSpacing: 1.4,
   );
 
@@ -124,6 +130,7 @@ class DbType {
     fontSize: 8.5,
     height: 1.1,
     fontWeight: FontWeight.w500,
+    fontVariations: <FontVariation>[FontVariation('wght', 500)],
     letterSpacing: 0.5,
   );
 
@@ -133,6 +140,7 @@ class DbType {
     fontSize: 12,
     height: 1.1,
     fontWeight: FontWeight.w600,
+    fontVariations: <FontVariation>[FontVariation('wght', 600)],
     fontFeatures: _tabular,
   );
 }

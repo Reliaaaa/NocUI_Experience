@@ -40,6 +40,7 @@ int NativeApp::Run(const flutter::DartProject& project, int icon_resource_id) {
   }
 
   window_channel_ = std::make_unique<WindowChannel>(messenger, window_.get());
+  settings_window_ = std::make_unique<SettingsWindow>(messenger, icon_resource_id);
   display_channel_ = std::make_unique<DisplayChannel>(messenger);
   shell_channel_ = std::make_unique<ShellChannel>(messenger);
   shelf_channel_ = std::make_unique<ShelfChannel>(messenger);
@@ -72,6 +73,7 @@ int NativeApp::Run(const flutter::DartProject& project, int icon_resource_id) {
 
 void NativeApp::Shutdown() {
   // Channels first: they hold raw pointers into the engine and the window.
+  settings_window_.reset();
   startup_service_.reset();
   hotkey_service_.reset();
   power_channel_.reset();

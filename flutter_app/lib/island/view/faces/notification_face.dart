@@ -87,56 +87,64 @@ class NotificationCollapsed extends StatelessWidget {
     final AppServices services = AppScope.read(context);
     final IslandPalette palette = IslandTheme.of(context).palette;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: DbSpace.md),
-      child: AnimatedBuilder(
-        animation: services.notifications,
-        builder: (BuildContext context, _) {
-          final IslandNotification? notification =
-              services.notifications.current;
-          if (notification == null) {
-            return const SizedBox.shrink();
-          }
-          return Row(
-            children: <Widget>[
-              NotificationGlyph(
-                kind: notification.kind,
-                accent: notification.accent,
-                size: 20,
-              ),
-              const SizedBox(width: DbSpace.md),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return SizedBox.expand(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DbSpace.md),
+          child: AnimatedBuilder(
+            animation: services.notifications,
+            builder: (BuildContext context, _) {
+              final IslandNotification? notification =
+                  services.notifications.current;
+              if (notification == null) {
+                return const SizedBox.shrink();
+              }
+              return Transform.translate(
+                offset: const Offset(0, 1.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    Text(
-                      notification.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                      style: DbType.label.copyWith(color: palette.textPrimary),
+                    NotificationGlyph(
+                      kind: notification.kind,
+                      accent: notification.accent,
+                      size: 20,
                     ),
-                    if (notification.body.isNotEmpty)
-                      Text(
-                        notification.body,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: false,
-                        style: DbType.caption.copyWith(
-                          color: palette.textSecondary,
-                        ),
+                    const SizedBox(width: DbSpace.md),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            notification.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: false,
+                            style: DbType.label.copyWith(color: palette.textPrimary),
+                          ),
+                          if (notification.body.isNotEmpty)
+                            Text(
+                              notification.body,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              softWrap: false,
+                              style: DbType.caption.copyWith(
+                                color: palette.textSecondary,
+                              ),
+                            ),
+                        ],
                       ),
+                    ),
+                    if (services.notifications.pendingCount > 0) ...<Widget>[
+                      const SizedBox(width: DbSpace.sm),
+                      _PendingBadge(count: services.notifications.pendingCount),
+                    ],
                   ],
                 ),
-              ),
-              if (services.notifications.pendingCount > 0) ...<Widget>[
-                const SizedBox(width: DbSpace.sm),
-                _PendingBadge(count: services.notifications.pendingCount),
-              ],
-            ],
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }

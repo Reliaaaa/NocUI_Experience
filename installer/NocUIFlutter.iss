@@ -1,5 +1,5 @@
 #define MyAppName "NocUI Experience (Flutter)"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.1.1"
 #define MyAppExeName "NocUIExperience.exe"
 
 ; Reuse the Flutter preview identity so an existing Flutter installation is
@@ -20,10 +20,12 @@ OutputBaseFilename=NocUI-Experience-Setup-x64
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
+SetupIconFile=..\flutter_app\windows\runner\resources\app_icon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 CloseApplications=yes
 
 [Files]
+Source: "..\flutter_app\assets\fonts\OFL.txt"; DestDir: "{app}\licenses"; DestName: "Inter-OFL.txt"; Flags: ignoreversion
 Source: "..\flutter_app\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
