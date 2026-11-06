@@ -1,5 +1,5 @@
 #define MyAppName "NocUI Experience (Flutter)"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.1.1"
 #define MyAppExeName "NocUIExperience.exe"
 
 ; Reuse the Flutter preview identity so an existing Flutter installation is
