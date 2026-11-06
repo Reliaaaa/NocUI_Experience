@@ -141,15 +141,17 @@ Future<AppServices> _buildServices({bool settingsWindow = false}) async {
   final WindowBridge window = WindowBridge();
 
   // From here on, every Dart log line also lands in the native log file.
-  if (!settingsWindow) AppLog.sink = (LogRecord record) {
-    window.writeLog(
-      level: record.level.name,
-      tag: record.tag,
-      message: record.error == null
-          ? record.message
-          : '${record.message} | ${record.error}',
-    );
-  };
+  if (!settingsWindow) {
+    AppLog.sink = (LogRecord record) {
+      window.writeLog(
+        level: record.level.name,
+        tag: record.tag,
+        message: record.error == null
+            ? record.message
+            : '${record.message} | ${record.error}',
+      );
+    };
+  }
   final DisplayBridge displays = DisplayBridge();
   final TrayBridge tray = TrayBridge();
   final MediaBridge mediaBridge = MediaBridge();
