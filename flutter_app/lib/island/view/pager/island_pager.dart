@@ -11,7 +11,9 @@ import '../../../design/tokens/db_typography.dart';
 import '../../state/island_controller.dart';
 import '../../state/island_page.dart';
 import '../pages/calendar_page.dart';
+import '../pages/clipboard_page.dart';
 import '../pages/media_page.dart';
+import '../pages/notes_page.dart';
 import '../pages/now_page.dart';
 import '../pages/shelf_page.dart';
 import '../pages/shortcuts_page.dart';
@@ -127,11 +129,10 @@ class _IslandPagerState extends State<IslandPager> {
         return const ShortcutsPage();
       case IslandPage.shelf:
         return const ShelfPage();
-      // Pages that arrive in later phases are not yet offered by the
-      // coordinator, so they are unreachable rather than empty.
       case IslandPage.notes:
+        return const NotesPage();
       case IslandPage.clipboard:
-        return NowPage(controller: widget.controller);
+        return const ClipboardPage();
     }
   }
 

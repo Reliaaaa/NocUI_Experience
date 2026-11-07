@@ -83,26 +83,35 @@ class SettingsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final IslandPalette palette = IslandTheme.of(context).palette;
-    final Widget labelContent = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Text(
-          label,
-          style: DbType.body.copyWith(
-            color: palette.textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        if (description != null) ...<Widget>[
-          const SizedBox(height: 2),
+    final bool isSwitch = control is DbSwitch;
+    final Widget labelContent = ExcludeSemantics(
+      excluding: isSwitch,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
           Text(
-            description!,
-            style: DbType.caption.copyWith(color: palette.textSecondary),
+            label,
+            style: DbType.body.copyWith(
+              color: palette.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
+          if (description != null) ...<Widget>[
+            const SizedBox(height: 2),
+            Text(
+              description!,
+              style: DbType.caption.copyWith(color: palette.textSecondary),
+            ),
+          ],
         ],
-      ],
+      ),
     );
+    // Attach the visible row label to the switch's own semantics node. The
+    // visual label is excluded above so assistive technology announces it once.
+    final Widget labelledControl = isSwitch
+        ? Semantics(label: label, hint: description, child: control)
+        : control;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: DbSpace.lg,
@@ -119,7 +128,7 @@ class SettingsRow extends StatelessWidget {
                 const SizedBox(height: DbSpace.md),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: control,
+                  child: labelledControl,
                 ),
               ],
             );
@@ -129,7 +138,7 @@ class SettingsRow extends StatelessWidget {
             children: <Widget>[
               Expanded(child: labelContent),
               const SizedBox(width: DbSpace.lg),
-              control,
+              labelledControl,
             ],
           );
         },
@@ -139,50 +148,72 @@ class SettingsRow extends StatelessWidget {
 }
 
 /// A switch, sized and weighted for a dense settings surface.
-class DbSwitch extends StatelessWidget {
+class DbSwitch extends StatefulWidget {
   const DbSwitch({required this.value, required this.onChanged, super.key});
 
   final bool value;
   final ValueChanged<bool>? onChanged;
 
   @override
+  State<DbSwitch> createState() => _DbSwitchState();
+}
+
+class _DbSwitchState extends State<DbSwitch> {
+  bool _focused = false;
+
+  @override
   Widget build(BuildContext context) {
     final IslandThemeData theme = IslandTheme.of(context);
     final IslandPalette palette = theme.palette;
-    final bool enabled = onChanged != null;
+    final bool enabled = widget.onChanged != null;
+    void toggle() => widget.onChanged?.call(!widget.value);
 
     return Semantics(
-      toggled: value,
+      toggled: widget.value,
       enabled: enabled,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: enabled ? () => onChanged!(!value) : null,
-        child: MouseRegion(
-          cursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
-          child: AnimatedContainer(
-            duration: theme.motion.scale(DbDuration.micro),
-            curve: DbCurve.standard,
-            width: 38,
-            height: 22,
-            padding: const EdgeInsets.all(3),
-            alignment: value ? Alignment.centerRight : Alignment.centerLeft,
-            decoration: BoxDecoration(
-              color: value
-                  ? palette.accent.withValues(alpha: enabled ? 0.9 : 0.4)
-                  : palette.surfaceSunken,
-              borderRadius: BorderRadius.circular(DbRadius.pill),
-              border: Border.all(
-                color: value ? const Color(0x00000000) : palette.stroke,
-              ),
-            ),
-            child: Container(
-              width: 16,
-              height: 16,
+      onTap: enabled ? toggle : null,
+      child: FocusableActionDetector(
+        enabled: enabled,
+        onShowFocusHighlight: (bool focused) => setState(() => _focused = focused),
+        actions: <Type, Action<Intent>>{
+          ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
+            toggle();
+            return null;
+          }),
+        },
+        child: GestureDetector(
+          excludeFromSemantics: true,
+          behavior: HitTestBehavior.opaque,
+          onTap: enabled ? toggle : null,
+          child: MouseRegion(
+            cursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+            child: AnimatedContainer(
+              duration: theme.motion.scale(DbDuration.micro),
+              curve: DbCurve.standard,
+              width: 38,
+              height: 22,
+              padding: const EdgeInsets.all(3),
+              alignment: widget.value ? Alignment.centerRight : Alignment.centerLeft,
               decoration: BoxDecoration(
-                color: value
-                    ? const Color(0xFFFFFFFF)
-                    : palette.textSecondary,
-                shape: BoxShape.circle,
+                color: widget.value
+                    ? palette.accent.withValues(alpha: enabled ? 0.9 : 0.4)
+                    : palette.surfaceSunken,
+                borderRadius: BorderRadius.circular(DbRadius.pill),
+                border: Border.all(
+                  color: _focused
+                      ? palette.textPrimary
+                      : (widget.value ? const Color(0x00000000) : palette.stroke),
+                ),
+              ),
+              child: Container(
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: widget.value
+                      ? const Color(0xFFFFFFFF)
+                      : palette.textSecondary,
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
           ),

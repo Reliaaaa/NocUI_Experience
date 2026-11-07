@@ -323,6 +323,76 @@ class AppearanceSettings extends _Section {
             ),
           ],
         ),
+        _AppearancePreview(settings: settings),
+      ],
+    );
+  }
+}
+
+/// A small illustration rather than a second live overlay window. It reflects
+/// the selected appearance without starting another island or native service.
+class _AppearancePreview extends StatelessWidget {
+  const _AppearancePreview({required this.settings});
+
+  final AppSettings settings;
+
+  @override
+  Widget build(BuildContext context) {
+    final IslandPalette palette = IslandTheme.of(context).palette;
+    return SettingsSection(
+      title: 'Notch preview',
+      description: 'A simplified preview of the selected appearance.',
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.all(DbSpace.lg),
+          child: Container(
+            height: 120,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(DbRadius.card),
+              border: Border.all(color: palette.strokeStrong),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[
+                  palette.accent.withValues(alpha: 0.16),
+                  palette.surfaceRaised,
+                  palette.accent.withValues(alpha: 0.28),
+                ],
+              ),
+            ),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                width: 180 * settings.islandScale,
+                height: 38 * settings.islandScale,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: palette.surface.withValues(alpha: settings.surfaceOpacity),
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(16 * settings.cornerScale),
+                  ),
+                  border: Border.all(color: palette.strokeStrong),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: palette.accent,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: DbSpace.sm),
+                    Text('12:34', style: DbType.label.copyWith(color: palette.textPrimary)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -438,6 +508,8 @@ class FeatureSettings extends _Section {
     IslandPage.media,
     IslandPage.shelf,
     IslandPage.system,
+    IslandPage.notes,
+    IslandPage.clipboard,
   ];
 
   void _setPage(IslandPage page, bool enabled) {

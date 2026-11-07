@@ -7,7 +7,7 @@ class AppInfo {
   const AppInfo._();
 
   static const String name = 'NocUI Experience';
-  static const String version = '1.1.0';
+  static const String version = '1.1.1';
 
   static const String tagline = 'A Dynamic Island for Windows 11.';
 

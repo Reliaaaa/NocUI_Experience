@@ -76,87 +76,126 @@ class _SystemPageState extends State<SystemPage> {
 
         return PageScaffold(
           title: 'System',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Reveal(
-                order: 1,
-                child: _Graph(
-                  label: 'Processor',
-                  readout: performance.cpuValid
-                      ? '${performance.cpuPercent.round()}%'
-                      : 'measuring…',
-                  color: palette.accent,
-                  values: system.cpuHistory,
-                  height: 46,
-                ),
-              ),
-              const SizedBox(height: DbSpace.md),
-              Reveal(
-                order: 2,
-                child: _Graph(
-                  label: 'Memory',
-                  readout: performance.hasMemory
-                      ? '${performance.memoryPercent.round()}% · '
-                            '${Formatters.bytes(performance.memoryUsedBytes)}'
-                            ' of ${Formatters.bytes(performance.memoryTotalBytes)}'
-                      : 'measuring…',
-                  color: palette.positive,
-                  values: system.memoryHistory,
-                  height: 36,
-                ),
-              ),
-              const SizedBox(height: DbSpace.md),
-              Reveal(
-                order: 3,
-                child: _Throughput(
-                  down: system.downHistory,
-                  up: system.upHistory,
-                  peak: peak,
-                  valid: performance.networkValid,
-                  downNow: performance.networkDownBytes,
-                  upNow: performance.networkUpBytes,
-                ),
-              ),
-              const Spacer(),
-              Reveal(
-                order: 4,
-                child: Row(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                // Keep power visible alongside the live graphs, as in the
+                // compact design, without dropping network or privacy data.
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    if (power.hasBattery)
-                      _Fact(
-                        icon: DbIcons.battery,
-                        label: power.charging
-                            ? '${power.percent}% · Charging'
-                            : (power.minutesRemaining > 0
-                                  ? '${power.minutesRemaining ~/ 60}h '
-                                        '${power.minutesRemaining % 60}m left'
-                                  : '${power.percent}%'),
-                        tone: power.isCritical
-                            ? palette.negative
-                            : (power.isLow ? palette.warning : null),
+                    if (power.hasBattery) ...<Widget>[
+                      SizedBox(
+                        width: 100,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Icon(
+                              DbIcons.battery,
+                              size: 26,
+                              color: power.isCritical
+                                  ? palette.negative
+                                  : (power.isLow ? palette.warning : palette.accent),
+                            ),
+                            const SizedBox(height: DbSpace.xs),
+                            Text(
+                              power.percent < 0 ? '—' : '${power.percent}%',
+                              style: DbType.title.copyWith(color: palette.textPrimary),
+                            ),
+                            Text(
+                              power.charging
+                                  ? 'Charging'
+                                  : (power.onAcPower ? 'Plugged in' : 'On battery'),
+                              style: DbType.caption.copyWith(color: palette.textSecondary),
+                            ),
+                          ],
+                        ),
                       ),
-                    _Fact(
-                      icon: network.isWifi ? DbIcons.wifi : DbIcons.network,
-                      label: network.connected
-                          ? (network.isWifi && network.ssid.isNotEmpty
-                                ? network.ssid
-                                : 'Connected')
-                          : 'Offline',
-                      tone: network.connected ? null : palette.textTertiary,
+                      Container(width: 1, height: 104, color: palette.separator),
+                      const SizedBox(width: DbSpace.md),
+                    ],
+                    Expanded(
+                      child: Column(
+                        children: <Widget>[
+                          Reveal(
+                            order: 1,
+                            child: _Graph(
+                              label: 'Processor',
+                              readout: performance.cpuValid
+                                  ? '${performance.cpuPercent.round()}%'
+                                  : 'measuring…',
+                              color: palette.accent,
+                              values: system.cpuHistory,
+                              height: 26,
+                            ),
+                          ),
+                          const SizedBox(height: DbSpace.md),
+                          Reveal(
+                            order: 2,
+                            child: _Graph(
+                              label: 'Memory',
+                              readout: performance.hasMemory
+                                  ? '${performance.memoryPercent.round()}% · '
+                                      '${Formatters.bytes(performance.memoryUsedBytes)}'
+                                      ' of ${Formatters.bytes(performance.memoryTotalBytes)}'
+                                  : 'measuring…',
+                              color: palette.positive,
+                              values: system.memoryHistory,
+                              height: 22,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    if (privacy.anyInUse)
-                      _Fact(
-                        icon: privacy.cameraInUse
-                            ? DbIcons.camera
-                            : DbIcons.microphone,
-                        label: 'In use',
-                        tone: palette.negative,
-                      ),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: DbSpace.md),
+                Reveal(
+                  order: 3,
+                  child: _Throughput(
+                    down: system.downHistory,
+                    up: system.upHistory,
+                    peak: peak,
+                    valid: performance.networkValid,
+                    downNow: performance.networkDownBytes,
+                    upNow: performance.networkUpBytes,
+                  ),
+                ),
+                const SizedBox(height: DbSpace.md),
+                Reveal(
+                  order: 4,
+                  child: Wrap(
+                    runSpacing: DbSpace.xs,
+                    children: <Widget>[
+                      if (power.hasBattery && !power.charging && power.minutesRemaining > 0)
+                        _Fact(
+                          icon: DbIcons.battery,
+                          label: '${power.minutesRemaining ~/ 60}h ${power.minutesRemaining % 60}m left',
+                          tone: power.isCritical
+                              ? palette.negative
+                              : (power.isLow ? palette.warning : null),
+                        ),
+                      _Fact(
+                        icon: network.isWifi ? DbIcons.wifi : DbIcons.network,
+                        label: network.connected
+                            ? (network.isWifi && network.ssid.isNotEmpty
+                                ? network.ssid : 'Connected')
+                            : 'Offline',
+                        tone: network.connected ? null : palette.textTertiary,
+                      ),
+                      if (privacy.anyInUse)
+                        _Fact(
+                          icon: privacy.cameraInUse ? DbIcons.camera : DbIcons.microphone,
+                          label: 'In use',
+                          tone: palette.negative,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -195,9 +234,14 @@ class _Graph extends StatelessWidget {
                 style: DbType.body.copyWith(color: palette.textSecondary),
               ),
             ),
-            Text(
-              readout,
-              style: DbType.numeric.copyWith(color: palette.textPrimary),
+            Flexible(
+              child: Text(
+                readout,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+                style: DbType.numeric.copyWith(color: palette.textPrimary),
+              ),
             ),
           ],
         ),
