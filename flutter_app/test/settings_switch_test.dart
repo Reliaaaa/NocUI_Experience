@@ -12,7 +12,7 @@ void main() {
     bool value = false;
     await tester.pumpWidget(WidgetsApp(
       color: const Color(0xff000000),
-      home: IslandTheme(
+      builder: (context, _) => IslandTheme(
         data: IslandThemeData(
           palette: IslandPalette.dark(accent: AccentPreset.teal.color, opacity: 1),
           motion: MotionProfile.reduced,
