@@ -12,7 +12,7 @@ namespace NotchUI;
 
 public sealed partial class OverlayWindow : Window
 {
-    private const double ExpandedHeight = 218;
+    private const double ExpandedHeight = 288;
     private readonly NotchCoordinator _coordinator;
     private readonly OverlayWindowHost _host;
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _geometryTimer;
@@ -82,6 +82,20 @@ public sealed partial class OverlayWindow : Window
         var luminance = 0.2126 * Linear(red) + 0.7152 * Linear(green) + 0.0722 * Linear(blue);
         var foreground = new SolidColorBrush(luminance >= 0.179
             ? Color.FromArgb(255, 0, 0, 0) : Color.FromArgb(255, 255, 255, 255));
+        // Match Flutter IslandPalette's raised surfaces while respecting custom notch colors.
+        // Native control themes follow the surface brightness, including focus/disabled states.
+        var isLight = luminance >= 0.179;
+        Pill.RequestedTheme = isLight ? ElementTheme.Light : ElementTheme.Dark;
+        var raised = new SolidColorBrush(isLight
+            ? Color.FromArgb(255, 255, 255, 255) : Color.FromArgb(255, 28, 28, 30));
+        MediaCard.Background = raised;
+        FocusCard.Background = raised;
+        MediaLabel.Foreground = foreground;
+        MediaLabel.Opacity = 0.72;
+        // Keep labels on the configurable outer surface opaque for contrast.
+        DateText.Opacity = 1;
+        BatteryText.Opacity = 1;
+        MediaArtistText.Opacity = 0.72;
         SummaryText.Foreground = foreground;
         ClockText.Foreground = foreground;
         CompactBatteryText.Foreground = foreground;
@@ -100,13 +114,16 @@ public sealed partial class OverlayWindow : Window
         DateText.Text = _coordinator.Clock.DateText;
         BatteryText.Visibility = settings.BatteryEnabled ? Visibility.Visible : Visibility.Collapsed;
         CompactBatteryText.Text = settings.BatteryEnabled && _coordinator.Battery.Availability == BatteryAvailability.Available
-            ? $"{_coordinator.Battery.Percentage}%{(_coordinator.Battery.IsCharging ? " ⚡" : "")}" : "";
+            ? $"{_coordinator.Battery.Percentage}%" : "";
         BatteryText.Text = _coordinator.Battery.Availability switch
         {
             BatteryAvailability.Available => $"Battery: {_coordinator.Battery.Percentage}%{(_coordinator.Battery.IsCharging ? " · Charging" : "")}",
             BatteryAvailability.Unavailable => "No battery detected",
             _ => "Battery status unavailable"
         };
+        ToolTipService.SetToolTip(CompactBatteryText, settings.BatteryEnabled ? BatteryText.Text : null);
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(CompactBatteryText, settings.BatteryEnabled ? BatteryText.Text : "");
+        MediaCard.Visibility = settings.MediaEnabled ? Visibility.Visible : Visibility.Collapsed;
         MediaText.Visibility = settings.MediaEnabled ? Visibility.Visible : Visibility.Collapsed;
         MediaControls.Visibility = settings.MediaEnabled ? Visibility.Visible : Visibility.Collapsed;
         MediaText.Text = _coordinator.Media.Error ?? (_coordinator.Media.Availability switch
@@ -116,12 +133,15 @@ public sealed partial class OverlayWindow : Window
             MediaAvailability.Error => "Media unavailable. Disable and re-enable the module to retry.",
             _ => "No active media session"
         });
+        ToolTipService.SetToolTip(MediaText, MediaText.Text);
         MediaArtistText.Text = _coordinator.Media.Artist;
+        ToolTipService.SetToolTip(MediaArtistText, MediaArtistText.Text);
         MediaArtistText.Visibility = settings.MediaEnabled && _coordinator.Media.Availability == MediaAvailability.Active
             && !string.IsNullOrWhiteSpace(_coordinator.Media.Artist) ? Visibility.Visible : Visibility.Collapsed;
         PreviousButton.IsEnabled = _coordinator.IsExpanded && _coordinator.Media.CanPrevious && !_coordinator.Media.IsBusy;
         PlayPauseIcon.Glyph = _coordinator.Media.IsPlaying ? "\uE769" : "\uE768";
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(PlayPauseButton, _coordinator.Media.IsPlaying ? "Pause" : "Play");
+        ToolTipService.SetToolTip(PlayPauseButton, _coordinator.Media.IsPlaying ? "Pause" : "Play");
         PlayPauseButton.IsEnabled = _coordinator.IsExpanded && _coordinator.Media.CanTogglePlayPause && !_coordinator.Media.IsBusy;
         NextButton.IsEnabled = _coordinator.IsExpanded && _coordinator.Media.CanNext && !_coordinator.Media.IsBusy;
         if (_transition is null && !_changingState)
