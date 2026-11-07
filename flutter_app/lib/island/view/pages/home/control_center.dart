@@ -111,13 +111,26 @@ class _ControlCenterState extends State<ControlCenter> {
               const SizedBox(height: DbSpace.sm),
               Row(children: [
                 Icon(volume.muted ? DbIcons.muted : DbIcons.volume, color: palette.textSecondary, size: 18),
-                Expanded(child: Material(color: const Color(0x00000000), child: SliderTheme(
-                  data: SliderThemeData(activeTrackColor: palette.accent, inactiveTrackColor: palette.surfaceRaised,
-                    thumbColor: palette.accent, trackHeight: 5),
-                  child: Slider(value: volume.level.clamp(0.0, 1.0).toDouble(),
-                    semanticFormatterCallback: (value) => '${(value * 100).round()} percent',
-                    onChanged: volume.available ? (value) => unawaited(services.system.setVolume(value)) : null),
-                ))),
+                Expanded(child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 180),
+                    child: Material(color: const Color(0x00000000), child: SliderTheme(
+                      data: SliderThemeData(
+                        activeTrackColor: palette.accent,
+                        inactiveTrackColor: palette.surfaceRaised,
+                        disabledActiveTrackColor: palette.textTertiary,
+                        disabledInactiveTrackColor: palette.surfaceRaised,
+                        thumbColor: palette.accent,
+                        disabledThumbColor: palette.textTertiary,
+                        trackHeight: 5,
+                      ),
+                      child: Slider(value: volume.level.clamp(0.0, 1.0).toDouble(),
+                        semanticFormatterCallback: (value) => 'Volume ${(value * 100).round()} percent',
+                        onChanged: volume.available ? (value) => unawaited(services.system.setVolume(value)) : null),
+                    )),
+                  ),
+                )),
                 Text(volume.available ? '${volume.percent}%' : 'Unavailable', style: DbType.label.copyWith(color: palette.textPrimary)),
               ]),
             ],
