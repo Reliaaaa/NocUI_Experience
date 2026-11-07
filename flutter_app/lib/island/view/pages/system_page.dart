@@ -127,7 +127,7 @@ class _SystemPageState extends State<SystemPage> {
                       _Fact(
                         icon: DbIcons.battery,
                         label: power.charging
-                            ? 'Charging'
+                            ? '${power.percent}% · Charging'
                             : (power.minutesRemaining > 0
                                   ? '${power.minutesRemaining ~/ 60}h '
                                         '${power.minutesRemaining % 60}m left'

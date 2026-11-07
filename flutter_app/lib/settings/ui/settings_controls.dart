@@ -29,8 +29,8 @@ class SettingsSection extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Text(
-          title.toUpperCase(),
-          style: DbType.overline.copyWith(color: palette.textTertiary),
+          title,
+          style: DbType.title.copyWith(color: palette.textPrimary),
         ),
         if (description != null) ...<Widget>[
           const SizedBox(height: DbSpace.xs),
@@ -83,36 +83,56 @@ class SettingsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final IslandPalette palette = IslandTheme.of(context).palette;
+    final Widget labelContent = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(
+          label,
+          style: DbType.body.copyWith(
+            color: palette.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        if (description != null) ...<Widget>[
+          const SizedBox(height: 2),
+          Text(
+            description!,
+            style: DbType.caption.copyWith(color: palette.textSecondary),
+          ),
+        ],
+      ],
+    );
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: DbSpace.lg,
         vertical: DbSpace.md,
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 420) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text(
-                  label,
-                  style: DbType.body.copyWith(color: palette.textPrimary),
+                labelContent,
+                const SizedBox(height: DbSpace.md),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: control,
                 ),
-                if (description != null) ...<Widget>[
-                  const SizedBox(height: 2),
-                  Text(
-                    description!,
-                    style: DbType.caption.copyWith(color: palette.textTertiary),
-                  ),
-                ],
               ],
-            ),
-          ),
-          const SizedBox(width: DbSpace.lg),
-          control,
-        ],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Expanded(child: labelContent),
+              const SizedBox(width: DbSpace.lg),
+              control,
+            ],
+          );
+        },
       ),
     );
   }
@@ -160,9 +180,7 @@ class DbSwitch extends StatelessWidget {
               height: 16,
               decoration: BoxDecoration(
                 color: value
-                    ? (palette.isDark
-                          ? const Color(0xFF0B0C0F)
-                          : const Color(0xFFFFFFFF))
+                    ? const Color(0xFFFFFFFF)
                     : palette.textSecondary,
                 shape: BoxShape.circle,
               ),
@@ -267,40 +285,6 @@ class _DbSliderState extends State<DbSlider> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Semantics(
-          label: '${widget.semanticLabel}, enter value${widget.unit.isEmpty ? '' : ' in ${widget.unit}'}, '
-              'range ${_format(widget.min)} to ${_format(widget.max)}',
-          textField: true,
-          child: Container(
-            width: 68,
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: palette.surfaceSunken,
-              borderRadius: BorderRadius.circular(DbRadius.control),
-              border: Border.all(color: _focus.hasFocus ? palette.accent : palette.stroke),
-            ),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: EditableText(
-                    controller: _controller,
-                    focusNode: _focus,
-                    style: DbType.numeric.copyWith(color: palette.textPrimary),
-                    cursorColor: palette.accent,
-                    backgroundCursorColor: palette.textTertiary,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
-                    textInputAction: TextInputAction.done,
-                    maxLines: 1,
-                    onSubmitted: (_) => _focus.unfocus(),
-                  ),
-                ),
-                if (widget.unit.isNotEmpty)
-                  Text(widget.unit, style: DbType.caption.copyWith(color: palette.textSecondary)),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: DbSpace.md),
         SizedBox(
           width: widget.width,
           height: 22,
@@ -338,14 +322,48 @@ class _DbSliderState extends State<DbSlider> {
                       width: 13,
                       height: 13,
                       decoration: BoxDecoration(
-                        color: palette.textPrimary,
+                        color: palette.accent,
                         shape: BoxShape.circle,
-                        border: Border.all(color: palette.stroke),
+                        border: Border.all(color: palette.textPrimary, width: 2),
                       ),
                     ),
                   ),
                 ],
               ),
+            ),
+          ),
+        ),
+        const SizedBox(width: DbSpace.md),
+        Semantics(
+          label: '${widget.semanticLabel}, enter value${widget.unit.isEmpty ? '' : ' in ${widget.unit}'}, '
+              'range ${_format(widget.min)} to ${_format(widget.max)}',
+          textField: true,
+          child: Container(
+            width: 68,
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            decoration: BoxDecoration(
+              color: palette.surfaceSunken,
+              borderRadius: BorderRadius.circular(DbRadius.control),
+              border: Border.all(color: _focus.hasFocus ? palette.accent : palette.stroke),
+            ),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: EditableText(
+                    controller: _controller,
+                    focusNode: _focus,
+                    style: DbType.numeric.copyWith(color: palette.textPrimary),
+                    cursorColor: palette.accent,
+                    backgroundCursorColor: palette.textTertiary,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                    textInputAction: TextInputAction.done,
+                    maxLines: 1,
+                    onSubmitted: (_) => _focus.unfocus(),
+                  ),
+                ),
+                if (widget.unit.isNotEmpty)
+                  Text(widget.unit, style: DbType.caption.copyWith(color: palette.textSecondary)),
+              ],
             ),
           ),
         ),
@@ -459,7 +477,7 @@ class DbSwatches extends StatelessWidget {
                     height: 22,
                     decoration: BoxDecoration(
                       color: preset.color,
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(DbRadius.control / 2),
                       border: Border.all(
                         color: preset == value
                             ? palette.textPrimary

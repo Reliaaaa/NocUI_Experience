@@ -86,12 +86,16 @@ class _NowPageState extends State<NowPage> {
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         textBaseline: TextBaseline.alphabetic,
                         children: <Widget>[
-                          // The hero. Light rather than bold, tracked tight,
-                          // and rolling only the digits that changed.
+                          // The clock is the strongest element in the summary;
+                          // only digits that changed roll between values.
                           RollingText(
                             ClockFormat.time(now, use24Hour: use24Hour),
                             style: DbType.display.copyWith(
                               color: palette.textPrimary,
+                              fontWeight: FontWeight.w600,
+                              fontVariations: const <FontVariation>[
+                                FontVariation('wght', 600),
+                              ],
                             ),
                           ),
                           const SizedBox(width: DbSpace.sm),

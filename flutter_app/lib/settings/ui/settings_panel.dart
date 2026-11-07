@@ -57,6 +57,25 @@ extension SettingsTabX on SettingsTab {
     }
   }
 
+  String get description {
+    switch (this) {
+      case SettingsTab.general:
+        return 'Choose how NocUI starts and behaves on your desktop.';
+      case SettingsTab.appearance:
+        return 'Personalize the theme, color and shape of the notch.';
+      case SettingsTab.display:
+        return 'Choose a display and adjust the notch position.';
+      case SettingsTab.features:
+        return 'Choose the pages and modules available in the notch.';
+      case SettingsTab.shortcuts:
+        return 'Configure keyboard shortcuts for NocUI actions.';
+      case SettingsTab.privacy:
+        return 'Control optional access to your data and device.';
+      case SettingsTab.about:
+        return 'Information about NocUI Experience.';
+    }
+  }
+
   IconData get icon {
     switch (this) {
       case SettingsTab.general:
@@ -154,6 +173,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
           children: <Widget>[
             _NavigationRail(
               selected: _tab,
+              compact: MediaQuery.sizeOf(context).width < 700,
               onSelected: (SettingsTab tab) => setState(() => _tab = tab),
               onClose: widget.onClose,
             ),
@@ -185,6 +205,11 @@ class _SettingsPanelState extends State<SettingsPanel> {
                           onPressed: widget.onClose,
                         ),
                       ],
+                    ),
+                    const SizedBox(height: DbSpace.xs),
+                    Text(
+                      _tab.description,
+                      style: DbType.body.copyWith(color: palette.textSecondary),
                     ),
                     if (services.settings.remoteError != null) ...<Widget>[
                       const SizedBox(height: DbSpace.md),
@@ -262,11 +287,13 @@ class _SettingsPanelState extends State<SettingsPanel> {
 class _NavigationRail extends StatelessWidget {
   const _NavigationRail({
     required this.selected,
+    required this.compact,
     required this.onSelected,
     required this.onClose,
   });
 
   final SettingsTab selected;
+  final bool compact;
   final ValueChanged<SettingsTab> onSelected;
   final VoidCallback onClose;
 
@@ -275,8 +302,9 @@ class _NavigationRail extends StatelessWidget {
     final IslandThemeData theme = IslandTheme.of(context);
     final IslandPalette palette = theme.palette;
 
-    return SizedBox(
-      width: 216,
+    return Container(
+      width: compact ? 64 : 216,
+      color: palette.surfaceRaised,
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: DbSpace.md,
@@ -285,14 +313,14 @@ class _NavigationRail extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Padding(
+            if (!compact) Padding(
               padding: const EdgeInsets.symmetric(horizontal: DbSpace.md),
               child: Text(
                 AppInfo.name,
                 style: DbType.title.copyWith(color: palette.textPrimary),
               ),
             ),
-            Padding(
+            if (!compact) Padding(
               padding: const EdgeInsets.symmetric(horizontal: DbSpace.md),
               child: Text(
                 AppInfo.version,
@@ -308,6 +336,7 @@ class _NavigationRail extends StatelessWidget {
                     for (final SettingsTab tab in SettingsTab.values)
                       _RailItem(
                         tab: tab,
+                        compact: compact,
                         selected: tab == selected,
                         onTap: () => onSelected(tab),
                       ),
@@ -325,11 +354,13 @@ class _NavigationRail extends StatelessWidget {
 class _RailItem extends StatefulWidget {
   const _RailItem({
     required this.tab,
+    required this.compact,
     required this.selected,
     required this.onTap,
   });
 
   final SettingsTab tab;
+  final bool compact;
   final bool selected;
   final VoidCallback onTap;
 
@@ -372,8 +403,8 @@ class _RailItemState extends State<_RailItem> {
             duration: theme.motion.scale(DbDuration.micro),
             curve: DbCurve.standard,
             margin: const EdgeInsets.only(bottom: 2),
-            padding: const EdgeInsets.symmetric(
-              horizontal: DbSpace.md,
+            padding: EdgeInsets.symmetric(
+              horizontal: widget.compact ? DbSpace.xs : DbSpace.md,
               vertical: DbSpace.md,
             ),
             decoration: BoxDecoration(
@@ -389,12 +420,23 @@ class _RailItemState extends State<_RailItem> {
             ),
             child: Row(
               children: <Widget>[
-                Icon(widget.tab.icon, size: DbSize.iconSm, color: foreground),
-                const SizedBox(width: DbSpace.md),
-                Text(
-                  widget.tab.label,
-                  style: DbType.body.copyWith(color: foreground),
+                Container(
+                  width: 3,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: widget.selected ? palette.accent : const Color(0x00000000),
+                    borderRadius: BorderRadius.circular(DbRadius.pill),
+                  ),
                 ),
+                const SizedBox(width: DbSpace.sm),
+                Icon(widget.tab.icon, size: DbSize.iconMd, color: foreground),
+                if (!widget.compact) ...<Widget>[
+                  const SizedBox(width: DbSpace.md),
+                  Text(
+                    widget.tab.label,
+                    style: DbType.body.copyWith(color: foreground),
+                  ),
+                ],
               ],
             ),
           ),

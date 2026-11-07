@@ -232,7 +232,9 @@ class _CalendarPageState extends State<CalendarPage> {
                           decoration: BoxDecoration(
                             color: palette.surfaceSunken,
                             borderRadius: BorderRadius.circular(DbRadius.card),
-                            border: Border.all(color: palette.stroke),
+                            border: Border.all(
+                              color: palette.accent.withValues(alpha: 0.20),
+                            ),
                           ),
                           child: AnimatedSwitcher(
                             duration: theme.motion.scale(DbDuration.quick),
