@@ -99,10 +99,11 @@ class ClipboardController extends ChangeNotifier {
       await _bridge.setTextPreview(enabled: _previewEnabled);
       _log.info('Clipboard activity enabled.');
     } else {
+      _dismissClipboardNotifications();
+      _last = null;
       await _bridge.setEnabled(false);
       await _subscription?.cancel();
       _subscription = null;
-      _last = null;
       _log.info('Clipboard activity disabled.');
     }
     notifyListeners();
@@ -113,12 +114,36 @@ class ClipboardController extends ChangeNotifier {
       return;
     }
     _previewEnabled = value;
+    if (!value) _dismissClipboardNotifications();
+    final ClipboardActivity? previous = _last;
+    if (!value && previous != null && previous.preview.isNotEmpty) {
+      _last = ClipboardActivity(
+        kind: previous.kind,
+        source: previous.source,
+        length: previous.length,
+        at: previous.at,
+      );
+    }
     await _bridge.setTextPreview(enabled: value);
     notifyListeners();
   }
 
+  void _dismissClipboardNotifications() {
+    // Remove queued items first so dismissing the current one cannot briefly
+    // promote another clipboard preview into view.
+    for (final notification in _notifications.queued) {
+      if (notification.kind == NotificationKind.clipboard) {
+        _notifications.dismiss(notification.id);
+      }
+    }
+    final current = _notifications.current;
+    if (current?.kind == NotificationKind.clipboard) {
+      _notifications.dismiss(current!.id);
+    }
+  }
+
   void _onEvent(NativeEvent event) {
-    if (event.type != 'copied') {
+    if (!_enabled || event.type != 'copied') {
       return;
     }
     final ClipboardActivity activity = ClipboardActivity(

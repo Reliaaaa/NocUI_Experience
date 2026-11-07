@@ -243,7 +243,7 @@ class _Toggle extends StatelessWidget {
   }
 }
 
-/// Five across. Wide enough for a label under an icon at 100% scaling, and
+/// Four across. Wide enough for a label under an icon at 100% scaling, and
 /// scrollable rather than paged, because a shortcut grid that hid its last row
 /// behind a page turn would be slower than the Start menu it replaces.
 class _Grid extends StatelessWidget {
@@ -252,7 +252,7 @@ class _Grid extends StatelessWidget {
   final List<ShortcutEntry> entries;
   final ValueChanged<ShortcutEntry> onTap;
 
-  static const int _columns = 5;
+  static const int _columns = 4;
 
   @override
   Widget build(BuildContext context) {
@@ -354,28 +354,32 @@ class _TileState extends State<_Tile> {
           scale: _pressed ? 0.94 : 1.0,
           duration: theme.motion.scale(DbDuration.instant),
           curve: DbCurve.standard,
-          child: AnimatedContainer(
-            duration: theme.motion.scale(DbDuration.micro),
-            curve: DbCurve.standard,
-            height: 54,
-            decoration: BoxDecoration(
-              color: _hovered
-                  ? palette.surfaceRaised
-                  : palette.surfaceSunken,
-              borderRadius: BorderRadius.circular(DbRadius.control),
-              border: Border.all(
-                color: _hovered ? palette.strokeStrong : palette.stroke,
-              ),
-            ),
+          child: SizedBox(
+            height: 68,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(
-                  widget.entry.icon,
-                  size: DbSize.iconMd,
-                  color: _hovered ? palette.accent : palette.textSecondary,
+                AnimatedContainer(
+                  duration: theme.motion.scale(DbDuration.micro),
+                  curve: DbCurve.standard,
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _hovered
+                        ? palette.surfaceRaised
+                        : palette.surfaceSunken,
+                    borderRadius: BorderRadius.circular(DbRadius.control),
+                    border: Border.all(
+                      color: _hovered ? palette.strokeStrong : palette.stroke,
+                    ),
+                  ),
+                  child: Icon(
+                    widget.entry.icon,
+                    size: DbSize.iconMd,
+                    color: _hovered ? palette.accent : palette.textSecondary,
+                  ),
                 ),
-                const SizedBox(height: DbSpace.xxs),
+                const SizedBox(height: DbSpace.xs),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: DbSpace.xxs),
                   child: Text(

@@ -373,7 +373,7 @@ class _Empty extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Icon(DbIcons.image, size: DbSize.iconLg, color: tint),
+          Icon(DbIcons.image, size: DbSize.iconLg + 4, color: tint),
           const SizedBox(height: DbSpace.xs),
           Text(
             'Paste or drop an image',

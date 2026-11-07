@@ -266,6 +266,8 @@ class IslandCoordinator {
       if (on(IslandPage.media, current.mediaEnabled)) IslandPage.media,
       if (on(IslandPage.shelf, true)) IslandPage.shelf,
       if (on(IslandPage.system, current.systemStatusEnabled)) IslandPage.system,
+      if (on(IslandPage.notes, true)) IslandPage.notes,
+      if (on(IslandPage.clipboard, true)) IslandPage.clipboard,
     ]);
   }
 

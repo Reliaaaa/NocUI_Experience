@@ -276,7 +276,7 @@ class _PresetState extends State<_Preset> {
                   : (_hovered ? palette.surfaceRaised : palette.surfaceSunken),
               borderRadius: BorderRadius.circular(DbRadius.pill),
               border: Border.all(
-                color: on ? palette.accent : palette.stroke,
+                color: on ? palette.accent : palette.strokeStrong,
               ),
             ),
             child: Text(

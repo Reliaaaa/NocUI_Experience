@@ -28,7 +28,7 @@ class PageScaffold extends StatelessWidget {
     super.key,
   });
 
-  /// Small caps label. Omitted on the Now page, which needs no introduction.
+  /// Page label. Omitted by pages with their own header.
   final String? title;
 
   /// Actions that belong with the title.
@@ -53,16 +53,31 @@ class PageScaffold extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      title!.toUpperCase(),
-                      style: DbType.overline
-                          .copyWith(color: palette.textTertiary),
+                      title!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: DbType.title.copyWith(color: palette.textPrimary),
                     ),
                   ),
                   ?trailing,
                 ],
               ),
             ),
-            const SizedBox(height: DbSpace.md),
+            const SizedBox(height: DbSpace.xs),
+            Stack(
+              children: <Widget>[
+                Container(height: 1, color: palette.separator),
+                Container(
+                  height: 2,
+                  width: 72,
+                  decoration: BoxDecoration(
+                    color: palette.accent,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: DbSpace.xs),
           ],
           Expanded(child: child),
         ],
