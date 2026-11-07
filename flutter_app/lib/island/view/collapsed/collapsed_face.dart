@@ -33,7 +33,6 @@ class CollapsedFace extends StatelessWidget {
             animation: Listenable.merge(<Listenable>[
               services.clock,
               services.activities,
-              services.system,
             ]),
             builder: (BuildContext context, _) {
               final List<LiveActivity> visible = services.activities.visible;
@@ -53,12 +52,8 @@ class CollapsedFace extends StatelessWidget {
                   children: <Widget>[
                     if (leading != null)
                       _ActivityEar(activity: leading, alignEnd: false)
-                    else if (services.system.power.hasBattery && services.system.power.percent >= 0)
-                      Text('${services.system.power.percent}%', style: DbType.caption.copyWith(
-                        color: services.system.power.isLow ? palette.warning : palette.positive,
-                      ))
                     else
-                      _LiveDot(color: palette.accent),
+                      _BatteryOrDot(services: services),
                     const SizedBox(width: DbSpace.md),
                     Text(
                       ClockFormat.time(now, use24Hour: use24Hour),
@@ -90,6 +85,33 @@ class CollapsedFace extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Rebuild only the battery indicator when system status changes.
+class _BatteryOrDot extends StatelessWidget {
+  const _BatteryOrDot({required this.services});
+
+  final AppServices services;
+
+  @override
+  Widget build(BuildContext context) {
+    final IslandPalette palette = IslandTheme.of(context).palette;
+    return AnimatedBuilder(
+      animation: services.system,
+      builder: (context, _) {
+        final power = services.system.power;
+        if (!power.hasBattery || power.percent < 0) {
+          return _LiveDot(color: palette.accent);
+        }
+        return Text(
+          '${power.percent}%',
+          style: DbType.caption.copyWith(
+            color: power.isLow ? palette.warning : palette.positive,
+          ),
+        );
+      },
     );
   }
 }
