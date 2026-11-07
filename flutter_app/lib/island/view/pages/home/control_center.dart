@@ -194,6 +194,8 @@ class _VolumeSliderState extends State<VolumeSlider> {
         slider: true,
         enabled: enabled,
         value: '${(value * 100).round()} percent',
+        increasedValue: enabled ? '${((value + 0.05).clamp(0.0, 1.0) * 100).round()} percent' : null,
+        decreasedValue: enabled ? '${((value - 0.05).clamp(0.0, 1.0) * 100).round()} percent' : null,
         onIncrease: enabled ? () => _change(value + 0.05) : null,
         onDecrease: enabled ? () => _change(value - 0.05) : null,
         child: FocusableActionDetector(
