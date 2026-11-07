@@ -7,6 +7,8 @@ import 'package:dynamicbar/native/models/native_models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class FakeClipboardBridge extends ClipboardBridge {
+  // Closed in the test’s finally block after the controller is disposed.
+  // ignore: close_sinks
   final StreamController<NativeEvent> controller = StreamController<NativeEvent>.broadcast(sync: true);
 
   @override
