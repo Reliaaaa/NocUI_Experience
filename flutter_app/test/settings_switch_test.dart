@@ -20,7 +20,10 @@ void main() {
           cornerScale: 1,
           islandScale: 1,
         ),
-        child: StatefulBuilder(
+        child: Focus(
+          autofocus: true,
+          skipTraversal: true,
+          child: StatefulBuilder(
           builder: (context, setState) => Center(
             child: SettingsRow(
               label: 'Keep notch visible',
@@ -32,11 +35,16 @@ void main() {
             ),
           ),
         ),
+        ),
       ),
     ));
     expect(find.bySemanticsLabel('Keep notch visible'), findsOneWidget);
+    await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
+    final target = find.descendant(
+      of: find.byType(DbSwitch), matching: find.byType(GestureDetector));
+    expect(Focus.of(tester.element(target)).hasPrimaryFocus, isTrue);
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump();
     expect(value, isTrue);

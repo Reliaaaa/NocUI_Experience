@@ -175,6 +175,11 @@ class _DbSwitchState extends State<DbSwitch> {
       child: FocusableActionDetector(
         enabled: enabled,
         onShowFocusHighlight: (bool focused) => setState(() => _focused = focused),
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
+        },
         actions: <Type, Action<Intent>>{
           ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
             toggle();
