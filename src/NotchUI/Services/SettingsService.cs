@@ -14,6 +14,7 @@ public sealed class SettingsService : ISettingsService
     private const string CurrentKey = "NotchUI.Settings";
     private const string RecoveryKey = "NotchUI.Settings.LastGood";
     private readonly object _gate = new();
+    private bool _inspected;
     private bool _preserveStoredSettings;
 #if UNPACKAGED
     private readonly string? _settingsPath;
@@ -26,6 +27,7 @@ public sealed class SettingsService : ISettingsService
     {
         lock (_gate)
         {
+            _inspected = true;
             LastError = null;
             _preserveStoredSettings = true;
             try
@@ -102,6 +104,8 @@ public sealed class SettingsService : ISettingsService
     {
         lock (_gate)
         {
+            // Inspect existing data even when a caller saves without loading first.
+            if (!_inspected) Load();
             if (_preserveStoredSettings) return false;
             try
             {

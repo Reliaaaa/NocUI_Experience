@@ -37,6 +37,9 @@ var path = Path.Combine(directory, "settings.json");
 try
 {
     var service = new SettingsService(path);
+    Check(new SettingsService(path).Save(expected) && File.ReadAllText(path) == encoded,
+        "Save before Load must allow a new settings file.");
+    File.Delete(path);
     Check(service.Load() == new NotchSettings() && service.Save(expected), "Missing file must allow save.");
     foreach (var encoding in new System.Text.Encoding[] { new System.Text.UTF8Encoding(true), System.Text.Encoding.Unicode, System.Text.Encoding.BigEndianUnicode })
     {
@@ -46,11 +49,14 @@ try
     foreach (var protectedPayload in new[] { new string('x', 4097), "{\"SchemaVersion\":2,\"Settings\":{}}" })
     {
         File.WriteAllText(path, protectedPayload);
+        Check(!new SettingsService(path).Save(expected) && File.ReadAllText(path) == protectedPayload,
+            "Save before Load overwrote protected settings.");
         Check(service.Load() == new NotchSettings() && !service.Save(expected) && File.ReadAllText(path) == protectedPayload,
             "Oversize or future settings were overwritten.");
     }
     File.Delete(path);
     Directory.CreateDirectory(path); // Opening a directory as a file fails on supported platforms.
+    Check(!new SettingsService(path).Save(expected) && Directory.Exists(path), "Save before Load overwrote unreadable settings.");
     Check(service.Load() == new NotchSettings() && !service.Save(expected) && Directory.Exists(path), "Unreadable settings were overwritten.");
     Directory.Delete(path);
     File.WriteAllText(path, encoded);

@@ -70,7 +70,7 @@ public sealed class NotchCoordinator : IDisposable
     public Task<bool> TogglePlayPauseAsync() => _media.TogglePlayPauseAsync();
     public Task<bool> PreviousAsync() => _media.PreviousAsync();
     public Task<bool> NextAsync() => _media.NextAsync();
-    public void RefreshSystemState() { _clock.Refresh(); _battery.Refresh(); }
+    public void RefreshSystemState() { _clock.Refresh(); _battery.Refresh(); _media.Refresh(); }
     private void OnChanged(object? sender, EventArgs args) => Changed?.Invoke(this, EventArgs.Empty);
     private void ApplyModules()
     {

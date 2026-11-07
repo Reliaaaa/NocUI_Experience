@@ -10,6 +10,7 @@ public interface IMediaService : IDisposable
     event EventHandler? Changed;
     void Start();
     void Stop();
+    void Refresh();
     Task<bool> TogglePlayPauseAsync();
     Task<bool> PreviousAsync();
     Task<bool> NextAsync();
@@ -38,6 +39,7 @@ public sealed class MediaService(DispatcherQueue dispatcher) : IMediaService
             if (!_running || generation != _generation) return;
             _manager = manager;
             manager.CurrentSessionChanged += OnSessionChanged;
+            manager.SessionsChanged += OnSessionsChanged;
             SelectSession();
         }
         catch (Exception) { if (_running && generation == _generation) Publish(new(MediaAvailability.Error)); }
@@ -49,27 +51,68 @@ public sealed class MediaService(DispatcherQueue dispatcher) : IMediaService
         ++_commandTicket;
         ++_generation;
         ++_refreshVersion;
-        if (_manager is not null) _manager.CurrentSessionChanged -= OnSessionChanged;
+        if (_manager is not null)
+        {
+            _manager.CurrentSessionChanged -= OnSessionChanged;
+            _manager.SessionsChanged -= OnSessionsChanged;
+        }
         Detach();
         _manager = null;
         Publish(new(MediaAvailability.Disabled));
     }
     private void OnSessionChanged(GlobalSystemMediaTransportControlsSessionManager sender, CurrentSessionChangedEventArgs args)
-        => dispatcher.TryEnqueue(() => { if (_running) SelectSession(); });
+        => QueueSessionSelection(sender);
+    private void OnSessionsChanged(GlobalSystemMediaTransportControlsSessionManager sender, SessionsChangedEventArgs args)
+        => QueueSessionSelection(sender);
+    private void QueueSessionSelection(GlobalSystemMediaTransportControlsSessionManager sender)
+        => dispatcher.TryEnqueue(() => { if (_running && ReferenceEquals(sender, _manager)) SelectSession(); });
     private void SelectSession()
     {
-        Detach();
-        ++_generation;
         try
         {
-            _session = _manager?.GetCurrentSession();
+            var selected = _manager?.GetCurrentSession();
+            // Some players expose a session before Windows assigns a current one.
+            if (selected is null && _manager is not null)
+            {
+                foreach (var candidate in _manager.GetSessions())
+                {
+                    try
+                    {
+                        var playback = candidate.GetPlaybackInfo();
+                        selected ??= candidate;
+                        if (playback.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
+                        {
+                            selected = candidate;
+                            break;
+                        }
+                    }
+                    catch (Exception) { /* A closing player must not hide other sessions. */ }
+                }
+            }
+            if (selected is not null && ReferenceEquals(selected, _session)) { Refresh(); return; }
+            Detach();
+            ++_generation;
+            ++_refreshVersion;
+            // A command for the previous player may never complete. Its result
+            // must neither block nor modify controls for the replacement player.
+            ++_commandTicket;
+            _commandBusy = false;
+            _session = selected;
             if (_session is null) { Publish(new(MediaAvailability.NoSession)); return; }
             _session.MediaPropertiesChanged += OnPropertiesChanged;
             _session.PlaybackInfoChanged += OnPlaybackChanged;
             Publish(new(MediaAvailability.Loading));
             Refresh();
         }
-        catch (Exception) { Detach(); Publish(new(MediaAvailability.Error)); }
+        catch (Exception)
+        {
+            ++_generation;
+            ++_refreshVersion;
+            ++_commandTicket;
+            _commandBusy = false;
+            Detach();
+            Publish(new(MediaAvailability.Error));
+        }
     }
     private void Detach()
     {
@@ -85,7 +128,15 @@ public sealed class MediaService(DispatcherQueue dispatcher) : IMediaService
     public async void Refresh()
     {
         var session = _session;
-        if (!_running || session is null) return;
+        if (!_running) return;
+        if (_manager is null)
+        {
+            // A failed initial request can be retried by a system resume/refresh.
+            // Loading means the initial asynchronous request is still pending.
+            if (State.Availability == MediaAvailability.Error) { Stop(); Start(); }
+            return;
+        }
+        if (session is null) { SelectSession(); return; }
         int generation = _generation, version = ++_refreshVersion;
         try
         {
