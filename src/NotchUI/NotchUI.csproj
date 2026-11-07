@@ -15,6 +15,7 @@
     <DefineConstants>$(DefineConstants);UNPACKAGED</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="../../licenses/Gili-MIT.txt" Link="licenses/Gili-MIT.txt" CopyToOutputDirectory="PreserveNewest" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250205002" />
   </ItemGroup>
 </Project>
