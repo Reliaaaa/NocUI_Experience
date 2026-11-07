@@ -1,4 +1,4 @@
-import 'dart:ui' show SemanticsFlag;
+import 'dart:ui' show Tristate;
 
 import 'package:dynamicbar/design/theme/island_theme.dart';
 import 'package:dynamicbar/design/tokens/db_colors.dart';
@@ -42,11 +42,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(selected, 2);
-    expect(tester.getSemantics(thirdPage).hasFlag(SemanticsFlag.isSelected), isTrue);
+    expect(tester.getSemantics(thirdPage).getSemanticsData().flagsCollection.isSelected,
+      Tristate.isTrue);
     expect(
       tester.getSemantics(find.bySemanticsLabel('Page 1 of 3'))
-          .hasFlag(SemanticsFlag.isSelected),
-      isFalse,
+          .getSemanticsData().flagsCollection.isSelected,
+      Tristate.isFalse,
     );
   });
 }
