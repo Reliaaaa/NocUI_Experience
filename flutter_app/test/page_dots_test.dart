@@ -11,7 +11,6 @@ void main() {
   testWidgets('page indicators select a page and expose its selected state',
       (WidgetTester tester) async {
     final SemanticsHandle semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
     int selected = 0;
 
     await tester.pumpWidget(Directionality(
@@ -49,5 +48,6 @@ void main() {
           .getSemanticsData().flagsCollection.isSelected,
       Tristate.isFalse,
     );
+    semantics.dispose();
   });
 }
