@@ -10,7 +10,7 @@ import 'package:dynamicbar/native/connectivity_bridge.dart';
 import 'package:dynamicbar/native/system_bridge.dart';
 import 'package:dynamicbar/settings/app_settings.dart';
 import 'package:dynamicbar/settings/settings_controller.dart';
-import 'package:flutter/material.dart' show Slider;
+import 'package:flutter/material.dart' show Slider, SliderTheme;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -113,6 +113,9 @@ void main() {
         expect(sliderBounds.right, lessThanOrEqualTo(bounds.right));
         expect(sliderBounds.width, lessThanOrEqualTo(180));
         expect(tester.widget<Slider>(slider).onChanged, isNull);
+        final sliderTheme = SliderTheme.of(tester.element(slider));
+        expect(sliderTheme.disabledActiveTrackColor, isNotNull);
+        expect(sliderTheme.disabledInactiveTrackColor, isNotNull);
 
         system.setStatus(const VolumeStatus(available: true, level: 0.5));
         await tester.pump();
