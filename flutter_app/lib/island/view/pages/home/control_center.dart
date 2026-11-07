@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart' show Material, Slider, SliderTheme, SliderThemeData;
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../../app/app_services.dart';
@@ -115,20 +115,12 @@ class _ControlCenterState extends State<ControlCenter> {
                   alignment: Alignment.centerLeft,
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 180),
-                    child: Material(color: const Color(0x00000000), child: SliderTheme(
-                      data: SliderThemeData(
-                        activeTrackColor: palette.accent,
-                        inactiveTrackColor: palette.surfaceRaised,
-                        disabledActiveTrackColor: palette.textTertiary,
-                        disabledInactiveTrackColor: palette.surfaceRaised,
-                        thumbColor: palette.accent,
-                        disabledThumbColor: palette.textTertiary,
-                        trackHeight: 5,
-                      ),
-                      child: Slider(value: volume.level.clamp(0.0, 1.0).toDouble(),
-                        semanticFormatterCallback: (value) => 'Volume ${(value * 100).round()} percent',
-                        onChanged: volume.available ? (value) => unawaited(services.system.setVolume(value)) : null),
-                    )),
+                    child: VolumeSlider(
+                      value: volume.level,
+                      onChanged: volume.available
+                          ? (value) => unawaited(services.system.setVolume(value))
+                          : null,
+                    ),
                   ),
                 )),
                 Text(volume.available ? '${volume.percent}%' : 'Unavailable', style: DbType.label.copyWith(color: palette.textPrimary)),
@@ -171,4 +163,79 @@ class _Tile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Volume input that does not require a Material overlay in the notch window.
+class VolumeSlider extends StatefulWidget {
+  const VolumeSlider({required this.value, required this.onChanged, super.key});
+  final double value;
+  final ValueChanged<double>? onChanged;
+
+  @override
+  State<VolumeSlider> createState() => _VolumeSliderState();
+}
+
+class _VolumeSliderState extends State<VolumeSlider> {
+  bool _focused = false;
+
+  void _change(double value) => widget.onChanged?.call(value.clamp(0.0, 1.0).toDouble());
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = IslandTheme.of(context).palette;
+    final value = widget.value.clamp(0.0, 1.0).toDouble();
+    final enabled = widget.onChanged != null;
+    return LayoutBuilder(builder: (context, constraints) {
+      void update(double x) {
+        if (constraints.maxWidth > 0) _change(x / constraints.maxWidth);
+      }
+      return Semantics(
+        label: 'Volume',
+        slider: true,
+        enabled: enabled,
+        value: '${(value * 100).round()} percent',
+        onIncrease: enabled ? () => _change(value + 0.05) : null,
+        onDecrease: enabled ? () => _change(value - 0.05) : null,
+        child: FocusableActionDetector(
+          enabled: enabled,
+          onShowFocusHighlight: (focused) => setState(() => _focused = focused),
+          shortcuts: const <ShortcutActivator, Intent>{
+            SingleActivator(LogicalKeyboardKey.arrowRight): _VolumeStepIntent(1),
+            SingleActivator(LogicalKeyboardKey.arrowUp): _VolumeStepIntent(1),
+            SingleActivator(LogicalKeyboardKey.arrowLeft): _VolumeStepIntent(-1),
+            SingleActivator(LogicalKeyboardKey.arrowDown): _VolumeStepIntent(-1),
+          },
+          actions: <Type, Action<Intent>>{
+            _VolumeStepIntent: CallbackAction<_VolumeStepIntent>(onInvoke: (intent) { _change(value + intent.direction * 0.05); return null; }),
+          },
+          child: GestureDetector(
+            excludeFromSemantics: true,
+            behavior: HitTestBehavior.opaque,
+            onTapDown: enabled ? (details) => update(details.localPosition.dx) : null,
+            onHorizontalDragUpdate: enabled ? (details) => update(details.localPosition.dx) : null,
+            child: SizedBox(
+              height: 32,
+              child: Stack(alignment: Alignment.centerLeft, children: [
+                Container(height: 5, decoration: BoxDecoration(color: palette.surfaceRaised, borderRadius: BorderRadius.circular(5))),
+                FractionallySizedBox(widthFactor: value, child: Container(height: 5, decoration: BoxDecoration(
+                  color: enabled ? palette.accent : palette.textTertiary, borderRadius: BorderRadius.circular(5)))),
+                Align(alignment: Alignment(value * 2 - 1, 0), child: Container(
+                  width: 12, height: 12, decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: enabled ? palette.accent : palette.textTertiary,
+                    border: _focused ? Border.all(color: palette.textPrimary, width: 2) : null,
+                  ),
+                )),
+              ]),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+}
+
+class _VolumeStepIntent extends Intent {
+  const _VolumeStepIntent(this.direction);
+  final int direction;
 }
