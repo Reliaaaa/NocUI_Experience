@@ -33,6 +33,7 @@ class CollapsedFace extends StatelessWidget {
             animation: Listenable.merge(<Listenable>[
               services.clock,
               services.activities,
+              services.system,
             ]),
             builder: (BuildContext context, _) {
               final List<LiveActivity> visible = services.activities.visible;
@@ -52,6 +53,10 @@ class CollapsedFace extends StatelessWidget {
                   children: <Widget>[
                     if (leading != null)
                       _ActivityEar(activity: leading, alignEnd: false)
+                    else if (services.system.power.hasBattery && services.system.power.percent >= 0)
+                      Text('${services.system.power.percent}%', style: DbType.caption.copyWith(
+                        color: services.system.power.isLow ? palette.warning : palette.positive,
+                      ))
                     else
                       _LiveDot(color: palette.accent),
                     const SizedBox(width: DbSpace.md),

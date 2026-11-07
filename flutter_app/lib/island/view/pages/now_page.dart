@@ -24,6 +24,7 @@ import '../../state/island_page.dart';
 import '../../state/island_state.dart';
 import '../../../settings/app_settings.dart';
 import 'home/connections_sheet.dart';
+import 'home/control_center.dart';
 import 'home/home_deck.dart';
 import 'intro_banner.dart';
 import 'page_scaffold.dart';
@@ -52,6 +53,7 @@ class NowPage extends StatefulWidget {
 
 class _NowPageState extends State<NowPage> {
   ConnectionsTarget? _connections;
+  bool _showControlCenter = true;
 
   void _openConnections(ConnectionsTarget target) =>
       setState(() => _connections = target);
@@ -66,6 +68,12 @@ class _NowPageState extends State<NowPage> {
     final bool use24Hour = settings.use24HourClock;
     final bool deck = settings.homeDeckEnabled;
     final IslandController controller = widget.controller;
+
+    if (_showControlCenter) {
+      return PageScaffold(
+        child: ControlCenter(onHome: () => setState(() => _showControlCenter = false)),
+      );
+    }
 
     return SecondsScope(
       child: PageScaffold(
@@ -148,7 +156,7 @@ class _NowPageState extends State<NowPage> {
             Reveal(
               order: 3,
               scaleFrom: 0.95,
-              child: _Actions(controller: controller, services: services),
+              child: _Actions(controller: controller, services: services, onControlCenter: () => setState(() => _showControlCenter = true)),
             ),
           ],
         ),
@@ -687,16 +695,19 @@ class _Chip extends StatelessWidget {
 }
 
 class _Actions extends StatelessWidget {
-  const _Actions({required this.controller, required this.services});
+  const _Actions({required this.controller, required this.services, required this.onControlCenter});
 
   final IslandController controller;
   final AppServices services;
+  final VoidCallback onControlCenter;
 
   @override
   Widget build(BuildContext context) {
     final IslandPalette palette = IslandTheme.of(context).palette;
     return Row(
       children: <Widget>[
+        IslandButton(icon: DbIcons.grid, tooltip: 'Open Control Center', onPressed: onControlCenter),
+        const SizedBox(width: DbSpace.sm),
         Expanded(
           child: Text(
             'NocUI Experience',
