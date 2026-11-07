@@ -186,7 +186,7 @@ class _NowPlayingState extends State<_NowPlaying> {
         // would put colour on it that says nothing about what is playing.
         _TintWash(colour: tint, strength: fromArt == null ? 0 : 1),
         PageScaffold(
-          title: playing ? 'Now playing' : 'Paused',
+          title: playing ? 'Media · Playing' : 'Media · Paused',
           trailing: _SourceChip(session: session, tint: tint),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

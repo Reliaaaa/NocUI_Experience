@@ -12,12 +12,14 @@ namespace NotchUI;
 
 public sealed partial class OverlayWindow : Window
 {
-    private const double ExpandedHeight = 170;
+    private const double ExpandedHeight = 218;
     private readonly NotchCoordinator _coordinator;
     private readonly OverlayWindowHost _host;
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _geometryTimer;
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _hoverTimer;
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _leaveTimer;
+    private readonly Pomodoro _pomodoro = new();
+    private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _pomodoroTimer;
     private bool _pointerInside;
     private bool _windowActive;
     private bool _closed;
@@ -31,6 +33,9 @@ public sealed partial class OverlayWindow : Window
         _host.SystemStateChanged += OnSystemStateChanged;
         _host.DisplayChanged += OnDisplayChanged;
         _coordinator.Changed += OnCoordinatorChanged;
+        _pomodoroTimer = DispatcherQueue.CreateTimer();
+        _pomodoroTimer.Interval = TimeSpan.FromSeconds(1);
+        _pomodoroTimer.Tick += OnPomodoroTick;
         _geometryTimer = DispatcherQueue.CreateTimer();
         _geometryTimer.Interval = TimeSpan.FromMilliseconds(16);
         _geometryTimer.Tick += OnGeometryTick;
@@ -84,6 +89,8 @@ public sealed partial class OverlayWindow : Window
         BatteryText.Foreground = foreground;
         MediaText.Foreground = foreground;
         MediaArtistText.Foreground = foreground;
+        PomodoroText.Foreground = foreground;
+        UpdatePomodoro();
         Pill.CornerRadius = new CornerRadius(settings.CornerRadius);
         SummaryText.Text = settings.MediaEnabled && _coordinator.Media.Availability == MediaAvailability.Active
             ? _coordinator.Media.Title : "NocUI Experience";
@@ -124,6 +131,42 @@ public sealed partial class OverlayWindow : Window
         }
         ApplyGeometry();
     }
+    private void UpdatePomodoro()
+    {
+        var remaining = _pomodoro.Remaining(DateTimeOffset.UtcNow);
+        var seconds = (int)Math.Ceiling(remaining.TotalSeconds);
+        var phase = _pomodoro.Phase switch
+        {
+            PomodoroPhase.Focus => "Focus",
+            PomodoroPhase.ShortBreak => "Break",
+            _ => "Long break"
+        };
+        PomodoroText.Text = $"{phase}  {seconds / 60:00}:{seconds % 60:00}";
+        PomodoroToggle.Content = _pomodoro.IsRunning ? "Pause" : "Start";
+        PomodoroToggle.IsEnabled = _coordinator.IsExpanded;
+        PomodoroReset.IsEnabled = _coordinator.IsExpanded;
+    }
+
+    private void OnPomodoroToggle(object sender, RoutedEventArgs args)
+    {
+        if (_pomodoro.IsRunning) { _pomodoro.Pause(DateTimeOffset.UtcNow); _pomodoroTimer.Stop(); }
+        else { _pomodoro.Start(DateTimeOffset.UtcNow); _pomodoroTimer.Start(); }
+        UpdatePomodoro();
+    }
+
+    private void OnPomodoroReset(object sender, RoutedEventArgs args)
+    {
+        _pomodoro.Reset();
+        _pomodoroTimer.Stop();
+        UpdatePomodoro();
+    }
+
+    private void OnPomodoroTick(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
+    {
+        if (_pomodoro.Tick(DateTimeOffset.UtcNow)) _pomodoroTimer.Stop();
+        UpdatePomodoro();
+    }
+
     private void OnPointerEntered(object sender, PointerRoutedEventArgs args)
     {
         if (_closed) return;
@@ -329,6 +372,8 @@ public sealed partial class OverlayWindow : Window
         _coordinator.Changed -= OnCoordinatorChanged;
         _host.SystemStateChanged -= OnSystemStateChanged;
         _host.DisplayChanged -= OnDisplayChanged;
+        _pomodoroTimer.Stop();
+        _pomodoroTimer.Tick -= OnPomodoroTick;
         _geometryTimer.Stop();
         _geometryTimer.Tick -= OnGeometryTick;
         _hoverTimer.Stop();

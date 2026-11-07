@@ -60,6 +60,24 @@ finally
 {
     Directory.Delete(directory, true);
 }
+var now = new DateTimeOffset(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+var pomodoro = new Pomodoro();
+pomodoro.Start(now);
+Check(pomodoro.Remaining(now.AddMinutes(10)) == TimeSpan.FromMinutes(15), "Pomodoro countdown failed.");
+pomodoro.Pause(now.AddMinutes(10));
+Check(pomodoro.Remaining(now.AddHours(1)) == TimeSpan.FromMinutes(15), "Paused timer changed.");
+pomodoro.Start(now.AddHours(1));
+Check(pomodoro.Tick(now.AddHours(1).AddMinutes(15)) && pomodoro.Phase == PomodoroPhase.ShortBreak, "Focus transition failed.");
+for (var i = 0; i < 3; i++)
+{
+    pomodoro.Start(now);
+    Check(pomodoro.Tick(now.Add(pomodoro.Duration)), "Break did not finish.");
+    pomodoro.Start(now);
+    Check(pomodoro.Tick(now.Add(pomodoro.Duration)), "Focus did not finish.");
+}
+Check(pomodoro.Phase == PomodoroPhase.LongBreak && pomodoro.CompletedFocusSessions == 4, "Long break transition failed.");
+pomodoro.Reset();
+Check(!pomodoro.IsRunning && pomodoro.Remaining(now) == TimeSpan.FromMinutes(15), "Reset failed.");
 Console.WriteLine("PASS: codec, bounded short reads, size boundary, BOM and portable storage preservation.");
 
 sealed class ShortReader(string text) : StringReader(text)

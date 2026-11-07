@@ -8,6 +8,7 @@
     <DefineConstants>$(DefineConstants);UNPACKAGED</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../src/NotchUI/Models/Pomodoro.cs" Link="Pomodoro.cs" />
     <Compile Include="../../src/NotchUI/Models/NotchSettings.cs" Link="NotchSettings.cs" />
     <Compile Include="../../src/NotchUI/Services/SettingsCodec.cs" Link="SettingsCodec.cs" />
     <Compile Include="../../src/NotchUI/Services/SettingsService.cs" Link="SettingsService.cs" />

@@ -1,6 +1,14 @@
 name: Legacy WinUI build (manual)
 
 on:
+  push:
+    branches: [feature]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'licenses/**'
+      - 'installer/NocUIExperience.iss'
+      - '.github/workflows/windows-build.yml'
   workflow_dispatch:
 
 permissions:

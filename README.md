@@ -6,13 +6,13 @@
 
 Antarmuka minimalis, animasi responsif, dan widget yang dapat disesuaikan—dalam satu ruang ringkas di bagian atas layar.
 
-![Version](https://img.shields.io/badge/version-1.1.1-blue)
+![Version](https://img.shields.io/badge/version-1.2.0-blue)
 [![Windows build](https://github.com/Reliaaaa/NocUI_Experience/actions/workflows/flutter-windows.yml/badge.svg?branch=feature)](https://github.com/Reliaaaa/NocUI_Experience/actions/workflows/flutter-windows.yml)
 ![Platform](https://img.shields.io/badge/platform-Windows%20x64-0078D4)
 ![Flutter](https://img.shields.io/badge/Flutter-Windows-02569B?logo=flutter&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT%20planned-lightgrey)
 
-**Status: Full Release · Version 1.1.1**
+**Status: Full Release · Version 1.2.0**
 
 </div>
 
@@ -21,6 +21,8 @@ Antarmuka minimalis, animasi responsif, dan widget yang dapat disesuaikan—dala
 ## 📖 Tentang Proyek
 
 NocUI Experience adalah aplikasi desktop Windows yang menghadirkan notch interaktif sebagai tempat melihat informasi dan mengakses kontrol tanpa membuka banyak jendela. Dalam keadaan ringkas, notch menampilkan informasi sekilas; ketika dibuka, pengguna dapat mengakses halaman dan pengaturan yang lebih lengkap.
+
+Rilis 1.2.0 adalah rilis terakhir yang direncanakan dengan Flutter; pengembangan berikutnya akan bermigrasi ke WinUI 3 dan C#. Migrasi masih berlangsung.
 
 Implementasi utama menggunakan Flutter untuk antarmuka dan C++ dengan API Windows untuk integrasi sistem. Source WinUI sebelumnya masih tersimpan sebagai referensi dan pemulihan, tetapi bukan jalur build utama.
 

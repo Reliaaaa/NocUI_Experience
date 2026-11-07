@@ -12,14 +12,16 @@ public sealed class TrayIconHost : IDisposable
     private readonly SubclassProc _callback;
     private NotifyIconData _icon;
     private bool _disposed;
+    private readonly nint _ownedIcon;
     private readonly uint _taskbarCreated = RegisterWindowMessage("TaskbarCreated");
     public TrayIconHost(nint hwnd, Action showSettings, Action exit)
     {
         _hwnd = hwnd; _showSettings = showSettings; _exit = exit; _callback = WndProc;
+        _ownedIcon = LoadImage(0, Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico"), 1, 0, 0, 0x10 | 0x40);
         _icon = new NotifyIconData { Size = (uint)Marshal.SizeOf<NotifyIconData>(), Window = hwnd, Id = 1,
-            Flags = 7, Callback = CallbackMessage, Icon = LoadIcon(0, (nint)32512), Tip = "NocUI Experience — berjalan", Info = "", InfoTitle = "" };
-        if (!SetWindowSubclass(hwnd, _callback, 2, 0)) throw new Win32Exception();
-        if (!ShellNotifyIcon(0, ref _icon)) { RemoveWindowSubclass(hwnd, _callback, 2); throw new Win32Exception(); }
+            Flags = 7, Callback = CallbackMessage, Icon = _ownedIcon != 0 ? _ownedIcon : LoadIcon(0, (nint)32512), Tip = "NocUI Experience — berjalan", Info = "", InfoTitle = "" };
+        if (!SetWindowSubclass(hwnd, _callback, 2, 0)) { var error = Marshal.GetLastWin32Error(); if (_ownedIcon != 0) DestroyIcon(_ownedIcon); throw new Win32Exception(error); }
+        if (!ShellNotifyIcon(0, ref _icon)) { var error = Marshal.GetLastWin32Error(); RemoveWindowSubclass(hwnd, _callback, 2); if (_ownedIcon != 0) DestroyIcon(_ownedIcon); throw new Win32Exception(error); }
     }
     private nint WndProc(nint hwnd, uint message, nuint wParam, nint lParam, nuint id, nuint data)
     {
@@ -51,6 +53,7 @@ public sealed class TrayIconHost : IDisposable
         if (_disposed) return;
         _disposed = true;
         ShellNotifyIcon(2, ref _icon); RemoveWindowSubclass(_hwnd, _callback, 2);
+        if (_ownedIcon != 0) DestroyIcon(_ownedIcon);
     }
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     private struct NotifyIconData
@@ -63,7 +66,9 @@ public sealed class TrayIconHost : IDisposable
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)] public string InfoTitle;
         public uint InfoFlags; public Guid Guid; public nint BalloonIcon;
     }
-    [DllImport("shell32.dll", EntryPoint = "Shell_NotifyIconW", CharSet = CharSet.Unicode)][return: MarshalAs(UnmanagedType.Bool)] private static extern bool ShellNotifyIcon(uint message, ref NotifyIconData data);
+    [DllImport("shell32.dll", EntryPoint = "Shell_NotifyIconW", CharSet = CharSet.Unicode, SetLastError = true)][return: MarshalAs(UnmanagedType.Bool)] private static extern bool ShellNotifyIcon(uint message, ref NotifyIconData data);
+    [DllImport("user32.dll", EntryPoint = "LoadImageW", CharSet = CharSet.Unicode, SetLastError = true)] private static extern nint LoadImage(nint instance, string name, uint type, int width, int height, uint flags);
+    [DllImport("user32.dll")] private static extern bool DestroyIcon(nint icon);
     [DllImport("user32.dll", EntryPoint = "LoadIconW")] private static extern nint LoadIcon(nint instance, nint resource);
     [DllImport("user32.dll")] private static extern nint CreatePopupMenu();
     [DllImport("user32.dll", EntryPoint = "AppendMenuW", CharSet = CharSet.Unicode)] private static extern bool AppendMenu(nint menu, uint flags, nuint id, string text);

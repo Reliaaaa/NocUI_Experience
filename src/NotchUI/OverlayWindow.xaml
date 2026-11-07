@@ -31,6 +31,12 @@
                         <Button x:Name="PlayPauseButton" AutomationProperties.Name="Play or pause" Click="OnPlayPauseClicked"><FontIcon x:Name="PlayPauseIcon" Glyph="&#xE768;" /></Button>
                         <Button x:Name="NextButton" AutomationProperties.Name="Next track" Click="OnNextClicked"><FontIcon Glyph="&#xE893;" /></Button>
                     </StackPanel>
+                    <Grid ColumnSpacing="8" Margin="0,6,0,0">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <TextBlock x:Name="PomodoroText" Foreground="White" VerticalAlignment="Center" />
+                        <Button x:Name="PomodoroToggle" Grid.Column="1" Content="Start" Click="OnPomodoroToggle" />
+                        <Button x:Name="PomodoroReset" Grid.Column="2" Content="Reset" Click="OnPomodoroReset" />
+                    </Grid>
                 </StackPanel>
             </StackPanel>
         </Border>
