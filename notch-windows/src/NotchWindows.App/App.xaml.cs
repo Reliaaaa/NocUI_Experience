@@ -35,6 +35,7 @@ public partial class App : Application
 
     public App()
     {
+        UnhandledException += (_, args) => Program.LogStartupFailure(args.Exception);
         InitializeComponent();
     }
 

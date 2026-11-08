@@ -69,13 +69,20 @@ public static class PortableWindowScanner
 }
 '@
 
+$startupLog = Join-Path $env:RUNNER_TEMP ("nocui-startup-" + [Guid]::NewGuid().ToString('N') + '.log')
+$env:NOCUI_STARTUP_LOG = $startupLog
 $process = Start-Process -FilePath $exe -WorkingDirectory $PublishDir -PassThru
 try {
     $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
     $stablePolls = 0
     while ([DateTime]::UtcNow -lt $deadline) {
         $process.Refresh()
-        if ($process.HasExited) { throw "Portable app exited before showing a window (code $($process.ExitCode))." }
+        if ($process.HasExited) {
+            if (Test-Path $startupLog) { Get-Content $startupLog | ForEach-Object { Write-Host $_ } }
+            Get-WinEvent -FilterHashtable @{ LogName = 'Application'; StartTime = (Get-Date).AddMinutes(-3); Id = 1000, 1026 } -ErrorAction SilentlyContinue |
+                Where-Object { $_.Message -match 'NotchWindows.App' } | Select-Object -First 5 | ForEach-Object { Write-Host $_.Message }
+            throw "Portable app exited before showing a window (code $($process.ExitCode))."
+        }
 
         $windows = [PortableWindowScanner]::VisibleTopCenter($process.Id)
         if ($windows.Length -gt 0) {
@@ -98,4 +105,6 @@ finally {
         $process.WaitForExit(5000) | Out-Null
     }
     $process.Dispose()
+    Remove-Item Env:NOCUI_STARTUP_LOG -ErrorAction SilentlyContinue
+    Remove-Item $startupLog -ErrorAction SilentlyContinue
 }

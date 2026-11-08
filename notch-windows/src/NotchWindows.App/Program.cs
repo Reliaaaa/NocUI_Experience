@@ -10,12 +10,24 @@ public static class Program
     [global::System.STAThreadAttribute]
     private static void Main(string[] args)
     {
-        ComWrappersSupport.InitializeComWrappers();
-        Application.Start(p =>
+        try
         {
-            var context = new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread());
-            System.Threading.SynchronizationContext.SetSynchronizationContext(context);
-            _ = new App();
-        });
+            ComWrappersSupport.InitializeComWrappers();
+            Application.Start(p =>
+            {
+                var context = new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread());
+                System.Threading.SynchronizationContext.SetSynchronizationContext(context);
+                _ = new App();
+            });
+        }
+        catch (Exception ex) { LogStartupFailure(ex); throw; }
+    }
+
+    internal static void LogStartupFailure(Exception exception)
+    {
+        var path = Environment.GetEnvironmentVariable("NOCUI_STARTUP_LOG");
+        if (string.IsNullOrWhiteSpace(path)) return;
+        try { File.AppendAllText(path, exception + Environment.NewLine); }
+        catch (Exception) { /* Diagnostics must not hide the original failure. */ }
     }
 }
