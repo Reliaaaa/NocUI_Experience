@@ -23,6 +23,7 @@ public sealed partial class NotchShellWindow : Window
     private readonly nint _hwnd;
     private readonly INotchNavigationService _navigation;
     private SettingsWindow? _settingsWindow;
+    private ShelfPanel? _shelfPanel;
 
     public NotchShellWindow(NotchShellViewModel viewModel, INotchNavigationService navigation)
     {
@@ -110,7 +111,7 @@ public sealed partial class NotchShellWindow : Window
             NotchPanelKind.NowPlaying => new MusicPanel(),
             NotchPanelKind.Dashboard => new DashboardPanel(),
             NotchPanelKind.ControlCenter => new ControlCenterPanel(),
-            NotchPanelKind.Shelf => new ShelfPanel(),
+            NotchPanelKind.Shelf => _shelfPanel ??= new ShelfPanel(),
             _ => null,
         };
     }

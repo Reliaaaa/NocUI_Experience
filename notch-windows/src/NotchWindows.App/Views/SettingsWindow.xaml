@@ -29,6 +29,8 @@
                       SelectedItem="{x:Bind ViewModel.Theme, Mode=TwoWay}" />
 
             <Button Content="Simpan" Command="{x:Bind ViewModel.SaveCommand}" HorizontalAlignment="Left" />
+            <TextBlock Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" TextWrapping="Wrap"
+                       AutomationProperties.LiveSetting="Polite" />
         </StackPanel>
     </ScrollViewer>
 </Window>

@@ -2,12 +2,20 @@
     x:Class="NotchWindows.App.Views.Panels.ShelfPanel"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-
-    <!-- F-005a drag-and-drop file, F-030 app launcher pin (P1/P2 — UI dasar, logic drop lengkap di Rilis 2) -->
-    <Grid AllowDrop="True" Drop="OnDrop" DragOver="OnDragOver">
-        <TextBlock Style="{StaticResource NotchSecondaryTextStyle}"
-                   Text="Drop file di sini, atau pin aplikasi favorit (segera)"
-                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                   TextWrapping="Wrap" TextAlignment="Center" />
+    <Grid AllowDrop="True" Drop="OnDrop" DragOver="OnDragOver" MinWidth="320">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock Style="{StaticResource NotchPrimaryTextStyle}" Text="Shelf" />
+        <TextBlock x:Name="StatusText" Grid.Row="1" Margin="0,8,0,8" TextWrapping="Wrap"
+                   Style="{StaticResource NotchSecondaryTextStyle}"
+                   Text="Jatuhkan file di sini. Daftar tersimpan selama aplikasi berjalan." />
+        <StackPanel Grid.Row="2" Spacing="8">
+            <ListView x:Name="ItemList" MaxHeight="150" DisplayMemberPath="Name"
+                      AutomationProperties.Name="File di Shelf" />
+            <Button x:Name="ClearButton" Content="Kosongkan daftar" Click="OnClear" IsEnabled="False" />
+        </StackPanel>
     </Grid>
 </UserControl>

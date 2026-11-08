@@ -4,10 +4,12 @@ on:
   push:
     paths:
       - 'notch-windows/**'
+      - 'installer/NocUIWinUIPreview.iss'
       - '.github/workflows/notch-windows.yml'
   pull_request:
     paths:
       - 'notch-windows/**'
+      - 'installer/NocUIWinUIPreview.iss'
       - '.github/workflows/notch-windows.yml'
   workflow_dispatch:
 
@@ -34,3 +36,33 @@ jobs:
         run: msbuild NotchWindows.sln -t:Build -p:Configuration=Release
       - name: Test
         run: dotnet test NotchWindows.sln --configuration Release --no-build --no-restore
+      - name: Restore Windows x64 publish
+        run: msbuild src/NotchWindows.App/NotchWindows.App.csproj -t:Restore -p:Configuration=Release -p:Platform=x64 -p:RuntimeIdentifier=win-x64 -p:SelfContained=true -p:WindowsAppSDKSelfContained=true
+      - name: Publish portable Windows x64
+        shell: pwsh
+        run: |
+          $publishDir = Join-Path $env:GITHUB_WORKSPACE 'artifacts\notch-windows\portable\'
+          msbuild src/NotchWindows.App/NotchWindows.App.csproj -t:Publish -p:Configuration=Release -p:Platform=x64 -p:RuntimeIdentifier=win-x64 -p:SelfContained=true -p:WindowsAppSDKSelfContained=true "-p:PublishDir=$publishDir"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          foreach ($relativePath in @('NotchWindows.App.exe', 'NotchWindows.App.runtimeconfig.json', 'NotchWindows.Core.dll', 'NotchWindows.Services.dll', 'NotchWindows.Data.dll', 'Migrations\001_Initial.sql')) {
+            if (!(Test-Path (Join-Path $publishDir $relativePath))) { throw "Portable bundle is missing $relativePath" }
+          }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nocui-winui-preview-portable-x64
+          path: artifacts/notch-windows/portable/
+          if-no-files-found: error
+      - name: Build preview installer
+        working-directory: .
+        shell: pwsh
+        run: |
+          $compiler = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
+          if (!(Test-Path $compiler)) { throw 'Inno Setup 6 is not installed on this runner.' }
+          & $compiler installer/NocUIWinUIPreview.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (!(Test-Path 'artifacts/notch-windows/installer/NocUI-WinUI-Preview-Setup-x64.exe')) { throw 'Preview installer was not produced.' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nocui-winui-preview-installer-x64
+          path: artifacts/notch-windows/installer/NocUI-WinUI-Preview-Setup-x64.exe
+          if-no-files-found: error

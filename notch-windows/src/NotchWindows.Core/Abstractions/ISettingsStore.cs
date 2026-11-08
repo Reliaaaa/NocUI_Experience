@@ -12,6 +12,7 @@ public interface ISettingsStore
 {
     /// <summary>Settings yang sedang dimuat di memori (default sebelum LoadAsync() dipanggil).</summary>
     AppSettings Current { get; }
+    string? LastError { get; }
 
     Task LoadAsync();
     Task SaveAsync(AppSettings settings);

@@ -20,6 +20,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         shortcut = current.GlobalToggleShortcut;
         theme = current.Theme;
         use24HourClock = current.Use24HourClock;
+        errorMessage = settingsStore.LastError;
     }
 
     [ObservableProperty] private NotchPosition position;
@@ -28,9 +29,10 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string shortcut;
     [ObservableProperty] private AppTheme theme;
     [ObservableProperty] private bool use24HourClock;
+    [ObservableProperty] private string? errorMessage;
 
     [RelayCommand]
-    private Task SaveAsync()
+    private async Task SaveAsync()
     {
         var settings = _settingsStore.Current;
         settings.Position = Position;
@@ -39,6 +41,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         settings.GlobalToggleShortcut = Shortcut;
         settings.Theme = Theme;
         settings.Use24HourClock = Use24HourClock;
-        return _settingsStore.SaveAsync(settings);
+        await _settingsStore.SaveAsync(settings);
+        ErrorMessage = _settingsStore.LastError;
     }
 }
