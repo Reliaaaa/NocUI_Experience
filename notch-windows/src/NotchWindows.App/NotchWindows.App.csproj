@@ -44,4 +44,12 @@
     <ProjectReference Include="..\NotchWindows.Interop\NotchWindows.Interop.csproj" />
   </ItemGroup>
 
+  <!-- Unpackaged publish needs the application's XAML resource index beside the executable. -->
+  <Target Name="CopyApplicationPriToPublish" AfterTargets="Publish">
+    <Copy SourceFiles="$(TargetDir)$(AssemblyName).pri" DestinationFolder="$(PublishDir)"
+          Condition="Exists('$(TargetDir)$(AssemblyName).pri')" />
+    <Error Condition="!Exists('$(PublishDir)$(AssemblyName).pri')"
+           Text="Application XAML resource index was not published." />
+  </Target>
+
 </Project>

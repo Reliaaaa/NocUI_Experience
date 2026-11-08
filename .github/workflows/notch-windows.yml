@@ -46,7 +46,7 @@ jobs:
           $publishDir = Join-Path $env:GITHUB_WORKSPACE 'artifacts\notch-windows\portable\'
           msbuild src/NotchWindows.App/NotchWindows.App.csproj -t:Publish -p:Configuration=Release -p:Platform=x64 -p:RuntimeIdentifier=win-x64 "-p:PublishDir=$publishDir"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          foreach ($relativePath in @('NotchWindows.App.exe', 'NotchWindows.App.runtimeconfig.json', 'NotchWindows.Core.dll', 'NotchWindows.Services.dll', 'NotchWindows.Data.dll', 'Migrations\001_Initial.sql')) {
+          foreach ($relativePath in @('NotchWindows.App.exe', 'NotchWindows.App.runtimeconfig.json', 'NotchWindows.App.pri', 'NotchWindows.Core.dll', 'NotchWindows.Services.dll', 'NotchWindows.Data.dll', 'Migrations\001_Initial.sql')) {
             if (!(Test-Path (Join-Path $publishDir $relativePath))) { throw "Portable bundle is missing $relativePath" }
           }
       - name: Smoke test portable window
