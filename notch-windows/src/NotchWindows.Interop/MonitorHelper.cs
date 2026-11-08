@@ -6,7 +6,7 @@ namespace NotchWindows.Interop;
 public static class MonitorHelper
 {
     /// <summary>Area kerja monitor yang sedang memuat window tertentu (atau monitor terdekat bila null/minimized).</summary>
-    public static NativeMethods.RECT GetWorkAreaForWindow(nint referenceHwnd)
+    private static NativeMethods.RECT GetWorkAreaForWindow(nint referenceHwnd)
     {
         var hMonitor = NativeMethods.MonitorFromWindow(referenceHwnd, NativeMethods.MONITOR_DEFAULTTONEAREST);
         var info = new NativeMethods.MONITORINFO { cbSize = System.Runtime.InteropServices.Marshal.SizeOf<NativeMethods.MONITORINFO>() };

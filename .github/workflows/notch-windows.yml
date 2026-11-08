@@ -17,14 +17,17 @@ permissions:
 jobs:
   build-and-test:
     runs-on: windows-2022
+    defaults:
+      run:
+        working-directory: notch-windows
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
       - name: Restore
-        run: dotnet restore notch-windows/NotchWindows.sln
+        run: dotnet restore NotchWindows.sln
       - name: Build
-        run: dotnet build notch-windows/NotchWindows.sln --configuration Release --no-restore
+        run: dotnet build NotchWindows.sln --configuration Release --no-restore
       - name: Test
-        run: dotnet test notch-windows/NotchWindows.sln --configuration Release --no-build --no-restore
+        run: dotnet test NotchWindows.sln --configuration Release --no-build --no-restore
