@@ -1,3 +1,4 @@
+using System.Globalization;
 using Dapper;
 using NotchWindows.Data.Entities;
 
@@ -26,14 +27,36 @@ public sealed class TodoRepository : ITodoRepository
     public async Task<List<TodoEntity>> GetAllAsync()
     {
         using var connection = _dbContext.OpenConnection();
-        var rows = await connection.QueryAsync<TodoEntity>(
+        var rows = await connection.QueryAsync<TodoRow>(
             "SELECT Id, Title, DueAt, IsCompleted, IsRecurring, RecurrenceRule, CreatedAt FROM Todos ORDER BY CreatedAt;");
-        return rows.AsList();
+        return rows.Select(row => new TodoEntity
+        {
+            Id = row.Id,
+            Title = row.Title,
+            DueAt = row.DueAt is null ? null : ParseTimestamp(row.DueAt),
+            IsCompleted = row.IsCompleted,
+            IsRecurring = row.IsRecurring,
+            RecurrenceRule = row.RecurrenceRule,
+            CreatedAt = ParseTimestamp(row.CreatedAt),
+        }).ToList();
     }
 
     public async Task<TodoEntity> UpsertAsync(TodoEntity todo)
     {
         using var connection = _dbContext.OpenConnection();
+
+        // SQLite stores timestamps as TEXT. Explicit round-trip formatting avoids
+        // provider-specific DateTimeOffset conversion and preserves the original offset.
+        var parameters = new
+        {
+            todo.Id,
+            todo.Title,
+            DueAt = todo.DueAt?.ToString("O", CultureInfo.InvariantCulture),
+            todo.IsCompleted,
+            todo.IsRecurring,
+            todo.RecurrenceRule,
+            CreatedAt = todo.CreatedAt.ToString("O", CultureInfo.InvariantCulture),
+        };
 
         if (todo.Id == 0)
         {
@@ -43,7 +66,7 @@ public sealed class TodoRepository : ITodoRepository
                 VALUES (@Title, @DueAt, @IsCompleted, @IsRecurring, @RecurrenceRule, @CreatedAt);
                 SELECT last_insert_rowid();
                 """,
-                todo);
+                parameters);
             todo.Id = (int)newId;
         }
         else
@@ -55,10 +78,26 @@ public sealed class TodoRepository : ITodoRepository
                     IsRecurring = @IsRecurring, RecurrenceRule = @RecurrenceRule
                 WHERE Id = @Id;
                 """,
-                todo);
+                parameters);
         }
 
         return todo;
+    }
+
+    // Parse also accepts timestamps previously written by Microsoft.Data.Sqlite
+    // (yyyy-MM-dd HH:mm:ss.FFFFFFFzzz), so existing databases remain readable.
+    private static DateTimeOffset ParseTimestamp(string value) =>
+        DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.None);
+
+    private sealed class TodoRow
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string? DueAt { get; set; }
+        public bool IsCompleted { get; set; }
+        public bool IsRecurring { get; set; }
+        public string? RecurrenceRule { get; set; }
+        public string CreatedAt { get; set; } = string.Empty;
     }
 
     public async Task DeleteAsync(int id)

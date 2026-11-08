@@ -64,6 +64,51 @@ public sealed class TodoRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Timestamps_RoundTripOffsetsAndTicks_AndNullableDueAtUpdates()
+    {
+        var repo = CreateRepository();
+        var createdAt = new DateTimeOffset(2026, 11, 8, 12, 34, 56, TimeSpan.FromHours(5.5)).AddTicks(1234567);
+        var dueAt = new DateTimeOffset(2026, 11, 9, 1, 2, 3, TimeSpan.FromHours(-7)).AddTicks(7654321);
+        var saved = await repo.UpsertAsync(new TodoEntity { Title = "Offsets", CreatedAt = createdAt });
+
+        var loaded = Assert.Single(await CreateRepository().GetAllAsync());
+        Assert.True(createdAt.EqualsExact(loaded.CreatedAt));
+        Assert.Null(loaded.DueAt);
+
+        saved.DueAt = dueAt;
+        await repo.UpsertAsync(saved);
+        loaded = Assert.Single(await CreateRepository().GetAllAsync());
+        Assert.True(dueAt.EqualsExact(loaded.DueAt!.Value));
+        Assert.True(createdAt.EqualsExact(loaded.CreatedAt));
+
+        saved.DueAt = null;
+        await repo.UpsertAsync(saved);
+        loaded = Assert.Single(await CreateRepository().GetAllAsync());
+        Assert.Null(loaded.DueAt);
+        Assert.True(createdAt.EqualsExact(loaded.CreatedAt));
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ReadsExistingProviderTimestampFormat()
+    {
+        var createdAt = new DateTimeOffset(2026, 11, 8, 12, 34, 56, TimeSpan.FromHours(7)).AddTicks(1234567);
+        var dueAt = createdAt.AddDays(1).ToOffset(TimeSpan.FromHours(-4));
+        using (var connection = new SqliteConnectionFactory(_dbPath).CreateOpenConnection())
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = "INSERT INTO Todos (Title, CreatedAt, DueAt) VALUES ($title, $created, $due);";
+            command.Parameters.AddWithValue("$title", "Legacy provider format");
+            command.Parameters.AddWithValue("$created", createdAt);
+            command.Parameters.AddWithValue("$due", dueAt);
+            await command.ExecuteNonQueryAsync();
+        }
+
+        var loaded = Assert.Single(await CreateRepository().GetAllAsync());
+        Assert.True(createdAt.EqualsExact(loaded.CreatedAt));
+        Assert.True(dueAt.EqualsExact(loaded.DueAt!.Value));
+    }
+
+    [Fact]
     public async Task DeleteAsync_RemovesTodo()
     {
         var repo = CreateRepository();
