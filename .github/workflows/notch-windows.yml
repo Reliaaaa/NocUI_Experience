@@ -1,0 +1,30 @@
+name: Notch Windows build
+
+on:
+  push:
+    paths:
+      - 'notch-windows/**'
+      - '.github/workflows/notch-windows.yml'
+  pull_request:
+    paths:
+      - 'notch-windows/**'
+      - '.github/workflows/notch-windows.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore
+        run: dotnet restore notch-windows/NotchWindows.sln
+      - name: Build
+        run: dotnet build notch-windows/NotchWindows.sln --configuration Release --no-restore
+      - name: Test
+        run: dotnet test notch-windows/NotchWindows.sln --configuration Release --no-build --no-restore

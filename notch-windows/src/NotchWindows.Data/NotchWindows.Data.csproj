@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>NotchWindows.Data</RootNamespace>
+    <!-- Data: SQLite repository + JSON settings store. Hanya reference Core (model), bukan ViewModel. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- QA fix (bug QA-011, P0): Version= dihapus, versi diatur terpusat di Directory.Packages.props -->
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Dapper" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NotchWindows.Core\NotchWindows.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- QA fix (bug QA-014, P0): file migrasi harus ikut ke output (dan ke output project yang
+         mereferensikan ini, mis. App dan Data.Tests) supaya SqliteConnectionFactory.MigrateAsync()
+         (default: AppContext.BaseDirectory\Migrations) benar-benar menemukannya saat runtime/test. -->
+    <None Include="Migrations\*.sql" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

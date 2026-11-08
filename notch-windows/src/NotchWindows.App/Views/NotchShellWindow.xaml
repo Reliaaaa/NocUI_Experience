@@ -1,0 +1,73 @@
+<Window
+    x:Class="NotchWindows.App.Views.NotchShellWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <!--
+        Notch shell: window frameless, latar transparan penuh. Ukuran HWND diperkecil menjadi ukuran
+        pill saat tertutup sehingga area layar di luar window tetap menerima klik melalui hit testing
+        normal Windows. Lihat 02-architecture.md §5.
+    -->
+    <Grid Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Pill tertutup: jam tengah + info kiri/kanan (F-004, F-005) -->
+        <Border
+            x:Name="NotchPillBorder"
+            Grid.Row="0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            CornerRadius="0,0,18,18"
+            Background="{ThemeResource NotchPillBackgroundBrush}"
+            MinHeight="32"
+            Padding="16,6"
+            PointerEntered="NotchPillBorder_PointerEntered"
+            Tapped="NotchPillBorder_Tapped">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                <TextBlock
+                    Grid.Column="0"
+                    x:Name="LeftMetricText"
+                    Style="{StaticResource NotchMetricTextStyle}" />
+                <TextBlock
+                    Grid.Column="1"
+                    x:Name="ClockText"
+                    HorizontalAlignment="Center"
+                    Style="{StaticResource NotchClockTextStyle}" />
+                <TextBlock
+                    Grid.Column="2"
+                    x:Name="RightMetricText"
+                    Style="{StaticResource NotchMetricTextStyle}" />
+            </Grid>
+        </Border>
+
+        <StackPanel
+            x:Name="NavigationBar"
+            Grid.Row="1"
+            Orientation="Horizontal"
+            HorizontalAlignment="Center"
+            Spacing="4"
+            Margin="0,8,0,0"
+            Visibility="Collapsed">
+            <Button Content="Ringkas" Tag="Closed" Click="OnPanelButtonClick" />
+            <Button Content="Now" Tag="Dashboard" Click="OnPanelButtonClick" />
+            <Button Content="Musik" Tag="NowPlaying" Click="OnPanelButtonClick" />
+            <Button Content="Shelf" Tag="Shelf" Click="OnPanelButtonClick" />
+            <Button Content="Kontrol" Tag="ControlCenter" Click="OnPanelButtonClick" />
+            <Button Content="Settings" Tag="Settings" Click="OnPanelButtonClick" />
+        </StackPanel>
+
+        <!-- Panel aktif diganti oleh NotchNavigationService saat tombol navigasi dipilih. -->
+        <ContentControl
+            x:Name="ActivePanelHost"
+            Grid.Row="2"
+            HorizontalAlignment="Center"
+            Margin="16,8,16,16" />
+    </Grid>
+</Window>

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>NotchWindows.Services</RootNamespace>
+    <UseWinRT>true</UseWinRT>
+    <!-- Services: implementasi konkret interface Core yang butuh Win32/WinRT. Boleh reference Core. TIDAK boleh reference App. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- QA fix (bug QA-011, P0): Version= dihapus, versi diatur terpusat di Directory.Packages.props -->
+    <PackageReference Include="Microsoft.Windows.CsWin32" PrivateAssets="all" />
+    <PackageReference Include="System.Management" />
+    <PackageReference Include="System.Reactive" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NotchWindows.Core\NotchWindows.Core.csproj" />
+  </ItemGroup>
+
+</Project>

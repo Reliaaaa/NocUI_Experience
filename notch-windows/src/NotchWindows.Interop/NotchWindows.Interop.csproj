@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <Platforms>x64;ARM64</Platforms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>NotchWindows.Interop</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Tidak boleh referensi ViewModel/Model dari NotchWindows.Core. Hanya tipe DTO interop sendiri. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- QA fix (bug QA-011, P0): Version= dihapus, versi diatur terpusat di Directory.Packages.props -->
+    <PackageReference Include="Microsoft.WindowsAppSDK" />
+  </ItemGroup>
+
+</Project>

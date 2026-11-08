@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- QA fix (bug QA-009, P2): diturunkan ke net8.0 murni (sama alasan dengan ViewModels.Tests) supaya
+       test Core bisa dibangun tanpa Windows SDK/workload. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- QA fix (bug QA-011, P0): Version= dihapus, versi diatur terpusat di Directory.Packages.props -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Moq" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\NotchWindows.Core\NotchWindows.Core.csproj" />
+  </ItemGroup>
+
+</Project>

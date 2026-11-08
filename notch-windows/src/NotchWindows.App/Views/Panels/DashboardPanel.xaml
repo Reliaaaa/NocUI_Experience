@@ -1,0 +1,29 @@
+<UserControl
+    x:Class="NotchWindows.App.Views.Panels.DashboardPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- F-020 quick toggle, F-021 cuaca, F-022 progress hari -->
+    <StackPanel Spacing="10">
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Style="{StaticResource NotchPrimaryTextStyle}"
+                       Text="{x:Bind ViewModel.Weather.TemperatureCelsius, Mode=OneWay, TargetNullValue='--'}" />
+            <TextBlock Grid.Column="1" Style="{StaticResource NotchSecondaryTextStyle}"
+                       Text="{x:Bind ViewModel.Weather.ConditionText, Mode=OneWay, TargetNullValue='Cuaca tidak tersedia'}" />
+        </Grid>
+
+        <ProgressBar Value="{x:Bind ViewModel.DayProgressPercent, Mode=OneWay}" Maximum="100" Height="4" />
+
+        <ItemsRepeater ItemsSource="{x:Bind ViewModel.Toggles, Mode=OneWay}">
+            <ItemsRepeater.ItemTemplate>
+                <DataTemplate>
+                    <ToggleSwitch Header="{Binding Label}" IsOn="{Binding IsOn, Mode=OneWay}" IsEnabled="{Binding IsAvailable}" />
+                </DataTemplate>
+            </ItemsRepeater.ItemTemplate>
+        </ItemsRepeater>
+    </StackPanel>
+</UserControl>

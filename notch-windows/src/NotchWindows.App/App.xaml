@@ -1,0 +1,14 @@
+<Application
+    x:Class="NotchWindows.App.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Resource original milik proyek ini, lihat NotchWindows.Assets -->
+                <ResourceDictionary Source="ms-appx:///NotchWindows.Assets/Styles/NotchShape.xaml"/>
+                <ResourceDictionary Source="ms-appx:///NotchWindows.Assets/Styles/GlassBrushes.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

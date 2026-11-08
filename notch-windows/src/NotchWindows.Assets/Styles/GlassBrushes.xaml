@@ -1,0 +1,16 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Palet glass-morphism ORIGINAL untuk proyek ini (dark, translucent).
+        Dipakai bersama WinUI3 SystemBackdrop (DesktopAcrylicController/MicaController)
+        untuk efek blur asli OS; brush ini adalah fallback/overlay tint.
+        TODO: finalisasi token warna di 03-design.md (Designer).
+    -->
+    <Color x:Key="NotchBaseColor">#0D0D0F</Color>
+    <SolidColorBrush x:Key="NotchBaseBrush" Color="{StaticResource NotchBaseColor}" Opacity="0.72"/>
+    <SolidColorBrush x:Key="NotchBorderBrush" Color="#33FFFFFF"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="#6C5CE7"/>
+
+</ResourceDictionary>

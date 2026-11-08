@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <!-- Memungkinkan restore/build TFM net8.0-windows10.0.* di Linux CI untuk cek tipe/compile saja
+         (bukan menjalankan). Build .exe/MSIX final tetap wajib di runner Windows — lihat docs/08-devops.md. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Authors>notch-windows contributors</Authors>
+    <Company>notch-windows</Company>
+    <!-- Semua ikon/aset di repo ini ORIGINAL (lihat docs/03-design.md) — jangan tambahkan aset bermerek pihak ketiga. -->
+  </PropertyGroup>
+</Project>

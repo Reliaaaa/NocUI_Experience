@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>NotchWindows.App</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x64;arm64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <WindowsPackageType>None</WindowsPackageType>
+    <!-- Composition root: boleh reference Core + Services + Data + Assets. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- QA fix (bug QA-011, P0): Version= dihapus, versi diatur terpusat di Directory.Packages.props -->
+    <PackageReference Include="Microsoft.WindowsAppSDK" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NotchWindows.Core\NotchWindows.Core.csproj" />
+    <ProjectReference Include="..\NotchWindows.Services\NotchWindows.Services.csproj" />
+    <ProjectReference Include="..\NotchWindows.Data\NotchWindows.Data.csproj" />
+    <ProjectReference Include="..\NotchWindows.Assets\NotchWindows.Assets.csproj" />
+    <!-- QA fix (bug QA-012, P0): NotchShellWindow.xaml.cs memakai WindowStyler/MonitorHelper dari
+         namespace NotchWindows.Interop, tapi project ini TIDAK PERNAH di-reference di sini -> CS0246
+         "tipe tidak ditemukan", build App gagal total. Referensi ditambahkan agar kompilasi jalan.
+         CATATAN untuk Tech Lead/Architect (lihat 06-qa-report.md §Bug QA-012): proyek
+         NotchWindows.Interop (WindowStyler/MonitorHelper/HotkeyManager/FullscreenDetector/NativeMethods)
+         dan App/Interop/Win32Window.cs + NotchWindows.Services/Window/FullscreenDetectionService.cs
+         adalah DUA implementasi P/Invoke notch-window yang tumpang-tindih dan sebagian saling tidak
+         konsisten (lihat juga bug QA-013). Referensi ini hanya membuat solution bisa dikompilasi,
+         BUKAN keputusan arsitektur final — konsolidasi ke satu implementasi tetap perlu diputuskan. -->
+    <ProjectReference Include="..\NotchWindows.Interop\NotchWindows.Interop.csproj" />
+  </ItemGroup>
+
+</Project>

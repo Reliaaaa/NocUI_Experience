@@ -1,0 +1,18 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Tema default MVP (F-041). Warna/opacity ORIGINAL, bukan hasil copy dari aplikasi pihak ketiga
+        mana pun — hanya terinspirasi bahasa desain umum "glass/dark pill" yang lazim di banyak
+        utility notch Windows. Varian lain (Black, FrostedGlass, Custom) ditambahkan di Rilis 2 (F-110)
+        sebagai file ResourceDictionary terpisah di folder yang sama.
+    -->
+    <SolidColorBrush x:Key="NotchPillBackgroundBrush" Color="#CC101014" />
+    <SolidColorBrush x:Key="NotchAccentBrush" Color="#7C5CFF" />
+    <SolidColorBrush x:Key="NotchTextPrimaryBrush" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="NotchTextSecondaryBrush" Color="#B3FFFFFF" />
+    <x:Double x:Key="NotchCornerRadiusCollapsed">20</x:Double>
+    <x:Double x:Key="NotchCornerRadiusExpanded">24</x:Double>
+
+</ResourceDictionary>

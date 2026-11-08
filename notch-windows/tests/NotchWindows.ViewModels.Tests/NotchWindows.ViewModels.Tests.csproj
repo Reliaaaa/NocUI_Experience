@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- QA fix (bug QA-008, P0): proyek ini sebelumnya mereferensikan src\NotchWindows.ViewModels\...,
+       project yang TIDAK PERNAH ADA (ViewModels ada di dalam NotchWindows.Core\ViewModels, bukan
+       proyek terpisah) -> restore/build project test ini gagal total sejak awal. TargetFramework juga
+       diturunkan ke net8.0 murni karena ViewModels (CommunityToolkit.Mvvm) tidak butuh Windows SDK,
+       supaya test ini bisa dibangun di CI Linux/macOS juga, bukan cuma di mesin Windows. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\NotchWindows.Core\NotchWindows.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Moq" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>NotchWindows.Assets</RootNamespace>
+    <!-- Assets: ResourceDictionary XAML (shape, brush, typography) — semua original, tanpa aset pihak ketiga. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- QA fix (bug QA-011, P0): Version= dihapus, versi diatur terpusat di Directory.Packages.props -->
+    <PackageReference Include="Microsoft.WindowsAppSDK" />
+  </ItemGroup>
+
+</Project>
