@@ -30,10 +30,10 @@ public sealed partial class DockBarWindow : Window
         ViewModel.Initialize();
     }
 
-    private static void OnDockIconPointerEntered(object sender, PointerRoutedEventArgs e) =>
+    private void OnDockIconPointerEntered(object sender, PointerRoutedEventArgs e) =>
         SetScale((FrameworkElement)sender, 1.25);
 
-    private static void OnDockIconPointerExited(object sender, PointerRoutedEventArgs e) =>
+    private void OnDockIconPointerExited(object sender, PointerRoutedEventArgs e) =>
         SetScale((FrameworkElement)sender, 1.0);
 
     private void OnDockIconTapped(object sender, TappedRoutedEventArgs e)
