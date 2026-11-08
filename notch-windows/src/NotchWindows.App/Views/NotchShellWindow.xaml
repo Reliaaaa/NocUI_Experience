@@ -25,26 +25,31 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Top"
             CornerRadius="0,0,18,18"
-            Background="{ThemeResource NotchPillBackgroundBrush}"
+            Background="#FF121214"
             MinWidth="180"
             MinHeight="32"
             Padding="16,6"
             PointerEntered="NotchPillBorder_PointerEntered"
             Tapped="NotchPillBorder_Tapped">
-            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
                 <TextBlock
                     Grid.Column="0"
                     x:Name="LeftMetricText"
-                    Style="{StaticResource NotchMetricTextStyle}" />
+                    Foreground="White" FontSize="11" FontWeight="SemiBold" />
                 <TextBlock
                     Grid.Column="1"
                     x:Name="ClockText"
                     HorizontalAlignment="Center"
-                    Style="{StaticResource NotchClockTextStyle}" />
+                    Foreground="White" FontSize="15" FontWeight="Bold" />
                 <TextBlock
                     Grid.Column="2"
                     x:Name="RightMetricText"
-                    Style="{StaticResource NotchMetricTextStyle}" />
+                    Foreground="White" FontSize="11" FontWeight="SemiBold" />
             </Grid>
         </Border>
 
