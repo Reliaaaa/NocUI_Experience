@@ -11,13 +11,24 @@ namespace NotchWindows.Services.System;
 /// </summary>
 public sealed class SystemStatsService : ISystemStatsService, IDisposable
 {
-    private readonly PerformanceCounter _cpuCounter = new("Processor", "% Processor Time", "_Total");
+    private readonly PerformanceCounter? _cpuCounter;
     private readonly BatteryService _batteryService;
 
     public SystemStatsService(BatteryService batteryService)
     {
         _batteryService = batteryService;
-        _cpuCounter.NextValue(); // panggilan pertama PerformanceCounter selalu 0, lihat docs/04-services.md
+        try
+        {
+            var counter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+            try { counter.NextValue(); _cpuCounter = counter; }
+            catch { counter.Dispose(); throw; }
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or UnauthorizedAccessException or
+                                   global::System.ComponentModel.Win32Exception)
+        {
+            // Performance counters are optional; a broken counter must not block the notch.
+            _cpuCounter = null;
+        }
         Samples = BuildSamples();
     }
 
@@ -31,7 +42,10 @@ public sealed class SystemStatsService : ISystemStatsService, IDisposable
 
     public Task<SystemStatus> GetSnapshotAsync()
     {
-        var cpu = _cpuCounter.NextValue();
+        double cpu;
+        try { cpu = _cpuCounter?.NextValue() ?? double.NaN; }
+        catch (Exception ex) when (ex is InvalidOperationException or UnauthorizedAccessException or
+                                   global::System.ComponentModel.Win32Exception) { cpu = double.NaN; }
         var ram = GetRamUsagePercent();
         var disk = GetPrimaryDiskUsagePercent();
         var battery = _batteryService.GetStatus();
@@ -61,5 +75,5 @@ public sealed class SystemStatsService : ISystemStatsService, IDisposable
         return drive.TotalSize <= 0 ? 0 : (double)used / drive.TotalSize * 100.0;
     }
 
-    public void Dispose() => _cpuCounter.Dispose();
+    public void Dispose() => _cpuCounter?.Dispose();
 }

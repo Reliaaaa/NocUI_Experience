@@ -13,6 +13,7 @@
     <Color x:Key="NotchTextPrimaryColor">#FFFFFFFF</Color>
     <Color x:Key="NotchTextSecondaryColor">#99FFFFFF</Color>
     <Color x:Key="DockBackgroundColor">#CC121214</Color>
+    <Color x:Key="NotchPillBackgroundColor">#CC121214</Color>
 
     <SolidColorBrush x:Key="NotchBackgroundBrush" Color="{StaticResource NotchBackgroundColor}" />
     <SolidColorBrush x:Key="NotchBorderBrush" Color="{StaticResource NotchBorderColor}" />
@@ -20,9 +21,10 @@
     <SolidColorBrush x:Key="NotchTextPrimaryBrush" Color="{StaticResource NotchTextPrimaryColor}" />
     <SolidColorBrush x:Key="NotchTextSecondaryBrush" Color="{StaticResource NotchTextSecondaryColor}" />
     <SolidColorBrush x:Key="DockBackgroundBrush" Color="{StaticResource DockBackgroundColor}" />
+    <SolidColorBrush x:Key="NotchPillBackgroundBrush" Color="{StaticResource NotchPillBackgroundColor}" />
 
-    <x:Double x:Key="NotchCollapsedCornerRadius">16</x:Double>
+    <CornerRadius x:Key="NotchCollapsedCornerRadius">16</CornerRadius>
     <x:Double x:Key="NotchExpandedCornerRadius">24</x:Double>
-    <x:Double x:Key="DockCornerRadius">20</x:Double>
+    <CornerRadius x:Key="DockCornerRadius">20</CornerRadius>
 
 </ResourceDictionary>

@@ -30,6 +30,8 @@ jobs:
       - uses: microsoft/setup-msbuild@v2
         with:
           msbuild-architecture: x64
+      - name: Check XAML resource references
+        run: python tests/validate_xaml_resources.py
       - name: Restore
         run: msbuild NotchWindows.sln -t:Restore -p:Configuration=Release
       - name: Build
@@ -47,6 +49,9 @@ jobs:
           foreach ($relativePath in @('NotchWindows.App.exe', 'NotchWindows.App.runtimeconfig.json', 'NotchWindows.Core.dll', 'NotchWindows.Services.dll', 'NotchWindows.Data.dll', 'Migrations\001_Initial.sql')) {
             if (!(Test-Path (Join-Path $publishDir $relativePath))) { throw "Portable bundle is missing $relativePath" }
           }
+      - name: Smoke test portable window
+        shell: pwsh
+        run: ./scripts/Test-PortableWindow.ps1 -PublishDir (Join-Path $env:GITHUB_WORKSPACE 'artifacts\notch-windows\portable')
       - uses: actions/upload-artifact@v4
         with:
           name: nocui-winui-preview-portable-x64

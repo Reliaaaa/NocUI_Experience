@@ -27,6 +27,9 @@ public sealed class WindowStyler
             | NativeMethods.WS_EX_TOOLWINDOW
             | NativeMethods.WS_EX_NOACTIVATE;
         NativeMethods.SetWindowLongPtrSafe(_hwnd, NativeMethods.GWL_EXSTYLE, newEx);
+        // A layered window must have its alpha initialized before Windows displays it.
+        if (!NativeMethods.SetLayeredWindowAttributes(_hwnd, 0, 255, 0x2))
+            throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
     }
 
     /// <summary>

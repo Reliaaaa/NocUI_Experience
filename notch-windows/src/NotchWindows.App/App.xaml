@@ -5,9 +5,10 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Resource original milik proyek ini, lihat NotchWindows.Assets -->
-                <ResourceDictionary Source="ms-appx:///NotchWindows.Assets/Styles/NotchShape.xaml"/>
-                <ResourceDictionary Source="ms-appx:///NotchWindows.Assets/Styles/GlassBrushes.xaml"/>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <!-- Tema mendefinisikan brush dan token sebelum Styles.xaml mereferensikannya. -->
+                <ResourceDictionary Source="Resources/ThemeDictionary.xaml" />
+                <ResourceDictionary Source="Resources/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

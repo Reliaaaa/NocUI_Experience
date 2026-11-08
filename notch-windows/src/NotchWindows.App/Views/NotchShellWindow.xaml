@@ -26,6 +26,7 @@
             VerticalAlignment="Top"
             CornerRadius="0,0,18,18"
             Background="{ThemeResource NotchPillBackgroundBrush}"
+            MinWidth="180"
             MinHeight="32"
             Padding="16,6"
             PointerEntered="NotchPillBorder_PointerEntered"

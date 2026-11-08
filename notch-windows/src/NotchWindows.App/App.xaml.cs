@@ -56,20 +56,33 @@ public partial class App : Application
 
         // Migrasi DB saat startup (lihat docs/05-database.md). Todo/Notes sendiri Rilis 2 (QA-014),
         // tapi menjalankan migrasi dari awal membuat file+skema siap dipakai begitu UI-nya ada.
-        var connectionFactory = Services.GetRequiredService<SqliteConnectionFactory>();
-        await connectionFactory.MigrateAsync();
+        try
+        {
+            var connectionFactory = Services.GetRequiredService<SqliteConnectionFactory>();
+            await connectionFactory.MigrateAsync();
+        }
+        catch (Exception ex)
+        {
+            // Storage is optional for the notch; preserve the existing database on failure.
+            System.Diagnostics.Trace.TraceError("Database initialization failed: {0}", ex);
+        }
 
         var settingsStore = Services.GetRequiredService<ISettingsStore>();
         await settingsStore.LoadAsync();
 
         _notchShellWindow = Services.GetRequiredService<NotchShellWindow>();
-        _dockBarWindow = Services.GetRequiredService<DockBarWindow>();
-
         _notchShellWindow.Activate();
-        _dockBarWindow.Activate();
+        try
+        {
+            _dockBarWindow = Services.GetRequiredService<DockBarWindow>();
+            _dockBarWindow.Activate();
+        }
+        catch (Exception ex) { System.Diagnostics.Trace.TraceError("Dock initialization failed: {0}", ex); }
 
-        await _notchShellWindow.ViewModel.InitializeAsync();
-        await Services.GetRequiredService<DashboardViewModel>().InitializeAsync();
+        try { await _notchShellWindow.ViewModel.InitializeAsync(); }
+        catch (Exception ex) { System.Diagnostics.Trace.TraceError("Notch services initialization failed: {0}", ex); }
+        try { await Services.GetRequiredService<DashboardViewModel>().InitializeAsync(); }
+        catch (Exception ex) { System.Diagnostics.Trace.TraceError("Dashboard initialization failed: {0}", ex); }
         // DockBarWindow sudah memanggil ViewModel.Initialize() di konstruktornya sendiri — tidak
         // dipanggil ulang di sini supaya tidak double-subscribe ke IDockService.Items (lihat DockBarWindow.xaml.cs).
 

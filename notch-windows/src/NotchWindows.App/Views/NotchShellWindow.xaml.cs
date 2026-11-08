@@ -24,6 +24,7 @@ public sealed partial class NotchShellWindow : Window
     private readonly INotchNavigationService _navigation;
     private SettingsWindow? _settingsWindow;
     private ShelfPanel? _shelfPanel;
+    private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _clockTimer;
 
     public NotchShellWindow(NotchShellViewModel viewModel, INotchNavigationService navigation)
     {
@@ -31,6 +32,13 @@ public sealed partial class NotchShellWindow : Window
         ViewModel = viewModel;
         _navigation = navigation;
         _navigation.PanelChanged += OnPanelChanged;
+
+        _clockTimer = DispatcherQueue.CreateTimer();
+        _clockTimer.Interval = TimeSpan.FromSeconds(1);
+        _clockTimer.Tick += OnClockTick;
+        UpdateClock();
+        _clockTimer.Start();
+        Closed += OnClosed;
 
         _hwnd = WindowNative.GetWindowHandle(this);
         _styler = new WindowStyler(_hwnd);
@@ -77,6 +85,20 @@ public sealed partial class NotchShellWindow : Window
     private void PositionAtTopCenter()
     {
         PositionForCurrentState();
+    }
+
+    private void OnClockTick(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args) => UpdateClock();
+
+    private void UpdateClock() => ClockText.Text = DateTime.Now.ToString(
+        App.Services.GetRequiredService<NotchWindows.Core.Abstractions.ISettingsStore>().Current.Use24HourClock
+            ? "HH:mm" : "h:mm tt");
+
+    private void OnClosed(object sender, WindowEventArgs args)
+    {
+        _clockTimer.Stop();
+        _clockTimer.Tick -= OnClockTick;
+        _navigation.PanelChanged -= OnPanelChanged;
+        Closed -= OnClosed;
     }
 
     private void PositionForCurrentState()
