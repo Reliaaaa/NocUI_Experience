@@ -49,7 +49,7 @@ public class WeatherServiceTests
         {
             var response = new HttpResponseMessage(statusCode)
             {
-                Content = new StringContent(content, System.Text.Encoding.UTF8, "application/json"),
+                Content = new StringContent(content, global::System.Text.Encoding.UTF8, "application/json"),
             };
             return Task.FromResult(response);
         }
