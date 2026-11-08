@@ -13,6 +13,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <WindowsPackageType>None</WindowsPackageType>
+    <!-- Only the executable carries the .NET and Windows App SDK runtimes in a portable publish. -->
+    <SelfContained Condition="'$(RuntimeIdentifier)' == 'win-x64'">true</SelfContained>
+    <WindowsAppSDKSelfContained Condition="'$(RuntimeIdentifier)' == 'win-x64'">true</WindowsAppSDKSelfContained>
     <!-- Composition root: boleh reference Core + Services + Data + Assets. -->
   </PropertyGroup>
 
